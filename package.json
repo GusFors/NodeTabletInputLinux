@@ -1,0 +1,19 @@
+{
+  "name": "nodelinux",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "sudo node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "draftlog": "^1.0.13",
+    "node-hid": "^2.1.1",
+    "robotjs": "^0.6.0"
+  }
+}

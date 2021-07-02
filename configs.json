@@ -1,0 +1,54 @@
+[
+    {
+        "vendorId": 1386,
+        "productId": 782,
+        "name": "Wacom CTL-480",
+        "top": 539,
+        "left": 2736,
+        "bottom": 6011,
+        "right": 12464,
+        "multiplier": 1,
+        "isForcedProportions": true,
+        "xMax": 15200,
+        "yMax": 9500
+    },
+    {
+        "vendorId": 1386,
+        "productId": 770,
+        "name": "Wacom CTH-480",
+        "top": 0,
+        "left": 0,
+        "bottom": 8550,
+        "right": 15100,
+        "multiplier": 1,
+        "isForcedProportions": true,
+        "xMax": 15200,
+        "yMax": 9500
+    },
+    {
+        "vendorId": 1386,
+        "productId": 886,
+        "name": "Wacom CTL-4100WL",
+        "top": 0,
+        "left": 0,
+        "bottom": 8550,
+        "right": 15100,
+        "multiplier": 1,
+        "isForcedProportions": true,
+        "xMax": 15200,
+        "yMax": 9500
+    },
+    {
+        "vendorId": 1386,
+        "productId": 890,
+        "name": "Wacom CTL-472",
+        "top": 0,
+        "left": 0,
+        "bottom": 8550,
+        "right": 15100,
+        "multiplier": 1,
+        "isForcedProportions": true,
+        "xMax": 15200,
+        "yMax": 9500
+    }
+]
