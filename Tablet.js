@@ -40,8 +40,6 @@ class Tablet {
         return
       }
 
-      console.log(reportData)
-
       x = reportData[2] | (reportData[3] << 8)
       y = reportData[4] | (reportData[5] << 8)
 
@@ -63,6 +61,8 @@ class Tablet {
       if (yS < 0) {
         yS = 0
       }
+
+      x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
 
       switch (reportData[1]) {
         case 241:
@@ -89,8 +89,6 @@ class Tablet {
             robot.mouseToggle('up', 'left')
           }
       }
-
-      x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
     })
     return 0
   }

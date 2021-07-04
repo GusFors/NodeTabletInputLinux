@@ -64,8 +64,9 @@ class DeviceDetector {
       if (err) {
         console.log('Unable to read device, trying next.. ', err)
       }
-      console.log(data)
-      if (data) {
+
+      // TODO check why CTH-480 can have different buffer lengths
+      if (data && data.length !== 64) {
         clearTimeout(tryReadTimeout)
         tabletDevice.close()
         console.log('Success reading device')
