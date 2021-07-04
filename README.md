@@ -1,1 +1,1 @@
-Node console app for Tablet input, slightly altered for Linux. Made for fun and since I had some issues with other drivers.
+Node console app for Tablet input, made for fun. Only tested on Manjaro currently.

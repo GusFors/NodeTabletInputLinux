@@ -22,6 +22,8 @@ class Tablet {
     this.tabletHID = new HID.HID(await deviceDetector.getPath())
     this.settings = await deviceDetector.getConfig()
 
+    console.log('Getting input from', this.settings.name)
+
     this.xScale = 2560 / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorResolution.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
@@ -34,10 +36,11 @@ class Tablet {
     let isClick = false
 
     this.tabletHID.on('data', (reportData) => {
-      if (reportData[0] != 2) {
-        isClick === false
+      if (reportData[0] !== 2) {
         return
       }
+
+      console.log(reportData)
 
       x = reportData[2] | (reportData[3] << 8)
       y = reportData[4] | (reportData[5] << 8)
@@ -61,36 +64,30 @@ class Tablet {
         yS = 0
       }
 
-      // buggy
-      if (reportData[7] > 0) {
-        if (isClick === false) {
-          isClick = true
-          robot.mouseToggle('down', 'left')
-        }
-      }
-
-      if (reportData[7] === 0) {
-        isClick = false
-        robot.mouseToggle('up', 'left')
-      }
-
-      /* if (reportData[1] === 228 && isClick === false) {
-      robot.mouseClick('left')
-      isClick = true
-      setTimeout(() => {
-        isClick = false
-      }, 700);
-    }  */
-
-      if (reportData[6] > 0) {
-        if (isClick === false) {
-          isClick = true
-          robot.mouseClick('left')
-
-          setTimeout(() => {
+      switch (reportData[1]) {
+        case 241:
+          if (isClick === false) {
+            isClick = true
+            robot.mouseToggle('down', 'left')
+          }
+          break
+        case 242:
+          if (!isClick) {
+            isClick = true
+            robot.mouseClick('left')
+          }
+          break
+        case 244:
+          if (!isClick) {
+            isClick = true
+            robot.mouseClick('right')
+          }
+          break
+        default:
+          if (isClick) {
             isClick = false
-          }, 300)
-        }
+            robot.mouseToggle('up', 'left')
+          }
       }
 
       x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
