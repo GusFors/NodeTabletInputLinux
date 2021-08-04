@@ -35,61 +35,125 @@ class Tablet {
     let yS
     let isClick = false
 
-    this.tabletHID.on('data', (reportData) => {
-      if (reportData[0] !== 2) {
-        return
-      }
+    if (this.settings.name === 'Wacom PTH-460') {
+      this.tabletHID.on('data', (reportData) => {
+        // console.log(reportData)
 
-      x = reportData[2] | (reportData[3] << 8)
-      y = reportData[4] | (reportData[5] << 8)
+        if (reportData[0] != 16) {
+          return
+        }
 
-      xS = (x - this.settings.left) * this.xScale
-      yS = (y - this.settings.top) * this.yScale
+        x = reportData[2] | (reportData[3] << 8)
+        y = reportData[5] | (reportData[6] << 8)
 
-      if (xS > 2560) {
-        xS = 2560
-      }
+        xS = (x - this.settings.left) * this.xScale
+        yS = (y - this.settings.top) * this.yScale
 
-      if (xS < 0) {
-        xS = 0
-      }
+        if (xS > 2560) {
+          xS = 2560
+        }
 
-      if (yS > 1440) {
-        yS = 1440
-      }
+        if (xS < 0) {
+          xS = 0
+        }
 
-      if (yS < 0) {
-        yS = 0
-      }
+        if (yS > 1440) {
+          yS = 1440
+        }
 
-      x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
+        if (yS < 0) {
+          yS = 0
+        }
 
-      switch (reportData[1]) {
-        case 241:
-          if (isClick === false) {
-            isClick = true
-            robot.mouseToggle('down', 'left')
-          }
-          break
-        case 242:
-          if (!isClick) {
-            isClick = true
-            robot.mouseClick('left')
-          }
-          break
-        case 244:
-          if (!isClick) {
-            isClick = true
-            robot.mouseClick('right')
-          }
-          break
-        default:
-          if (isClick) {
-            isClick = false
-            robot.mouseToggle('up', 'left')
-          }
-      }
-    })
+        x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
+
+        switch (reportData[1]) {
+          case 97:
+            if (isClick === false) {
+              isClick = true
+
+              robot.mouseToggle('down', 'left')
+            }
+            break
+          case 98:
+            if (!isClick) {
+              isClick = true
+
+              robot.mouseClick('left')
+            }
+            break
+          case 100:
+            if (!isClick) {
+              isClick = true
+
+              robot.mouseClick('right')
+            }
+            break
+          default:
+            if (isClick) {
+              isClick = false
+
+              robot.mouseToggle('up', 'left')
+            }
+        }
+      })
+    } else {
+      this.tabletHID.on('data', (reportData) => {
+        if (reportData[0] !== 2) {
+          return
+        }
+
+        x = reportData[2] | (reportData[3] << 8)
+        y = reportData[4] | (reportData[5] << 8)
+
+        xS = (x - this.settings.left) * this.xScale
+        yS = (y - this.settings.top) * this.yScale
+
+        if (xS > 2560) {
+          xS = 2560
+        }
+
+        if (xS < 0) {
+          xS = 0
+        }
+
+        if (yS > 1440) {
+          yS = 1440
+        }
+
+        if (yS < 0) {
+          yS = 0
+        }
+
+        x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
+
+        switch (reportData[1]) {
+          case 241:
+            if (isClick === false) {
+              isClick = true
+              robot.mouseToggle('down', 'left')
+            }
+            break
+          case 242:
+            if (!isClick) {
+              isClick = true
+              robot.mouseClick('left')
+            }
+            break
+          case 244:
+            if (!isClick) {
+              isClick = true
+              robot.mouseClick('right')
+            }
+            break
+          default:
+            if (isClick) {
+              isClick = false
+              robot.mouseToggle('up', 'left')
+            }
+        }
+      })
+    }
     return 0
   }
 
