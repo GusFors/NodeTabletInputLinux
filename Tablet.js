@@ -34,6 +34,10 @@ class Tablet {
     let xS
     let yS
     let isClick = false
+    let executionTimes = []
+    setInterval(() => {
+      console.log(this.averagePosition(executionTimes))
+    }, 1000)
 
     if (this.settings.name === 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportData) => {
@@ -99,6 +103,10 @@ class Tablet {
       })
     } else {
       this.tabletHID.on('data', (reportData) => {
+        //let timer = Math.random()
+        const t0 = performance.now()
+        //console.time('Timer' + timer)
+
         if (reportData[0] !== 2) {
           return
         }
@@ -125,7 +133,11 @@ class Tablet {
           yS = 0
         }
 
-        x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
+        if (x === 0 && y === 0) {
+          return
+        }
+
+        robot.moveMouse(xS + 2560, yS)
 
         switch (reportData[1]) {
           case 241:
@@ -134,24 +146,23 @@ class Tablet {
               robot.mouseToggle('down', 'left')
             }
             break
-          case 242:
-            if (!isClick) {
-              isClick = true
-              robot.mouseClick('left')
-            }
-            break
+
           case 244:
             if (!isClick) {
               isClick = true
               robot.mouseClick('right')
             }
             break
+
           default:
             if (isClick) {
               isClick = false
               robot.mouseToggle('up', 'left')
             }
         }
+        const t1 = performance.now()
+        //console.timeEnd('Timer' + timer)
+        executionTimes.push(t1 - t0)
       })
     }
     return 0
