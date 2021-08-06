@@ -27,7 +27,9 @@ class Tablet {
     this.xScale = 2560 / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorResolution.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
+    // preferably remove the delay by manually removing sleep events in the robotjs modules c/c++ files and then rebuilding with node-gyp
     robot.setMouseDelay(0)
+    robot.setKeyboardDelay(0)
 
     let x
     let y
@@ -35,13 +37,35 @@ class Tablet {
     let yS
     let isClick = false
     let executionTimes = []
+    let previousTouchWheelValue = 0
+    /*
     setInterval(() => {
       console.log(this.averagePosition(executionTimes))
     }, 1000)
+    */
 
     if (this.settings.name === 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportData) => {
-        // console.log(reportData)
+        // const t0 = performance.now()
+
+        if (reportData[0] === 17) {
+          console.log(reportData[4] - 127)
+
+          if (reportData[4] === 127) {
+            previousTouchWheelValue = 0
+            return
+          }
+
+          if (reportData[4] < previousTouchWheelValue) {
+            //  console.log('incr')
+            robot.keyTap('audio_vol_up')
+          } else {
+            //console.log('decr')
+            robot.keyTap('audio_vol_down')
+          }
+
+          previousTouchWheelValue = reportData[4]
+        }
 
         if (reportData[0] != 16) {
           return
@@ -104,11 +128,13 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
+        // const t1 = performance.now()
+        // executionTimes.push(t1 - t0)
       })
     } else {
       this.tabletHID.on('data', (reportData) => {
         //let timer = Math.random()
-        const t0 = performance.now()
+        //const t0 = performance.now()
         //console.time('Timer' + timer)
 
         if (reportData[0] !== 2) {
@@ -164,9 +190,9 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
-        const t1 = performance.now()
+        // const t1 = performance.now()
         //console.timeEnd('Timer' + timer)
-        executionTimes.push(t1 - t0)
+        //executionTimes.push(t1 - t0)
       })
     }
     return 0

@@ -1,1 +1,1 @@
-Node console app for Tablet input, made for fun. Only tested on Manjaro currently.
+Node console app for Tablet input, just made for fun. Using node-hid and robotjs(with removed nanosleep functions) 

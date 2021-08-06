@@ -68,6 +68,7 @@
     "v8_enable_lite_mode": 0,
     "v8_enable_object_print": 1,
     "v8_enable_pointer_compression": 0,
+    "v8_enable_webassembly": 1,
     "v8_no_strict_aliasing": 1,
     "v8_optimized_debug": 1,
     "v8_promise_internal_field_count": 1,
@@ -75,7 +76,7 @@
     "v8_trace_maps": 0,
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
-    "nodedir": "/root/.cache/node-gyp/16.3.0",
+    "nodedir": "/root/.cache/node-gyp/16.5.0",
     "standalone_static_library": 1
   }
 }
