@@ -69,7 +69,11 @@ class Tablet {
           yS = 0
         }
 
-        x === 0 && y === 0 ? false : robot.moveMouse(xS + 2560, yS)
+        if (x === 0 && y === 0) {
+          return
+        }
+
+        robot.moveMouse(xS + 2560, yS)
 
         switch (reportData[1]) {
           case 97:
