@@ -44,9 +44,9 @@ class Tablet {
       console.log(this.averagePosition(executionTimes))
     }, 1000)
 
-    setTimeout(() => {
-      process.exit()
-    }, 10000)
+    // setTimeout(() => {
+    //  process.exit()
+    //}, 10000)
 
     if (this.settings.name === 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportData) => {

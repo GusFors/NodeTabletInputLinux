@@ -7,7 +7,7 @@ Display *display = NULL;
 // Display *display = XOpenDisplay(":0.0");
 NAN_METHOD(setpointer)
 {
-   
+
     int32_t x = Nan::To<int32_t>(info[0]).FromJust();
     int32_t y = Nan::To<int32_t>(info[1]).FromJust();
     //Display *display = XOpenDisplay(":0.0");
@@ -20,7 +20,7 @@ NAN_METHOD(setpointer)
     XWarpPointer(display, None, DefaultRootWindow(display), 0, 0, 0, 0, x, y);
     XSync(display, false);
     //XFlush(display);
-   
+
     // XCloseDisplay(display);
     info.GetReturnValue().Set(Nan::New(1));
 }
