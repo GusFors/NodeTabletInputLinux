@@ -3,6 +3,7 @@ const robot = require('robotjs')
 const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./ConfigHandler')
 const deviceDetector = new DeviceDetector()
+const Pointer = require('./build/Release/pointer.node')
 
 class Tablet {
   constructor() {
@@ -38,15 +39,18 @@ class Tablet {
     let isClick = false
     let executionTimes = []
     let previousTouchWheelValue = 0
-    /*
+
     setInterval(() => {
       console.log(this.averagePosition(executionTimes))
     }, 1000)
-    */
+
+    setTimeout(() => {
+      process.exit()
+    }, 10000)
 
     if (this.settings.name === 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportData) => {
-        // const t0 = performance.now()
+        const t0 = performance.now()
 
         if (reportData[0] === 17) {
           console.log(reportData[4] - 127)
@@ -97,7 +101,8 @@ class Tablet {
           return
         }
 
-        robot.moveMouse(xS + 2560, yS)
+        Pointer.setpointer(xS + 2560, yS)
+        //robot.moveMouse(xS + 2560, yS)
 
         switch (reportData[1]) {
           case 97:
@@ -128,8 +133,8 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
-        // const t1 = performance.now()
-        // executionTimes.push(t1 - t0)
+        const t1 = performance.now()
+        executionTimes.push(t1 - t0)
       })
     } else {
       this.tabletHID.on('data', (reportData) => {
