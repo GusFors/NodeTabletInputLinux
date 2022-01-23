@@ -1,1 +1,1 @@
-Node console app for Tablet input, just made for fun. Using node-hid and robotjs(with removed nanosleep functions) 
+Node console app for Tablet input. Using node-hid and robotjs(for clicks) 

@@ -28,7 +28,7 @@ class Tablet {
     this.xScale = 2560 / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorResolution.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
-    // preferably remove the delay by manually removing sleep events in the robotjs modules c/c++ files and then rebuilding with node-gyp
+    // can also remove the delay by manually removing sleep events in the robotjs modules c/c++ files and then rebuilding with node-gyp
     robot.setMouseDelay(0)
     robot.setKeyboardDelay(0)
 
@@ -39,14 +39,6 @@ class Tablet {
     let isClick = false
     let executionTimes = []
     let previousTouchWheelValue = 0
-
-    setInterval(() => {
-      console.log(this.averagePosition(executionTimes))
-    }, 1000)
-
-    // setTimeout(() => {
-    //  process.exit()
-    //}, 10000)
 
     if (this.settings.name === 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportData) => {
@@ -61,10 +53,8 @@ class Tablet {
           }
 
           if (reportData[4] < previousTouchWheelValue) {
-            //  console.log('incr')
             robot.keyTap('audio_vol_up')
           } else {
-            //console.log('decr')
             robot.keyTap('audio_vol_down')
           }
 
@@ -102,7 +92,6 @@ class Tablet {
         }
 
         Pointer.setpointer(xS + 2560, yS)
-        //robot.moveMouse(xS + 2560, yS)
 
         switch (reportData[1]) {
           case 97:
@@ -138,10 +127,6 @@ class Tablet {
       })
     } else {
       this.tabletHID.on('data', (reportData) => {
-        //let timer = Math.random()
-        //const t0 = performance.now()
-        //console.time('Timer' + timer)
-
         if (reportData[0] !== 2) {
           return
         }
@@ -171,9 +156,8 @@ class Tablet {
         if (x === 0 && y === 0) {
           return
         }
-
-        robot.moveMouse(xS + 2560, yS)
-
+        Pointer.setpointer(xS + 2560, yS)
+        
         switch (reportData[1]) {
           case 241:
             if (isClick === false) {
@@ -195,9 +179,7 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
-        // const t1 = performance.now()
-        //console.timeEnd('Timer' + timer)
-        //executionTimes.push(t1 - t0)
+       
       })
     }
     return 0
@@ -257,8 +239,6 @@ class Tablet {
       }
 
       if (reportData[9] === 0) {
-        // xBuffer.length = 0
-        // yBuffer.length = 0
         return false
       }
 
