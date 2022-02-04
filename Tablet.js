@@ -4,12 +4,8 @@ const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Pointer = require('./build/Release/pointer.node')
-const { spawn } = require('child_process')
-const child = spawn('pwd')
-
-child.stdout.on('data', (data) => {
-  console.log(`child stdout:\n${data}`)
-})
+const Display = require('./build/Release/display.node')
+// const { spawn } = require('child_process')
 
 class Tablet {
   constructor() {
@@ -30,8 +26,8 @@ class Tablet {
     this.settings = await deviceDetector.getConfig()
 
     console.log('Getting input from', this.settings.name)
-
-    this.xScale = 2560 / ((this.settings.right - this.settings.left) / this.settings.multiplier)
+    this.monitorResolution.width = Display.getPrimaryMonitorWidth()
+    this.xScale = this.monitorResolution.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorResolution.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
     // can also remove the delay by manually removing sleep events in the robotjs modules c/c++ files and then rebuilding with node-gyp
@@ -46,13 +42,15 @@ class Tablet {
     let executionTimes = []
     let previousTouchWheelValue = 0
     let heightLimit = this.monitorResolution.height
-    let widthLimit = 2560
+    let widthLimit = this.monitorResolution.width
+    let xOffset = Display.getPrimaryMonitorXoffset()
 
     if (this.settings.name !== 'Wacom PTH-460') {
-      console.log('Total X screen width: ' + Pointer.getDisplaysTotalWidth())
-      console.log('Number of monitors: ' + Pointer.getNumberOfMonitors())
-      console.log('Assumed primary monitor xOffset: ' + Pointer.getPrimaryMonitorXoffset())
-      console.log('Assumed primary monitor yOffset: ' + Pointer.getPrimaryMonitorYoffset())
+      console.log('Total X screen width: ' + Display.getDisplaysTotalWidth())
+      console.log('Number of active monitors: ' + Display.getNumberOfMonitors())
+      console.log('Assumed primary monitor xOffset: ' + xOffset)
+      console.log('Assumed primary monitor yOffset: ' + Display.getPrimaryMonitorYoffset())
+      console.log('Assumed primary monitor width: ' + Display.getPrimaryMonitorWidth())
 
       this.tabletHID.on('data', (reportData) => {
         // prevent setting cursor if no pen currently detected
@@ -66,16 +64,16 @@ class Tablet {
         xS = (x - this.settings.left) * this.xScale
         yS = (y - this.settings.top) * this.yScale
 
-        if (xS > 2560) {
-          xS = 2560
+        if (xS > this.monitorResolution.width) {
+          xS = this.monitorResolution.width
         }
 
         if (xS < 0) {
           xS = 0
         }
 
-        if (yS > 1440) {
-          yS = 1440
+        if (yS > this.monitorResolution.height) {
+          yS = this.monitorResolution.height
         }
 
         if (yS < 0) {
@@ -87,7 +85,7 @@ class Tablet {
         }
 
         // add offset to xS since in this case main monitor is not the leftmost monitor
-        console.log(Pointer.setPointer(xS + 2560, yS))
+        Pointer.setPointer(xS + xOffset, yS)
 
         // different pens can have different values, try and make it pen agnostic
         switch (reportData[1] & 0x07) {
@@ -310,3 +308,9 @@ class Tablet {
 }
 
 module.exports = Tablet
+
+// const child = spawn('xrandr')
+
+// child.stdout.on('data', (data) => {
+//   console.log(`child stdout:\n${data}`)
+// }) // worst case find primary with xrandr?

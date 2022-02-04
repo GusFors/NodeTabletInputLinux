@@ -8,7 +8,6 @@ using namespace v8;
 Display *display = NULL;
 
 // TODO fix an actual formatter for c++
-
 NAN_METHOD(setPointer)
 {
 
@@ -29,66 +28,9 @@ NAN_METHOD(setPointer)
     info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(getNumberOfMonitors)
-{
-  if (display == NULL)
-  {
-      display = XOpenDisplay(NULL);
-  }
-
-  int numMonitors = 0;
-	XRRGetMonitors(display, DefaultRootWindow(display), 1, &numMonitors);
-  info.GetReturnValue().Set(Nan::New(numMonitors));
-}
-
-NAN_METHOD(getDisplaysTotalWidth)
-{
-
-  if (display == NULL)
-  {
-      display = XOpenDisplay(NULL);
-  }
-
-  int x = 0;
-  int displayWidth = XDisplayWidth(display, x);
-
-  info.GetReturnValue().Set(Nan::New(displayWidth)); 
-}
-
-NAN_METHOD(getPrimaryMonitorXoffset)
-{
-  if (display == NULL)
-  {
-      display = XOpenDisplay(NULL);
-  }
-
-  XRRScreenResources *monRes = XRRGetScreenResources(display, DefaultRootWindow(display));
-  XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
- 
-  info.GetReturnValue().Set(Nan::New(monInfo->x)); 
-}
-
-NAN_METHOD(getPrimaryMonitorYoffset)
-{
-  if (display == NULL)
-  {
-      display = XOpenDisplay(NULL);
-  }
-
-  XRRScreenResources *monRes = XRRGetScreenResources(display, DefaultRootWindow(display));
-  XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
- 
-  info.GetReturnValue().Set(Nan::New(monInfo->y)); 
-}
-
-
 NAN_MODULE_INIT(init)
 {
     Nan::SetMethod(target, "setPointer", setPointer);
-    Nan::SetMethod(target, "getDisplaysTotalWidth", getDisplaysTotalWidth);
-    Nan::SetMethod(target, "getNumberOfMonitors", getNumberOfMonitors);
-    Nan::SetMethod(target, "getPrimaryMonitorXoffset", getPrimaryMonitorXoffset);
-    Nan::SetMethod(target, "getPrimaryMonitorYoffset", getPrimaryMonitorYoffset);
 }
 
 NODE_MODULE(pointer, init);
