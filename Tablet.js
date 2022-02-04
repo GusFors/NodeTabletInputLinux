@@ -106,6 +106,7 @@ class Tablet {
       this.tabletHID.on('data', (reportData) => {
         const t0 = performance.now()
 
+        // TODO fix continuous scrolling issues
         if (reportData[0] === 17) {
           console.log(reportData[4] - 127)
 
