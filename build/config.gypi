@@ -349,16 +349,6 @@
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
     "nodedir": "/home/gustav/.cache/node-gyp/17.3.0",
-    "standalone_static_library": 1,
-    "userconfig": "/home/gustav/.npmrc",
-    "cache": "/home/gustav/.npm",
-    "local_prefix": "/home/gustav/Desktop/ProgProjects/NodeTabletInputLinux",
-    "globalconfig": "/usr/etc/npmrc",
-    "init_module": "/home/gustav/.npm-init.js",
-    "prefix": "/usr",
-    "user_agent": "npm/8.3.0 node/v17.3.0 linux x64 workspaces/false",
-    "metrics_registry": "https://registry.npmjs.org/",
-    "node_gyp": "/usr/lib/node_modules/node-gyp/bin/node-gyp.js",
-    "global_prefix": "/usr"
+    "standalone_static_library": 1
   }
 }

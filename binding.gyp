@@ -7,6 +7,7 @@
             'link_settings': {
                 'libraries': [
                     '-lX11',
+                    '-lXrandr',
                 ]
             },
             'cflags': [

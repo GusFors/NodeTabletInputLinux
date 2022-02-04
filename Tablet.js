@@ -4,6 +4,12 @@ const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Pointer = require('./build/Release/pointer.node')
+const { spawn } = require('child_process')
+const child = spawn('pwd')
+
+child.stdout.on('data', (data) => {
+  console.log(`child stdout:\n${data}`)
+})
 
 class Tablet {
   constructor() {
@@ -39,8 +45,15 @@ class Tablet {
     let isClick = false
     let executionTimes = []
     let previousTouchWheelValue = 0
+    let heightLimit = this.monitorResolution.height
+    let widthLimit = 2560
 
     if (this.settings.name !== 'Wacom PTH-460') {
+      console.log('Total X screen width: ' + Pointer.getDisplaysTotalWidth())
+      console.log('Number of monitors: ' + Pointer.getNumberOfMonitors())
+      console.log('Assumed primary monitor xOffset: ' + Pointer.getPrimaryMonitorXoffset())
+      console.log('Assumed primary monitor yOffset: ' + Pointer.getPrimaryMonitorYoffset())
+
       this.tabletHID.on('data', (reportData) => {
         // prevent setting cursor if no pen currently detected
         if (reportData[0] !== 0x02) {
@@ -74,7 +87,7 @@ class Tablet {
         }
 
         // add offset to xS since in this case main monitor is not the leftmost monitor
-        Pointer.setpointer(xS + 2560, yS)
+        console.log(Pointer.setPointer(xS + 2560, yS))
 
         // different pens can have different values, try and make it pen agnostic
         switch (reportData[1] & 0x07) {
@@ -154,7 +167,7 @@ class Tablet {
           return
         }
 
-        Pointer.setpointer(xS + 2560, yS)
+        Pointer.setPointer(xS + 2560, yS)
 
         switch (reportData[1]) {
           case 97:

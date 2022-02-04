@@ -129,7 +129,8 @@ LDFLAGS_Release := \
 	-m64
 
 LIBS := \
-	-lX11
+	-lX11 \
+	-lXrandr
 
 $(obj).target/pointer.node: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
 $(obj).target/pointer.node: LIBS := $(LIBS)
