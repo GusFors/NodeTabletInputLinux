@@ -13,7 +13,7 @@ class Tablet {
     this.settings = null
     this.xScale = null
     this.yScale = null
-    this.monitorResolution = robot.getScreenSize()
+    this.monitorResolution = { height: 0, width: 0 }
   }
 
   async simpleTabletInput(isRestart) {
@@ -27,6 +27,7 @@ class Tablet {
 
     console.log('Getting input from', this.settings.name)
     this.monitorResolution.width = Display.getPrimaryMonitorWidth()
+    this.monitorResolution.height = Display.getPrimaryMonitorHeight()
     this.xScale = this.monitorResolution.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorResolution.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
@@ -86,6 +87,7 @@ class Tablet {
 
         // add offset to xS since in this case main monitor is not the leftmost monitor
         Pointer.setPointer(xS + xOffset, yS)
+        //robot.moveMouse(xS + xOffset, yS)
 
         // different pens can have different values, try and make it pen agnostic
         switch (reportData[1] & 0x07) {
