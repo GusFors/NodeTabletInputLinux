@@ -11,6 +11,7 @@ class DeviceDetector {
     let wacDevices = allDevices.filter((device) => device.vendorId === 1386)
     let tabletMatches = []
     let tabletName
+
     for (let i = 0; i < wacDevices.length; i++) {
       for (let x = 0; x < this.configs.length; x++) {
         if (this.configs[x].productId === wacDevices[i].productId) {
@@ -44,6 +45,7 @@ class DeviceDetector {
   getConfig() {
     return new Promise((resolve, reject) => {
       let wacomDevices = HID.devices().filter((device) => device.vendorId === 1386)
+
       this.configs.forEach((config) => {
         wacomDevices.forEach((device) => {
           if (config.productId === device.productId) {
@@ -69,7 +71,7 @@ class DeviceDetector {
       if (data && data.length !== 64) {
         clearTimeout(tryReadTimeout)
         tabletDevice.close()
-        console.log('Success reading device')
+        console.log('\nSuccess reading device')
 
         return promiseResolve(dataReadArray[i].path)
       }

@@ -40,7 +40,69 @@ class Tablet {
     let executionTimes = []
     let previousTouchWheelValue = 0
 
-    if (this.settings.name === 'Wacom PTH-460') {
+    if (this.settings.name !== 'Wacom PTH-460') {
+      this.tabletHID.on('data', (reportData) => {
+        // prevent setting cursor if no pen currently detected
+        if (reportData[0] !== 0x02) {
+          return
+        }
+
+        x = reportData[2] | (reportData[3] << 8)
+        y = reportData[4] | (reportData[5] << 8)
+
+        xS = (x - this.settings.left) * this.xScale
+        yS = (y - this.settings.top) * this.yScale
+
+        if (xS > 2560) {
+          xS = 2560
+        }
+
+        if (xS < 0) {
+          xS = 0
+        }
+
+        if (yS > 1440) {
+          yS = 1440
+        }
+
+        if (yS < 0) {
+          yS = 0
+        }
+
+        if (x === 0 && y === 0) {
+          return
+        }
+
+        // add offset to xS since in this case main monitor is not the leftmost monitor
+        Pointer.setpointer(xS + 2560, yS)
+
+        // different pens can have different values, try and make it pen agnostic
+        switch (reportData[1] & 0x07) {
+          case 0x01:
+            if (isClick === false) {
+              isClick = true
+              robot.mouseToggle('down', 'left')
+            }
+            break
+
+          case 0x04:
+            if (!isClick) {
+              isClick = true
+              robot.mouseClick('right')
+            }
+            break
+
+          default:
+            if (isClick) {
+              isClick = false
+              robot.mouseToggle('up', 'left')
+            }
+        }
+        // console.log(reportData.readUInt32LE(0) & 0x3FFFFFFF);
+        // console.log((reportData[1] & 0x7));
+      })
+    } else {
+      // try and make use of the wheel of the pro tablet
       this.tabletHID.on('data', (reportData) => {
         const t0 = performance.now()
 
@@ -124,62 +186,6 @@ class Tablet {
         }
         const t1 = performance.now()
         executionTimes.push(t1 - t0)
-      })
-    } else {
-      this.tabletHID.on('data', (reportData) => {
-        if (reportData[0] !== 2) {
-          return
-        }
-
-        x = reportData[2] | (reportData[3] << 8)
-        y = reportData[4] | (reportData[5] << 8)
-
-        xS = (x - this.settings.left) * this.xScale
-        yS = (y - this.settings.top) * this.yScale
-
-        if (xS > 2560) {
-          xS = 2560
-        }
-
-        if (xS < 0) {
-          xS = 0
-        }
-
-        if (yS > 1440) {
-          yS = 1440
-        }
-
-        if (yS < 0) {
-          yS = 0
-        }
-
-        if (x === 0 && y === 0) {
-          return
-        }
-        Pointer.setpointer(xS + 2560, yS)
-        
-        switch (reportData[1]) {
-          case 241:
-            if (isClick === false) {
-              isClick = true
-              robot.mouseToggle('down', 'left')
-            }
-            break
-
-          case 244:
-            if (!isClick) {
-              isClick = true
-              robot.mouseClick('right')
-            }
-            break
-
-          default:
-            if (isClick) {
-              isClick = false
-              robot.mouseToggle('up', 'left')
-            }
-        }
-       
       })
     }
     return 0
