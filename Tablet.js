@@ -87,9 +87,9 @@ class Tablet {
 
         // add offset to xS since in this case main monitor is not the leftmost monitor
         Pointer.setPointer(xS + xOffset, yS)
-        //robot.moveMouse(xS + xOffset, yS)
+        // robot.moveMouse(xS + xOffset, yS)
 
-        // different pens can have different values, try and make it pen agnostic
+        // different pens can have different button/click values, try and make it pen agnostic
         switch (reportData[1] & 0x07) {
           case 0x01:
             if (isClick === false) {

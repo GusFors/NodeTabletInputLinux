@@ -7,7 +7,8 @@ using namespace v8;
 
 Display *display = NULL;
 
-// TODO fix an actual formatter for c++, place nan.h first after formatting or rebuild might fail
+// TODO fix an actual formatter for c++, place nan.h first after formatting or
+// rebuild might fail
 NAN_METHOD(getNumberOfMonitors) {
   if (display == NULL) {
     display = XOpenDisplay(NULL);
