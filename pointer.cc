@@ -20,7 +20,7 @@ NAN_METHOD(setPointer) {
   }
 
   XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
-  XSync(display, true);
+  XSync(display, false);
 
   //XFlush(display);
   //XCloseDisplay(display);
