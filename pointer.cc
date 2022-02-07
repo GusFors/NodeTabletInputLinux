@@ -12,6 +12,7 @@ Window root = NULL;
 // rebuild might fail
 NAN_METHOD(setPointer) {
 
+  // scaled x and y values from node
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
   int32_t y = Nan::To<int32_t>(info[1]).FromJust();
 
@@ -23,7 +24,7 @@ NAN_METHOD(setPointer) {
   XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
   // XSync(display, true);
   XFlush(display);
-  // info.GetReturnValue().Set(Nan::New(1));
+  info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "setPointer", setPointer); }

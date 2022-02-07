@@ -5,7 +5,6 @@ const ConfigHandler = require('./ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Pointer = require('./build/Release/pointer.node')
 const Display = require('./build/Release/display.node')
-// const { spawn } = require('child_process')
 
 class Tablet {
   constructor() {
@@ -24,8 +23,8 @@ class Tablet {
 
     this.tabletHID = new HID.HID(await deviceDetector.getPath())
     this.settings = await deviceDetector.getConfig()
-
     console.log('Getting input from', this.settings.name)
+
     this.monitorResolution.width = Display.getPrimaryMonitorWidth()
     this.monitorResolution.height = Display.getPrimaryMonitorHeight()
     this.xScale = this.monitorResolution.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
@@ -45,6 +44,10 @@ class Tablet {
     let heightLimit = this.monitorResolution.height
     let widthLimit = this.monitorResolution.width
     let xOffset = Display.getPrimaryMonitorXoffset()
+    let xAntiJitter = 0
+    let yAntiJitter = 0
+    const xBuffer = []
+    const yBuffer = []
 
     if (this.settings.name !== 'Wacom PTH-460') {
       console.log('Total X screen width: ' + Display.getDisplaysTotalWidth())
@@ -54,19 +57,23 @@ class Tablet {
       console.log('Assumed primary monitor width: ' + Display.getPrimaryMonitorWidth())
 
       this.tabletHID.on('data', (reportData) => {
-        // prevent setting cursor if no pen currently detected
-        // const t0 = performance.now()
+        const t0 = performance.now()
 
+        // prevent setting cursor if no pen currently detected
         if (reportData[0] !== 0x02) {
           return
         }
 
+        // get x and y position from the tablet buffer
         x = reportData[2] | (reportData[3] << 8)
         y = reportData[4] | (reportData[5] << 8)
 
+        // scale the values to monitor resolution
         xS = (x - this.settings.left) * this.xScale
         yS = (y - this.settings.top) * this.yScale
 
+
+        // safety checks to keep cursor on primary monitor
         if (xS > this.monitorResolution.width) {
           xS = this.monitorResolution.width
         }
@@ -87,9 +94,8 @@ class Tablet {
           return
         }
 
-        // add offset to xS since in this case main monitor is not the leftmost monitor
+        // add offset to xS since in my case the main monitor is not the leftmost monitor
         Pointer.setPointer(xS + xOffset, yS)
-        // robot.moveMouse(xS + xOffset, yS)
 
         // different pens can have different button/click values, try and make it pen agnostic
         switch (reportData[1] & 0x07) {
@@ -113,10 +119,8 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
-        //const t1 = performance.now()
-        //console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
-        // console.log(reportData.readUInt32LE(0) & 0x3FFFFFFF);
-        // console.log((reportData[1] & 0x7));
+        const t1 = performance.now()
+        console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
       })
     } else {
       // try and make use of the wheel of the pro tablet
@@ -288,8 +292,8 @@ class Tablet {
         yS = 0
       }
 
-      xBuffer.push(xS)
-      yBuffer.push(yS)
+      // add offset to xS since in this case main monitor is not the leftmost monitor
+      Pointer.setPointer(xS + 2560, yS)
 
       // pressure
       if (reportData[7] > 0) {
@@ -314,9 +318,3 @@ class Tablet {
 }
 
 module.exports = Tablet
-
-// const child = spawn('xrandr')
-
-// child.stdout.on('data', (data) => {
-//   console.log(`child stdout:\n${data}`)
-// }) // worst case find primary with xrandr?

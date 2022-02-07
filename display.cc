@@ -16,11 +16,11 @@ NAN_METHOD(getNumberOfMonitors) {
 
   int numMonitors = 0;
   XRRGetMonitors(display, XDefaultRootWindow(display), 1, &numMonitors);
+
   info.GetReturnValue().Set(Nan::New(numMonitors));
 }
 
 NAN_METHOD(getDisplaysTotalWidth) {
-
   if (display == NULL) {
     display = XOpenDisplay(NULL);
   }
