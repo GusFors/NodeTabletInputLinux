@@ -8,7 +8,8 @@ using namespace v8;
 Display *display = NULL;
 Window root = NULL;
 
-// TODO fix an actual formatter for c++, place nan.h first after formatting or rebuild might fail
+// TODO fix an actual formatter for c++, place nan.h first after formatting or
+// rebuild might fail
 NAN_METHOD(setPointer) {
 
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
@@ -20,11 +21,9 @@ NAN_METHOD(setPointer) {
   }
 
   XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
-  XSync(display, false);
-
-  //XFlush(display);
-  //XCloseDisplay(display);
-  //info.GetReturnValue().Set(Nan::New(1));
+  // XSync(display, true);
+  XFlush(display);
+  // info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "setPointer", setPointer); }

@@ -55,6 +55,8 @@ class Tablet {
 
       this.tabletHID.on('data', (reportData) => {
         // prevent setting cursor if no pen currently detected
+        // const t0 = performance.now()
+
         if (reportData[0] !== 0x02) {
           return
         }
@@ -111,6 +113,8 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
+        //const t1 = performance.now()
+        //console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
         // console.log(reportData.readUInt32LE(0) & 0x3FFFFFFF);
         // console.log((reportData[1] & 0x7));
       })

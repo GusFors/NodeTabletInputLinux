@@ -1,4 +1,5 @@
 [
+ 
   {
     "vendorId": 1386,
     "productId": 782,
@@ -7,6 +8,19 @@
     "left": 3100,
     "bottom": 5806,
     "right": 12100,
+    "multiplier": 1,
+    "isForcedProportions": true,
+    "xMax": 15200,
+    "yMax": 9500
+  },
+  {
+    "vendorId": 1386,
+    "productId": 782,
+    "name": "Wacom CTL-480 Big area",
+    "top": 181.25,
+    "left": 2100,
+    "bottom": 6368.75,
+    "right": 13100,
     "multiplier": 1,
     "isForcedProportions": true,
     "xMax": 15200,
