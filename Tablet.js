@@ -254,7 +254,8 @@ class Tablet {
     this.yScale = this.monitorResolution.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
     robot.setMouseDelay(0)
-
+    robot.setKeyboardDelay(0)
+    
     let intervalData = []
     let x
     let y
