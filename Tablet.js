@@ -56,9 +56,15 @@ class Tablet {
       console.log('Assumed primary monitor yOffset: ' + Display.getPrimaryMonitorYoffset())
       console.log('Assumed primary monitor width: ' + Display.getPrimaryMonitorWidth())
 
-      this.tabletHID.on('data', (reportData) => {
-        const t0 = performance.now()
+      // let rps = 0
+      // setInterval(() => {
+      //   console.log(rps);
+      //   rps = 0
+      // }, 1000);
 
+      this.tabletHID.on('data', (reportData) => {
+        // const t0 = performance.now()
+        // rps++
         // prevent setting cursor if no pen currently detected
         if (reportData[0] !== 0x02) {
           return
@@ -119,8 +125,8 @@ class Tablet {
               robot.mouseToggle('up', 'left')
             }
         }
-        const t1 = performance.now()
-        console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
+        // const t1 = performance.now()
+        // console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
       })
     } else {
       // try and make use of the wheel of the pro tablet
