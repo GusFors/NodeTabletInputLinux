@@ -1,5 +1,7 @@
 const Pointer = require('./build/Release/pointer.node')
 const robot = require('robotjs')
+
+// can also remove the delay by manually removing sleep events in the robotjs modules c/c++ files and then rebuilding with node-gyp
 robot.setMouseDelay(0)
 robot.setKeyboardDelay(0)
 
@@ -145,4 +147,104 @@ function proBufferParser(reportBuffer, tablet) {
   }
 }
 
-module.exports = { standardBufferParser, proBufferParser }
+let xBuffer = []
+let yBuffer = []
+const avgPositionStrength = 3
+const currentPositionStrength = 2
+
+function standardAvgBufferParser(reportBuffer, tablet) {
+  if (reportBuffer[0] !== 0x02) {
+    return
+  }
+
+  // get x and y position from the tablet buffer
+  x = reportBuffer[2] | (reportBuffer[3] << 8)
+  y = reportBuffer[4] | (reportBuffer[5] << 8)
+
+  // scale the values to monitor resolution
+  xS = (x - tablet.settings.left) * tablet.xScale
+  yS = (y - tablet.settings.top) * tablet.yScale
+
+  // safety checks to keep cursor on primary monitor
+  if (xS > tablet.monitorConfig.width) {
+    xS = tablet.monitorConfig.width
+  }
+
+  if (xS < 0) {
+    xS = 0
+  }
+
+  if (yS > tablet.monitorConfig.height) {
+    yS = tablet.monitorConfig.height
+  }
+
+  if (yS < 0) {
+    yS = 0
+  }
+
+  if (x === 0 && y === 0) {
+    xBuffer = []
+    yBuffer = []
+    return
+  }
+
+  xBuffer.push(xS)
+  yBuffer.push(yS)
+
+  // add offset to xS since in my case the main monitor is not the leftmost monitor
+  Pointer.setPointer(
+    averagePosition(xBuffer, avgPositionStrength, currentPositionStrength) + tablet.monitorConfig.xOffset,
+    averagePosition(yBuffer, avgPositionStrength, currentPositionStrength)
+  )
+
+  // different pens can have different button/click values, try and make it pen agnostic
+  switch (reportBuffer[1] & 0x07) {
+    case 0x01:
+      if (isClick === false) {
+        isClick = true
+        robot.mouseToggle('down', 'left')
+      }
+      break
+
+    case 0x04:
+      if (!isClick) {
+        isClick = true
+        robot.mouseClick('right')
+      }
+      break
+
+    default:
+      if (isClick) {
+        isClick = false
+        robot.mouseToggle('up', 'left')
+      }
+  }
+}
+
+// just trying stuff, not actually working properly
+function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {
+  let sum = 0
+  let latest = positionBufferArr.length - 1
+
+  // wait until there are enough values, prevent cursor getting stuck at display border
+  if (positionBufferArr.length >= amountOfPositions) {
+    for (let i = positionBufferArr.length; i > positionBufferArr.length - amountOfPositions; i--) {
+      // if position difference is over a certain value, get a smoothed position
+      if (Math.abs(positionBufferArr[latest] - positionBufferArr[i]) > 300) {
+        sum += (positionBufferArr[i - 1] + positionBufferArr[latest] + positionBufferArr[i + 1]) / 3
+      } else {
+        sum += positionBufferArr[i - 1]
+      }
+    }
+    // how much the most recent position value should be prioritized when calculating average position
+    for (let y = 0; y < currentPositionPrio; y++) {
+      sum += positionBufferArr[latest]
+      amountOfPositions++
+    }
+    return sum / amountOfPositions
+  } else {
+    return positionBufferArr[latest]
+  }
+}
+
+module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser }
