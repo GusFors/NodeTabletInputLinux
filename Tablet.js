@@ -46,17 +46,11 @@ class Tablet {
 
     if (this.settings.name !== 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportBuffer) => {
-        const t0 = performance.now()
         standardBufferParser(reportBuffer, this)
-        const t1 = performance.now()
-        console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
       })
     } else {
       this.tabletHID.on('data', (reportBuffer) => {
-        const t0 = performance.now()
         proBufferParser(reportBuffer, this)
-        const t1 = performance.now()
-        console.log(`Call to doSomething took ${t1 - t0} milliseconds.`)
       })
     }
     return 1
