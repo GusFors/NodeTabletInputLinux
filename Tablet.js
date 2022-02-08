@@ -41,10 +41,7 @@ class Tablet {
 
     if (this.settings.name !== 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportBuffer) => {
-        // const t0 = performance.now()
         standardBufferParser(reportBuffer, this)
-        // const t1 = performance.now()
-        // console.log(` setting cursor took ${t1 - t0} ms.`)
       })
     } else {
       this.tabletHID.on('data', (reportBuffer) => {
@@ -90,10 +87,7 @@ class Tablet {
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
 
     this.tabletHID.on('data', (reportBuffer) => {
-      //const t0 = performance.now()
       standardAvgBufferParser(reportBuffer, this)
-      // const t1 = performance.now()
-      // console.log(` setting cursor took ${t1 - t0} ms.`)
     })
 
     return 1

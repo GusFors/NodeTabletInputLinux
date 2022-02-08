@@ -221,7 +221,7 @@ function standardAvgBufferParser(reportBuffer, tablet) {
   }
 }
 
-// just trying stuff, not actually working properly
+// just trying stuff, experimental
 function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {
   let sum = 0
   let latest = positionBufferArr.length - 1
