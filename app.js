@@ -12,5 +12,7 @@ if (process.argv.includes('-de')) {
   process.exit()
 }
 
-const DetectedTablet = new Tablet()
-DetectedTablet.simpleTabletInput()
+;(async () => {
+  const DetectedTablet = new Tablet()
+  DetectedTablet.simpleTabletInput()
+})()
