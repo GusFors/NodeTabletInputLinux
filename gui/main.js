@@ -1,4 +1,8 @@
 const wsConnection = new WebSocket('ws://localhost:4000')
+const topInput = document.querySelector('#top')
+const bottomInput = document.querySelector('#bottom')
+const rightInput = document.querySelector('#right')
+const leftInput = document.querySelector('#left')
 
 wsConnection.addEventListener('open', (wsEvent) => {
   wsConnection.send(JSON.stringify({ msg: 'Basic html client connected' }))
@@ -6,13 +10,25 @@ wsConnection.addEventListener('open', (wsEvent) => {
 })
 
 wsConnection.addEventListener('message', (wsEvent) => {
-  let data = JSON.parse(wsEvent.data)
+  const data = JSON.parse(wsEvent.data)
   console.log('Data:', data)
 
   if (data.settings) {
-    document.querySelector(`#top`).value = data.settings.top
-    document.querySelector(`#bottom`).value = data.settings.bottom
-    document.querySelector(`#right`).value = data.settings.right
-    document.querySelector(`#left`).value = data.settings.left
+    topInput.value = data.settings.top
+    bottomInput.value = data.settings.bottom
+    rightInput.value = data.settings.right
+    leftInput.value = data.settings.left
   }
 })
+
+document.querySelector('#apply').onclick = (event) => {
+  wsConnection.send(
+    JSON.stringify({
+      id: 'applyArea',
+      top: parseInt(topInput.value),
+      bottom: parseInt(bottomInput.value),
+      left: parseInt(leftInput.value),
+      right: parseInt(rightInput.value),
+    })
+  )
+}
