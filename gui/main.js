@@ -3,6 +3,7 @@ const topInput = document.querySelector('#top')
 const bottomInput = document.querySelector('#bottom')
 const rightInput = document.querySelector('#right')
 const leftInput = document.querySelector('#left')
+const model = document.querySelector('#model')
 
 wsConnection.addEventListener('open', (wsEvent) => {
   wsConnection.send(JSON.stringify({ msg: 'Basic html client connected' }))
@@ -18,6 +19,7 @@ wsConnection.addEventListener('message', (wsEvent) => {
     bottomInput.value = data.settings.bottom
     rightInput.value = data.settings.right
     leftInput.value = data.settings.left
+    model.innerText += ' ' + data.settings.name
   }
 })
 
