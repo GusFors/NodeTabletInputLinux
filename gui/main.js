@@ -6,5 +6,13 @@ wsConnection.addEventListener('open', (wsEvent) => {
 })
 
 wsConnection.addEventListener('message', (wsEvent) => {
-  console.log('Data:', wsEvent.data)
+  let data = JSON.parse(wsEvent.data)
+  console.log('Data:', data)
+
+  if (data.settings) {
+    document.querySelector(`#top`).value = data.settings.top
+    document.querySelector(`#bottom`).value = data.settings.bottom
+    document.querySelector(`#right`).value = data.settings.right
+    document.querySelector(`#left`).value = data.settings.left
+  }
 })

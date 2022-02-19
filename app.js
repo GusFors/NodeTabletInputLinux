@@ -20,27 +20,28 @@ if (isExit) {
   }, 10000)
 }
 
-// start in forked process?
-if (isWebSocket) {
-  const WebSocket = require('ws')
-  const wss = new WebSocketServer({ port: 4000 })
-  console.log('starting ws server..')
-
-  wss.on('connection', (ws) => {
-    ws.on('message', (clientData) => {
-      console.log(JSON.parse(clientData))
-    })
-    ws.send('init from console')
-  })
-}
-
 ;(async () => {
   const DetectedTablet = new Tablet()
+
   if (isAvg) {
     DetectedTablet.tabletInput()
     console.log('using avg position')
   } else {
     DetectedTablet.simpleTabletInput()
     console.log('using raw position')
+  }
+
+  // start in forked process?
+  if (isWebSocket) {
+    const WebSocketServer = require('ws').WebSocketServer
+    const wss = new WebSocketServer({ port: 4000 })
+    console.log('starting ws server..')
+
+    wss.on('connection', (ws) => {
+      ws.on('message', (clientData) => {
+        console.log(JSON.parse(clientData))
+      })
+      ws.send(JSON.stringify({ msg: 'init from console', settings: DetectedTablet.settings }))
+    })
   }
 })()

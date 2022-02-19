@@ -4,10 +4,38 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="main.css" />
     <title>Tablet Configuration</title>
     <script src="main.js"></script>
   </head>
   <body>
-    <h1>Tablet Configuration</h1>
+    <div id="settingswrapper">
+      <h1>Tablet Configuration</h1>
+      <h3>Tablet area</h3>
+      <div id="areawrapper">
+        <div id="areavaluewrapper">
+          <div id="topbotwrapper">
+            <div class="tablecell">
+              <legend for="top">Top</legend>
+              <input id="top" type="number" />
+            </div>
+            <div class="tablecell">
+              <legend for="bottom">Bottom</legend>
+              <input id="bottom" type="number" />
+            </div>
+          </div>
+          <div id="leftrightwrapper">
+            <div class="tablecell">
+              <legend for="left">Left</legend>
+              <input id="left" type="number" />
+            </div>
+            <div class="tablecell">
+              <legend for="right">Right</legend>
+              <input id="right" type="number" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

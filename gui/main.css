@@ -1,0 +1,29 @@
+body {
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  background-color: #191f24;
+  color: rgb(243, 248, 250);
+}
+
+#topbotwrapper {
+  display: table;
+  margin: 10px;
+  margin-top: -10px;
+}
+
+#leftrightwrapper {
+  display: table;
+  margin: 10px;
+  margin-top: -10px;
+}
+
+.tablecell {
+  display: table-cell;
+}
+
+#settingswrapper {
+  margin-left: 10px;
+}
+
+input {
+  margin: 2px;
+}
