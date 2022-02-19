@@ -41,10 +41,20 @@ if (isExit) {
     spawn('xdg-open', [__dirname + '/gui/index.html'])
 
     wss.on('connection', (ws) => {
-      ws.on('message', (clientData) => {
-        console.log(JSON.parse(clientData))
-      })
       ws.send(JSON.stringify({ msg: 'init from console', settings: DetectedTablet.settings }))
+
+      ws.on('message', (clientData) => {
+        let data = JSON.parse(clientData)
+        console.log(data)
+
+        if (data.id === 'applyArea') {
+          DetectedTablet.settings.top = data.top
+          DetectedTablet.settings.bottom = data.bottom
+          DetectedTablet.settings.left = data.left
+          DetectedTablet.settings.right = data.right
+          console.log(DetectedTablet.settings)
+        }
+      })
     })
   }
 })()
