@@ -1,5 +1,6 @@
 const HID = require('node-hid')
 const Tablet = require('./Tablet')
+const { spawn } = require('child_process')
 
 let isForcedProportions = process.argv.includes('-f')
 let isFastLogging = process.argv.includes('-l')
@@ -36,6 +37,8 @@ if (isExit) {
     const WebSocketServer = require('ws').WebSocketServer
     const wss = new WebSocketServer({ port: 4000 })
     console.log('starting ws server..')
+
+    spawn('xdg-open', [__dirname + '/gui/index.html'])
 
     wss.on('connection', (ws) => {
       ws.on('message', (clientData) => {
