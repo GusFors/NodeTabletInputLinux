@@ -1,5 +1,5 @@
 const HID = require('node-hid')
-const ConfigHandler = require('./ConfigHandler')
+const ConfigHandler = require('./configs/ConfigHandler')
 
 class DeviceDetector {
   constructor() {

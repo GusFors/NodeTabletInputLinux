@@ -2,9 +2,9 @@ let c = 100 // 100 for most, 200 for PTH?
 
 if (process.argv.includes('-r')) {
   let x = 76
-  let y = 32.75
-  let width = 90
-  let height = 50.625
+  let y = 42.75
+  let width = 71
+  let height = 39.9375
 
   let left = (x - width / 2) * c
   let right = (x + width / 2) * c
@@ -27,7 +27,7 @@ if (process.argv.includes('-r')) {
   let y = (top + height / 2) / c
   width = width / c
   height = height / c
-
+ 
   console.log('width ' + width)
   console.log('height ' + height)
   console.log('x: ' + x)

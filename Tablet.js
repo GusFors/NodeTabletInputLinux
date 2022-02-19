@@ -1,6 +1,6 @@
 const HID = require('node-hid')
 const DeviceDetector = require('./DeviceDetector')
-const ConfigHandler = require('./ConfigHandler')
+const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Display = require('./build/Release/display.node')
 const { standardBufferParser, proBufferParser, standardAvgBufferParser } = require('./Parser')

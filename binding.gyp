@@ -2,7 +2,7 @@
     'targets': [
         {
             'target_name': 'pointer',
-            'sources': ['pointer.cc'],
+            'sources': ['native_modules/pointer.cc'],
             'include_dirs': ['<!(node -e \'require("nan")\')'],
             'link_settings': {
                 'libraries': [
@@ -16,7 +16,7 @@
         },
         {
             'target_name': 'display',
-            'sources': ['display.cc'],
+            'sources': ['native_modules/display.cc'],
             'include_dirs': ['<!(node -e \'require("nan")\')'],
             'link_settings': {
                 'libraries': [
