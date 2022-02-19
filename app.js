@@ -1,5 +1,4 @@
 const HID = require('node-hid')
-const { WebSocketServer } = require('ws')
 const Tablet = require('./Tablet')
 
 let isForcedProportions = process.argv.includes('-f')
