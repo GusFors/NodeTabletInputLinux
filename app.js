@@ -52,6 +52,8 @@ if (isExit) {
           DetectedTablet.settings.bottom = data.bottom
           DetectedTablet.settings.left = data.left
           DetectedTablet.settings.right = data.right
+
+          DetectedTablet.updateScale()
           console.log(DetectedTablet.settings)
         }
       })
