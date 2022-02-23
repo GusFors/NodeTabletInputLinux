@@ -3,7 +3,7 @@ const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Display = require('./build/Release/display.node')
-const { standardBufferParser, proBufferParser, standardAvgBufferParser } = require('./Parser')
+const { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer } = require('./Parser')
 
 class Tablet {
   constructor() {
@@ -45,6 +45,7 @@ class Tablet {
     // }, 1000)
     if (this.settings.name !== 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportBuffer) => {
+        initPointer()
         standardBufferParser(reportBuffer, this)
         // rps++
       })

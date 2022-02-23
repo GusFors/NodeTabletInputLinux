@@ -83,6 +83,7 @@ NAN_METHOD(getPrimaryMonitorHeight) {
   info.GetReturnValue().Set(Nan::New(monInfo->height));
 }
 
+// expose as a node module
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "getDisplaysTotalWidth", getDisplaysTotalWidth);
   Nan::SetMethod(target, "getNumberOfMonitors", getNumberOfMonitors);

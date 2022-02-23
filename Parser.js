@@ -12,12 +12,16 @@ let yS
 let isClick = false
 let previousTouchWheelValue = 0
 let setPositionInterval = false
+let positions = []
+let offset = 2560
+let inRange = false
 
 function standardBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
+    // inRange = false
     return
   }
-
+  // inRange = true
   // get x and y position from the tablet buffer
   x = reportBuffer[2] | (reportBuffer[3] << 8)
   y = reportBuffer[4] | (reportBuffer[5] << 8)
@@ -49,6 +53,8 @@ function standardBufferParser(reportBuffer, tablet) {
 
   // add offset to xS since in my case the main monitor is not the leftmost monitor
   Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
+
+  // positions.push({ x: xS + tablet.monitorConfig.xOffset, y: yS })
 
   // different pens can have different button/click values, try and make it pen agnostic
   switch (reportBuffer[1] & 0x07) {
@@ -221,6 +227,17 @@ function standardAvgBufferParser(reportBuffer, tablet) {
   }
 }
 
+function initPointer() {
+  return Pointer.initDisplay()
+}
+
+// optionally set cursor position every x ms instead of on data report cb
+// setInterval(() => {
+//   if (inRange) {
+//     Pointer.setPointer(xS + offset, yS)
+//   }
+// }, 1)
+
 // just trying stuff, experimental
 function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {
   let sum = 0
@@ -247,4 +264,4 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   }
 }
 
-module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser }
+module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer }

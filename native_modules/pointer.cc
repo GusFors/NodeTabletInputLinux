@@ -16,17 +16,27 @@ NAN_METHOD(setPointer) {
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
   int32_t y = Nan::To<int32_t>(info[1]).FromJust();
 
-  if (display == NULL) {
-    display = XOpenDisplay(":0.0");
-    root = XDefaultRootWindow(display);
-  }
-
+  // set absolute position
   XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
   // XSync(display, true);
+
   XFlush(display);
   info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_MODULE_INIT(init) { Nan::SetMethod(target, "setPointer", setPointer); }
+NAN_METHOD(initDisplay) {
+  // set display and root window
+  if (display == NULL) {
+    display = XOpenDisplay(":0.0");
+    root = XDefaultRootWindow(display);
+    info.GetReturnValue().Set(Nan::New(1));
+  }
+}
+
+// expose as a node module
+NAN_MODULE_INIT(init) {
+  Nan::SetMethod(target, "setPointer", setPointer);
+  Nan::SetMethod(target, "initDisplay", initDisplay);
+}
 
 NODE_MODULE(pointer, init);

@@ -45,7 +45,6 @@ class DeviceDetector {
   getConfig() {
     return new Promise((resolve, reject) => {
       let wacomDevices = HID.devices().filter((device) => device.vendorId === 1386)
-
       this.configs.forEach((config) => {
         wacomDevices.forEach((device) => {
           if (config.productId === device.productId) {
@@ -57,26 +56,32 @@ class DeviceDetector {
   }
 
   tryReadDevice(i, promiseResolve, dataReadArray) {
+    // keep looping until cancelled or succesful, some tablets don't get detected until pen is in range
     if (i === dataReadArray.length) {
       i = 0
     }
-
+    // try open one of the possible paths
     let tabletDevice = new HID.HID(dataReadArray[i].path)
+
+    // if it can't be read, try the next device path
     tabletDevice.read((err, data) => {
       if (err) {
         console.log('Unable to read device, trying next.. ', err)
       }
 
-      // TODO check why CTH-480 can have different buffer lengths
+      // TODO, CTH-480 can have different buffer lengths
       if (data && data.length !== 64) {
+        // stop looping
         clearTimeout(tryReadTimeout)
         tabletDevice.close()
-        console.log('\nSuccess reading device')
 
+        // resolve the promise that got passed down from getPath
+        console.log('\nSuccess reading device')
         return promiseResolve(dataReadArray[i].path)
       }
     })
 
+    // try next path after timeout, might not work properly if set too low
     let tryReadTimeout = setTimeout(() => {
       tabletDevice.close()
       if (i === dataReadArray.length - 1) {

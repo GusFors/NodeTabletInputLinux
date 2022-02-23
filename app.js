@@ -38,6 +38,7 @@ if (isExit) {
     const wss = new WebSocketServer({ port: 4000 })
     console.log('starting ws server..')
 
+    // https://superuser.com/questions/629844/how-can-i-launch-web-browser-automatically-with-given-window-size-and-url
     spawn('xdg-open', [__dirname + '/gui/index.html'])
 
     wss.on('connection', (ws) => {
