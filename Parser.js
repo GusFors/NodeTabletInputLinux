@@ -155,8 +155,8 @@ function proBufferParser(reportBuffer, tablet) {
 
 let xBuffer = []
 let yBuffer = []
-const avgPositionStrength = 3
-const currentPositionStrength = 2
+const avgPositionStrength = 4
+const currentPositionStrength = 3
 
 function standardAvgBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
@@ -197,7 +197,7 @@ function standardAvgBufferParser(reportBuffer, tablet) {
   xBuffer.push(xS)
   yBuffer.push(yS)
 
-  // add offset to xS since in my case the main monitor is not the leftmost monitor
+  // add offset to xS since in this case the main monitor is not the leftmost monitor
   Pointer.setPointer(
     averagePosition(xBuffer, avgPositionStrength, currentPositionStrength) + tablet.monitorConfig.xOffset,
     averagePosition(yBuffer, avgPositionStrength, currentPositionStrength)

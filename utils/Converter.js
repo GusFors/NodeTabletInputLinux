@@ -3,8 +3,8 @@ let c = 100 // 100 for most, 200 for PTH?
 if (process.argv.includes('-r')) {
   let x = 76
   let y = 42.75
-  let width = 71
-  let height = 39.9375
+  let width = 75
+  let height = 42.1875
 
   let left = (x - width / 2) * c
   let right = (x + width / 2) * c

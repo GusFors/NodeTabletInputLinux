@@ -94,6 +94,7 @@ class Tablet {
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
 
     this.tabletHID.on('data', (reportBuffer) => {
+      initPointer()
       standardAvgBufferParser(reportBuffer, this)
     })
 
