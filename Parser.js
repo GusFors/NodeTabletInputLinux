@@ -11,10 +11,20 @@ let xS
 let yS
 let isClick = false
 let previousTouchWheelValue = 0
-let setPositionInterval = false
-let positions = []
-let offset = 2560
-let inRange = false
+// let setPositionInterval = false
+// let positions = []
+// let offset = 2560
+// let inRange = false
+
+// setTimeout(() => {
+//   console.log('should click down once')
+//   Pointer.mouseLeftClickDown()
+// }, 3000)
+
+// setTimeout(() => {
+//   console.log('should click up once')
+//   Pointer.mouseLeftClickUp()
+// }, 5000)
 
 function standardBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
@@ -61,7 +71,8 @@ function standardBufferParser(reportBuffer, tablet) {
     case 0x01:
       if (isClick === false) {
         isClick = true
-        robot.mouseToggle('down', 'left')
+        Pointer.mouseLeftClickDown()
+        // robot.mouseToggle('down', 'left')
       }
       break
 
@@ -75,7 +86,8 @@ function standardBufferParser(reportBuffer, tablet) {
     default:
       if (isClick) {
         isClick = false
-        robot.mouseToggle('up', 'left')
+        Pointer.mouseLeftClickUp()
+        // robot.mouseToggle('up', 'left')
       }
   }
 }

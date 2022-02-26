@@ -2,9 +2,9 @@ const HID = require('node-hid')
 const Tablet = require('./Tablet')
 const { spawn } = require('child_process')
 
-let isForcedProportions = process.argv.includes('-f')
-let isFastLogging = process.argv.includes('-l')
-let isDraftLog = process.argv.includes('-d')
+// let isForcedProportions = process.argv.includes('-f')
+// let isFastLogging = process.argv.includes('-l')
+// let isDraftLog = process.argv.includes('-d')
 let isExit = process.argv.includes('-t')
 let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
@@ -38,7 +38,6 @@ if (isExit) {
     const wss = new WebSocketServer({ port: 4000 })
     console.log('starting ws server..')
 
-    // https://superuser.com/questions/629844/how-can-i-launch-web-browser-automatically-with-given-window-size-and-url
     spawn('xdg-open', [__dirname + '/gui/index.html'])
 
     wss.on('connection', (ws) => {

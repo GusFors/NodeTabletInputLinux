@@ -8,6 +8,7 @@
                 'libraries': [
                     '-lX11',
                     '-lXrandr',
+                    '-lXtst'
                 ]
             },
             'cflags': [

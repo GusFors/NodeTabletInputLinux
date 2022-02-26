@@ -1,12 +1,15 @@
 #include <nan.h>
+#include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
+#include <X11/extensions/XTest.h>
 
 using namespace v8;
+using namespace Nan;
 
 Display *display = NULL;
-Window root = NULL;
+Window root = 0;
 
 // TODO fix an actual formatter for c++, place nan.h first after formatting or
 // rebuild might fail
@@ -33,10 +36,24 @@ NAN_METHOD(initDisplay) {
   }
 }
 
+NAN_METHOD(mouseLeftClickDown) {
+  // test mouse click down
+  XTestFakeButtonEvent(display, 1, true, CurrentTime);
+  XFlush(display);
+}
+
+NAN_METHOD(mouseLeftClickUp) {
+  // test mouse click
+  XTestFakeButtonEvent(display, 1, false, CurrentTime);
+  XFlush(display);
+}
+
 // expose as a node module
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setPointer", setPointer);
   Nan::SetMethod(target, "initDisplay", initDisplay);
+  Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
+  Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
 }
 
 NODE_MODULE(pointer, init);

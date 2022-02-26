@@ -39,13 +39,13 @@ CFLAGS_CC_Debug := \
 	-std=gnu++17
 
 INCS_Debug := \
-	-I/home/gustav/.cache/node-gyp/17.5.0/include/node \
-	-I/home/gustav/.cache/node-gyp/17.5.0/src \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/openssl/config \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/openssl/openssl/include \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/uv/include \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/zlib \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/v8/include \
+	-I/home/gustav/.cache/node-gyp/17.6.0/include/node \
+	-I/home/gustav/.cache/node-gyp/17.6.0/src \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/openssl/config \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/openssl/openssl/include \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/uv/include \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/zlib \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 DEFS_Release := \
@@ -82,13 +82,13 @@ CFLAGS_CC_Release := \
 	-std=gnu++17
 
 INCS_Release := \
-	-I/home/gustav/.cache/node-gyp/17.5.0/include/node \
-	-I/home/gustav/.cache/node-gyp/17.5.0/src \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/openssl/config \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/openssl/openssl/include \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/uv/include \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/zlib \
-	-I/home/gustav/.cache/node-gyp/17.5.0/deps/v8/include \
+	-I/home/gustav/.cache/node-gyp/17.6.0/include/node \
+	-I/home/gustav/.cache/node-gyp/17.6.0/src \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/openssl/config \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/openssl/openssl/include \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/uv/include \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/zlib \
+	-I/home/gustav/.cache/node-gyp/17.6.0/deps/v8/include \
 	-I$(srcdir)/node_modules/nan
 
 OBJS := \
