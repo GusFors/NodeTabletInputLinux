@@ -1,12 +1,11 @@
-const Tablet = require('./Tablet')
-const { spawn } = require('child_process')
-
 // let isForcedProportions = process.argv.includes('-f')
 // let isFastLogging = process.argv.includes('-l')
 // let isDraftLog = process.argv.includes('-d')
 let isExit = process.argv.includes('-t')
 let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
+
+const Tablet = require('./Tablet')
 
 if (process.argv.includes('-de')) {
   const HID = require('node-hid')
@@ -34,6 +33,7 @@ if (isExit) {
 
   // start in forked process?
   if (isWebSocket) {
+    const { spawn } = require('child_process')
     const WebSocketServer = require('ws').WebSocketServer
     const wss = new WebSocketServer({ port: 4000 })
     console.log('starting ws server..')
@@ -60,9 +60,3 @@ if (isExit) {
     })
   }
 })()
-
-// process.on('uncaughtException', err => {
-//   console.log(err)
-//   // console.error('There was an uncaught error', err)
-//   // process.exit(1) //mandatory (as per the Node.js docs)
-// })

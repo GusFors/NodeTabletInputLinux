@@ -1,4 +1,4 @@
-let c = 200 // 100 for most, 200 for PTH?
+let c = 100 // 100 for most, 200 for PTH?
 
 if (process.argv.includes('-r')) {
   let x = 76

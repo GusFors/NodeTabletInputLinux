@@ -1,16 +1,10 @@
 const Pointer = require('./build/Release/pointer.node')
-const robot = require('robotjs')
-
-// can also remove the delay by manually removing sleep events in the robotjs modules c/c++ files and then rebuilding with node-gyp
-robot.setMouseDelay(0)
-robot.setKeyboardDelay(0)
 
 let x
 let y
 let xS
 let yS
 let isClick = false
-let previousTouchWheelValue = 0
 // let setPositionInterval = false
 // let positions = []
 // let offset = 2560
@@ -30,7 +24,7 @@ function standardBufferParser(reportBuffer, tablet) {
   xS = (x - tablet.settings.left) * tablet.xScale
   yS = (y - tablet.settings.top) * tablet.yScale
 
-  // safety checks to keep cursor on primary monitor
+  // extra checks to keep cursor on primary monitor
   if (xS > tablet.monitorConfig.width) {
     xS = tablet.monitorConfig.width
   }
@@ -54,8 +48,6 @@ function standardBufferParser(reportBuffer, tablet) {
   // add offset to xS since in my case the main monitor is not the leftmost monitor
   Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
 
-  // positions.push({ x: xS + tablet.monitorConfig.xOffset, y: yS })
-
   // different pens can have different button/click values, try and make it pen agnostic
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
@@ -68,7 +60,8 @@ function standardBufferParser(reportBuffer, tablet) {
     case 0x04:
       if (!isClick) {
         isClick = true
-        robot.mouseClick('right')
+        Pointer.mouseRightClickDown()
+        Pointer.mouseRightClickUp()
       }
       break
 
@@ -80,22 +73,25 @@ function standardBufferParser(reportBuffer, tablet) {
   }
 }
 
+// let previousTouchWheelValue = 0
+// const robot = require('robotjs')
+// robot.setMouseDelay(0)
+// robot.setKeyboardDelay(0)
+
 function proBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] === 17) {
-    console.log(reportBuffer[4] - 127)
-
-    // try and make use of the wheel of the pro tablet
-    if (reportBuffer[4] === 0x7f) {
-      previousTouchWheelValue = 0
-      return
-    }
-
-    if (reportBuffer[4] < previousTouchWheelValue) {
-      robot.keyTap('audio_vol_up')
-    } else {
-      robot.keyTap('audio_vol_down')
-    }
-    previousTouchWheelValue = reportBuffer[4]
+    // console.log(reportBuffer[4] - 127)
+    // // try and make use of the wheel of the pro tablet, buggy for now
+    // if (reportBuffer[4] === 0x7f) {
+    //   previousTouchWheelValue = 0
+    //   return
+    // }
+    // if (reportBuffer[4] < previousTouchWheelValue) {
+    //   robot.keyTap('audio_vol_up')
+    // } else {
+    //   robot.keyTap('audio_vol_down')
+    // }
+    // previousTouchWheelValue = reportBuffer[4]
   }
 
   if (reportBuffer[0] != 0x10) {
@@ -141,7 +137,8 @@ function proBufferParser(reportBuffer, tablet) {
     case 0x04:
       if (!isClick) {
         isClick = true
-        robot.mouseClick('right')
+        Pointer.mouseRightClickDown()
+        Pointer.mouseRightClickUp()
       }
       break
 
@@ -171,7 +168,7 @@ function standardAvgBufferParser(reportBuffer, tablet) {
   xS = (x - tablet.settings.left) * tablet.xScale
   yS = (y - tablet.settings.top) * tablet.yScale
 
-  // safety checks to keep cursor on primary monitor
+  // extra checks to keep cursor on primary monitor
   if (xS > tablet.monitorConfig.width) {
     xS = tablet.monitorConfig.width
   }
@@ -208,21 +205,22 @@ function standardAvgBufferParser(reportBuffer, tablet) {
     case 0x01:
       if (isClick === false) {
         isClick = true
-        robot.mouseToggle('down', 'left')
+        Pointer.mouseLeftClickDown()
       }
       break
 
     case 0x04:
       if (!isClick) {
         isClick = true
-        robot.mouseClick('right')
+        Pointer.mouseRightClickDown()
+        Pointer.mouseRightClickUp()
       }
       break
 
     default:
       if (isClick) {
         isClick = false
-        robot.mouseToggle('up', 'left')
+        Pointer.mouseLeftClickUp()
       }
   }
 }

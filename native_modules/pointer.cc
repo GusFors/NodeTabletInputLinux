@@ -48,12 +48,24 @@ NAN_METHOD(mouseLeftClickUp) {
   XFlush(display);
 }
 
+NAN_METHOD(mouseRightClickDown) {
+  XTestFakeButtonEvent(display, 3, true, CurrentTime);
+  XFlush(display);
+}
+
+NAN_METHOD(mouseRightClickUp) {
+  XTestFakeButtonEvent(display, 3, false, CurrentTime);
+  XFlush(display);
+}
+
 // expose as a node module
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setPointer", setPointer);
   Nan::SetMethod(target, "initDisplay", initDisplay);
   Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
   Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
+  Nan::SetMethod(target, "mouseRightClickDown", mouseRightClickDown);
+  Nan::SetMethod(target, "mouseRightClickUp", mouseRightClickUp);
 }
 
 NODE_MODULE(pointer, init);

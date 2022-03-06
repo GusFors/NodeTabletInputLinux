@@ -44,6 +44,8 @@ class Tablet {
     //   console.log(rps)
     //   rps = 0
     // }, 1000)
+
+    // init the X display
     initPointer()
 
     if (this.settings.name !== 'Wacom PTH-460') {
@@ -94,8 +96,8 @@ class Tablet {
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
 
+    initPointer()
     this.tabletHID.on('data', (reportBuffer) => {
-      initPointer()
       standardAvgBufferParser(reportBuffer, this)
     })
 
