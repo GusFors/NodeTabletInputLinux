@@ -1,4 +1,3 @@
-const HID = require('node-hid')
 const Tablet = require('./Tablet')
 const { spawn } = require('child_process')
 
@@ -10,6 +9,7 @@ let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
 
 if (process.argv.includes('-de')) {
+  const HID = require('node-hid')
   let devices = HID.devices()
   console.log(devices)
   process.exit()
@@ -60,3 +60,9 @@ if (isExit) {
     })
   }
 })()
+
+// process.on('uncaughtException', err => {
+//   console.log(err)
+//   // console.error('There was an uncaught error', err)
+//   // process.exit(1) //mandatory (as per the Node.js docs)
+// })

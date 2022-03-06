@@ -76,7 +76,7 @@ class DeviceDetector {
         tabletDevice.close()
 
         // resolve the promise that got passed down from getPath
-        console.log('\nSuccess reading device')
+        console.log('\nSuccess reading device with path', dataReadArray[i].path)
         return promiseResolve(dataReadArray[i].path)
       }
     })

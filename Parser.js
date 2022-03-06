@@ -16,16 +16,6 @@ let previousTouchWheelValue = 0
 // let offset = 2560
 // let inRange = false
 
-// setTimeout(() => {
-//   console.log('should click down once')
-//   Pointer.mouseLeftClickDown()
-// }, 3000)
-
-// setTimeout(() => {
-//   console.log('should click up once')
-//   Pointer.mouseLeftClickUp()
-// }, 5000)
-
 function standardBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
     // inRange = false
@@ -72,7 +62,6 @@ function standardBufferParser(reportBuffer, tablet) {
       if (isClick === false) {
         isClick = true
         Pointer.mouseLeftClickDown()
-        // robot.mouseToggle('down', 'left')
       }
       break
 
@@ -87,7 +76,6 @@ function standardBufferParser(reportBuffer, tablet) {
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
-        // robot.mouseToggle('up', 'left')
       }
   }
 }
@@ -146,7 +134,7 @@ function proBufferParser(reportBuffer, tablet) {
     case 0x01:
       if (isClick === false) {
         isClick = true
-        robot.mouseToggle('down', 'left')
+        Pointer.mouseLeftClickDown()
       }
       break
 
@@ -160,7 +148,7 @@ function proBufferParser(reportBuffer, tablet) {
     default:
       if (isClick) {
         isClick = false
-        robot.mouseToggle('up', 'left')
+        Pointer.mouseLeftClickUp()
       }
   }
 }
@@ -243,13 +231,6 @@ function initPointer() {
   return Pointer.initDisplay()
 }
 
-// optionally set cursor position every x ms instead of on data report cb
-// setInterval(() => {
-//   if (inRange) {
-//     Pointer.setPointer(xS + offset, yS)
-//   }
-// }, 1)
-
 // just trying stuff, experimental
 function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {
   let sum = 0
@@ -275,5 +256,12 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
     return positionBufferArr[latest]
   }
 }
+
+// optionally set cursor position every x ms instead of on data report cb
+// setInterval(() => {
+//   if (inRange) {
+//     Pointer.setPointer(xS + offset, yS)
+//   }
+// }, 1)
 
 module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer }

@@ -38,14 +38,16 @@ class Tablet {
     console.log('Assumed primary monitor xOffset: ' + this.monitorConfig.xOffset)
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
-    let rps = 0
+
+    // let rps = 0
     // setInterval(() => {
     //   console.log(rps)
     //   rps = 0
     // }, 1000)
+    initPointer()
+
     if (this.settings.name !== 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportBuffer) => {
-        initPointer()
         standardBufferParser(reportBuffer, this)
         // rps++
       })
@@ -55,7 +57,6 @@ class Tablet {
         // rps++
       })
     }
-
     return 1
   }
 
@@ -103,3 +104,11 @@ class Tablet {
 }
 
 module.exports = Tablet
+
+// setInterval(() => {
+//   this.tabletHID.read((err, reportBuffer) => {
+//     standardBufferParser(reportBuffer, this)
+//     //  console.log(data)
+//     rps++
+//   })
+// }, 1)
