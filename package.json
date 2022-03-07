@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "trace": "node --nomemory-reducer --trace-gc --trace-opt --prepare-always-opt --trace-opt-stats --trace-deopt --always-opt --nooptimize-for-size app.js"
   },
   "keywords": [],
   "author": "",

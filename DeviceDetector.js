@@ -56,7 +56,7 @@ class DeviceDetector {
   }
 
   tryReadDevice(i, promiseResolve, dataReadArray) {
-    // keep looping until cancelled or succesful, some tablets don't get detected until pen is in range
+    // keep looping until cancelled or succesful, some tablets might not get detected until pen is in range
     if (i === dataReadArray.length) {
       i = 0
     }
@@ -69,13 +69,13 @@ class DeviceDetector {
         console.log('Unable to read device, trying next.. ', err)
       }
 
-      // TODO, CTH-480 can have different buffer lengths
+      // TODO, CTH-480 can have different buffer lengths?
       if (data && data.length !== 64) {
         // stop looping
         clearTimeout(tryReadTimeout)
         tabletDevice.close()
 
-        // resolve the promise that got passed down from getPath
+        // resolve the promise that got passed
         console.log('\nSuccess reading device with path', dataReadArray[i].path)
         return promiseResolve(dataReadArray[i].path)
       }

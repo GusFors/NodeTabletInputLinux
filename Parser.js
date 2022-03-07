@@ -5,17 +5,13 @@ let y
 let xS
 let yS
 let isClick = false
-// let setPositionInterval = false
-// let positions = []
-// let offset = 2560
-// let inRange = false
 
+// TODO bind this instead of sending tablet every time?
 function standardBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
-    // inRange = false
     return
   }
-  // inRange = true
+
   // get x and y position from the tablet buffer
   x = reportBuffer[2] | (reportBuffer[3] << 8)
   y = reportBuffer[4] | (reportBuffer[5] << 8)
@@ -73,25 +69,9 @@ function standardBufferParser(reportBuffer, tablet) {
   }
 }
 
-// let previousTouchWheelValue = 0
-// const robot = require('robotjs')
-// robot.setMouseDelay(0)
-// robot.setKeyboardDelay(0)
-
 function proBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] === 17) {
-    // console.log(reportBuffer[4] - 127)
-    // // try and make use of the wheel of the pro tablet, buggy for now
-    // if (reportBuffer[4] === 0x7f) {
-    //   previousTouchWheelValue = 0
-    //   return
-    // }
-    // if (reportBuffer[4] < previousTouchWheelValue) {
-    //   robot.keyTap('audio_vol_up')
-    // } else {
-    //   robot.keyTap('audio_vol_down')
-    // }
-    // previousTouchWheelValue = reportBuffer[4]
+    // if touch wheel
   }
 
   if (reportBuffer[0] != 0x10) {
@@ -255,6 +235,13 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   }
 }
 
+module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer }
+
+// let positions = []
+// let offset = 2560
+// let inRange = false
+
+// let setPositionInterval = false
 // optionally set cursor position every x ms instead of on data report cb
 // setInterval(() => {
 //   if (inRange) {
@@ -262,4 +249,26 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
 //   }
 // }, 1)
 
-module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer }
+// let xT = xS + tablet.monitorConfig.xOffset
+// let yT = yS
+// setTimeout(() => {
+//   Pointer.setPointer(xT, yT)
+// }, 40)
+
+// let previousTouchWheelValue = 0
+// const robot = require('robotjs')
+// robot.setMouseDelay(0)
+// robot.setKeyboardDelay(0)
+
+// console.log(reportBuffer[4] - 127)
+// // try and make use of the wheel of the pro tablet, buggy for now
+// if (reportBuffer[4] === 0x7f) {
+//   previousTouchWheelValue = 0
+//   return
+// }
+// if (reportBuffer[4] < previousTouchWheelValue) {
+//   robot.keyTap('audio_vol_up')
+// } else {
+//   robot.keyTap('audio_vol_down')
+// }
+// previousTouchWheelValue = reportBuffer[4]
