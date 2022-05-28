@@ -60,3 +60,7 @@ if (isExit) {
     })
   }
 })()
+
+process.on('uncaughtException', function (error) {
+  console.log('oops..')
+})
