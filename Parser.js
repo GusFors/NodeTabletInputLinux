@@ -6,7 +6,7 @@ let xS
 let yS
 let isClick = false
 
-// TODO bind this instead of sending tablet every time?
+// TODO return values without scaling? set position elsewhere?
 function standardBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
     return

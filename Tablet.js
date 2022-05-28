@@ -39,8 +39,16 @@ class Tablet {
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
 
-    // init the X display
+    // init the X display and pointer
     initPointer()
+
+    // TODO read directly from hidraw instead of node-hid?
+    // const fs = require('fs')
+    // let rawHidPath = fs.createReadStream('/dev/hidraw6')
+    // rawHidPath.on('data', (chunk) => {
+    //   standardBufferParser(chunk, this)
+    //   // console.log(chunk)
+    // })
 
     if (this.settings.name !== 'Wacom PTH-460') {
       this.tabletHID.on('data', (reportBuffer) => {
