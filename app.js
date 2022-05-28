@@ -4,6 +4,7 @@
 let isExit = process.argv.includes('-t')
 let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
+let isAutomaticRestart = process.argv.includes('-r')
 
 const Tablet = require('./Tablet')
 
@@ -20,7 +21,9 @@ if (isExit) {
   }, 10000)
 }
 
-;(async () => {
+let running = false
+
+const run = async () => {
   const DetectedTablet = new Tablet()
 
   if (isAvg) {
@@ -30,6 +33,8 @@ if (isExit) {
     DetectedTablet.simpleTabletInput()
     console.log('using raw position')
   }
+
+  running = true
 
   // start in forked process?
   if (isWebSocket) {
@@ -59,8 +64,25 @@ if (isExit) {
       })
     })
   }
-})()
+}
+run()
+
+let restartInterval
 
 process.on('uncaughtException', function (error) {
-  console.log('oops..')
+  console.log('Crashed with error: ', error)
+  running = false
+
+  if (isAutomaticRestart) {
+    restartInterval = setInterval(() => {
+      if (!running) {
+        console.log('trying to restart..')
+        run()
+        clearInterval(restartInterval)
+      }
+    }, 1000)
+  }
+  // setInterval(() => {
+  //   run()
+  // }, 1000)
 })
