@@ -36,6 +36,16 @@ NAN_METHOD(initDisplay) {
   }
 }
 
+NAN_METHOD(setMotionEventPointer) {
+  int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+  int32_t y = Nan::To<int32_t>(info[1]).FromJust();
+
+  XTestFakeMotionEvent(display, 0, x, y, CurrentTime);
+  XFlush(display);
+
+  info.GetReturnValue().Set(Nan::New(1));
+}
+
 NAN_METHOD(mouseLeftClickDown) {
   // test mouse click down
   XTestFakeButtonEvent(display, 1, true, CurrentTime);
@@ -62,6 +72,7 @@ NAN_METHOD(mouseRightClickUp) {
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setPointer", setPointer);
   Nan::SetMethod(target, "initDisplay", initDisplay);
+  Nan::SetMethod(target, "setMotionEventPointer", setMotionEventPointer);
   Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
   Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
   Nan::SetMethod(target, "mouseRightClickDown", mouseRightClickDown);

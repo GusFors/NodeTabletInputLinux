@@ -44,7 +44,7 @@ class Tablet {
 
     // TODO read directly from hidraw instead of node-hid?
     // const fs = require('fs')
-    // let rawHidPath = fs.createReadStream('/dev/hidraw6')
+    // let rawHidPath = fs.createReadStream('/dev/hidraw6') // path might change
     // rawHidPath.on('data', (chunk) => {
     //   standardBufferParser(chunk, this)
     //   // console.log(chunk)
