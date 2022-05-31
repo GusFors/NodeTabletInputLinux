@@ -29,13 +29,13 @@ const run = async () => {
 
   if (isAvg) {
     DetectedTablet.tabletInput()
-    console.log('using avg position')
+    console.log('Using avg position')
   } else if (isDoubleReport) {
     DetectedTablet.simpleTabletInput(false, { isDoubleReport: true })
-    console.log('using double report position')
+    console.log('Using double report position')
   } else {
     DetectedTablet.simpleTabletInput()
-    console.log('using raw position')
+    console.log('Using raw position')
   }
 
   isRunning = true

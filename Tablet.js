@@ -37,7 +37,7 @@ class Tablet {
     console.log('Number of active monitors: ' + this.monitorConfig.numOfMonitors)
     console.log('Assumed primary monitor xOffset: ' + this.monitorConfig.xOffset)
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
-    console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
+    console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
 
     // init the X display before setting pointer positions
     initPointer()
