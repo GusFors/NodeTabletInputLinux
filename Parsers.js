@@ -42,7 +42,7 @@ function standardBufferParser(reportBuffer, tablet) {
   }
 
   // add offset to xS since in my case the main monitor is not the leftmost monitor
-  Pointer.setMotionEventPointer(xS + tablet.monitorConfig.xOffset, yS)
+  Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
 
   // different pens can have different button/click values, try and make it pen agnostic
   switch (reportBuffer[1] & 0x07) {
@@ -148,9 +148,6 @@ function doubleReportBufferParser(reportBuffer, tablet) {
   xS = (x - tablet.settings.left) * tablet.xScale
   yS = (y - tablet.settings.top) * tablet.yScale
 
-  xInp.push(xS)
-  yInp.push(yS)
-
   if (xS > tablet.monitorConfig.width) {
     xS = tablet.monitorConfig.width
   }
@@ -171,19 +168,22 @@ function doubleReportBufferParser(reportBuffer, tablet) {
     return
   }
 
+  xInp.push(xS)
+  yInp.push(yS)
+
   if (isInp) {
     if (xInp.length > 1) {
-      Pointer.setMotionEventPointer(xInp[xInp.length - 2] + tablet.monitorConfig.xOffset, yInp[yInp.length - 2])
+      Pointer.setPointer(xInp[xInp.length - 2] + tablet.monitorConfig.xOffset, yInp[yInp.length - 2])
 
       setTimeout(() => {
-        Pointer.setMotionEventPointer(
+        Pointer.setPointer(
           (xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2 + tablet.monitorConfig.xOffset,
           (yInp[yInp.length - 1] + yInp[yInp.length - 2]) / 2
         )
       }, 3.76)
     }
   } else {
-    Pointer.setMotionEventPointer(xS + tablet.monitorConfig.xOffset, yS)
+    Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
   }
 
   switch (reportBuffer[1] & 0x07) {
