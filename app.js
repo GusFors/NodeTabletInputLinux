@@ -74,13 +74,13 @@ run()
 let restartInterval
 
 process.on('uncaughtException', function (error) {
-  console.log('Crashed with error: ', error)
+  console.log('Crashed with error: ', error.message)
   isRunning = false
 
   if (isAutomaticRestart) {
     restartInterval = setInterval(() => {
       if (!isRunning) {
-        console.log('trying to restart..')
+        console.log('trying to restart.. \n')
         run()
         clearInterval(restartInterval)
       }

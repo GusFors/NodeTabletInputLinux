@@ -23,9 +23,9 @@ class DeviceDetector {
     return tabletMatches
   }
 
-  getPath() {
+  async getPath() {
     return new Promise((resolve, reject) => {
-      this.tryReadDevice(0, resolve, this.tabletDetector())
+      this.tryReadDevice(0, { resolve: resolve, reject, reject }, this.tabletDetector())
     })
   }
 
@@ -39,6 +39,7 @@ class DeviceDetector {
           }
         })
       })
+      return reject('Could not find or get any tablet name')
     })
   }
 
@@ -55,10 +56,14 @@ class DeviceDetector {
     })
   }
 
-  tryReadDevice(i, promiseResolve, dataReadArray) {
+  tryReadDevice(i, promise, dataReadArray) {
     // keep looping until cancelled or succesful, some tablets might not get detected until pen is in range
     if (i === dataReadArray.length) {
       i = 0
+    }
+
+    if (dataReadArray.length === 0) {
+      return promise.reject('No devices to read')
     }
     // try open one of the possible paths
     let tabletDevice = new HID.HID(dataReadArray[i].path)
@@ -77,7 +82,7 @@ class DeviceDetector {
 
         // resolve the promise that got passed
         console.log('\nSuccess reading device with path', dataReadArray[i].path)
-        return promiseResolve(dataReadArray[i].path)
+        return promise.resolve(dataReadArray[i].path)
       }
     })
 
@@ -85,9 +90,9 @@ class DeviceDetector {
     let tryReadTimeout = setTimeout(() => {
       tabletDevice.close()
       if (i === dataReadArray.length - 1) {
-        this.tryReadDevice(0, promiseResolve, dataReadArray)
+        this.tryReadDevice(0, promise.resolve, dataReadArray)
       } else {
-        this.tryReadDevice(i + 1, promiseResolve, dataReadArray)
+        this.tryReadDevice(i + 1, promise.resolve, dataReadArray)
       }
     }, 200)
   }
