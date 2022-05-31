@@ -42,7 +42,7 @@ function standardBufferParser(reportBuffer, tablet) {
   }
 
   // add offset to xS since in my case the main monitor is not the leftmost monitor
-  Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
+  Pointer.setMotionEventPointer(xS + tablet.monitorConfig.xOffset, yS)
 
   // different pens can have different button/click values, try and make it pen agnostic
   switch (reportBuffer[1] & 0x07) {
@@ -111,6 +111,96 @@ function proBufferParser(reportBuffer, tablet) {
       if (isClick === false) {
         isClick = true
         Pointer.mouseLeftClickDown()
+      }
+      break
+
+    case 0x04:
+      if (!isClick) {
+        isClick = true
+        Pointer.mouseRightClickDown()
+        Pointer.mouseRightClickUp()
+      }
+      break
+
+    default:
+      if (isClick) {
+        isClick = false
+        Pointer.mouseLeftClickUp()
+      }
+  }
+}
+
+let isInp = true
+let xInp = []
+let yInp = []
+
+// experimental, calculate an extra position value between the two most recent position reports from the tablet buffer,
+function doubleReportBufferParser(reportBuffer, tablet) {
+  if (reportBuffer[0] !== 0x02) {
+    // xInp = []
+    // yInp = []
+    return
+  }
+
+  x = reportBuffer[2] | (reportBuffer[3] << 8)
+  y = reportBuffer[4] | (reportBuffer[5] << 8)
+
+  xS = (x - tablet.settings.left) * tablet.xScale
+  yS = (y - tablet.settings.top) * tablet.yScale
+
+  xInp.push(xS)
+  yInp.push(yS)
+
+  if (xS > tablet.monitorConfig.width) {
+    xS = tablet.monitorConfig.width
+  }
+
+  if (xS < 0) {
+    xS = 0
+  }
+
+  if (yS > tablet.monitorConfig.height) {
+    yS = tablet.monitorConfig.height
+  }
+
+  if (yS < 0) {
+    yS = 0
+  }
+
+  if (x === 0 && y === 0) {
+    return
+  }
+
+  if (isInp) {
+    if (xInp.length > 1) {
+      Pointer.setMotionEventPointer(xInp[xInp.length - 2] + tablet.monitorConfig.xOffset, yInp[yInp.length - 2])
+
+      setTimeout(() => {
+        Pointer.setMotionEventPointer(
+          (xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2 + tablet.monitorConfig.xOffset,
+          (yInp[yInp.length - 1] + yInp[yInp.length - 2]) / 2
+        )
+      }, 3.76)
+    }
+  } else {
+    Pointer.setMotionEventPointer(xS + tablet.monitorConfig.xOffset, yS)
+  }
+
+  switch (reportBuffer[1] & 0x07) {
+    case 0x01:
+      if (isClick === false) {
+        isClick = true
+        Pointer.mouseLeftClickDown()
+      }
+      break
+
+    case 0x02:
+      if (isClick === false) {
+        isClick = true
+        isInp = !isInp
+        console.log('toggled inp', isInp)
+        xInp = []
+        yInp = []
       }
       break
 
@@ -235,7 +325,7 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   }
 }
 
-module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer }
+module.exports = { standardBufferParser, doubleReportBufferParser, proBufferParser, standardAvgBufferParser, initPointer }
 
 // let positions = []
 // let offset = 2560
@@ -272,3 +362,7 @@ module.exports = { standardBufferParser, proBufferParser, standardAvgBufferParse
 //   robot.keyTap('audio_vol_down')
 // }
 // previousTouchWheelValue = reportBuffer[4]
+
+// console.log(xInp[xInp.length - 2])
+// console.log((xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2)
+// console.log(xInp[xInp.length - 1])

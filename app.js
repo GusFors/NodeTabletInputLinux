@@ -5,6 +5,7 @@ let isExit = process.argv.includes('-t')
 let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
 let isAutomaticRestart = process.argv.includes('-r')
+let isDoubleReport = process.argv.includes('-d')
 
 const Tablet = require('./Tablet')
 
@@ -21,7 +22,7 @@ if (isExit) {
   }, 10000)
 }
 
-let running = false
+let isRunning = false
 
 const run = async () => {
   const DetectedTablet = new Tablet()
@@ -29,12 +30,15 @@ const run = async () => {
   if (isAvg) {
     DetectedTablet.tabletInput()
     console.log('using avg position')
+  } else if (isDoubleReport) {
+    DetectedTablet.simpleTabletInput(false, { isDoubleReport: true })
+    console.log('using double report position')
   } else {
     DetectedTablet.simpleTabletInput()
     console.log('using raw position')
   }
 
-  running = true
+  isRunning = true
 
   // start in forked process?
   if (isWebSocket) {
@@ -71,11 +75,11 @@ let restartInterval
 
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error)
-  running = false
+  isRunning = false
 
   if (isAutomaticRestart) {
     restartInterval = setInterval(() => {
-      if (!running) {
+      if (!isRunning) {
         console.log('trying to restart..')
         run()
         clearInterval(restartInterval)

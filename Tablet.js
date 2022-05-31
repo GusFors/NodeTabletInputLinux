@@ -3,7 +3,7 @@ const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Display = require('./build/Release/display.node')
-const { standardBufferParser, proBufferParser, standardAvgBufferParser, initPointer } = require('./Parser')
+const { standardBufferParser, doubleReportBufferParser, proBufferParser, standardAvgBufferParser, initPointer } = require('./Parsers')
 
 class Tablet {
   constructor() {
@@ -20,7 +20,7 @@ class Tablet {
     }
   }
 
-  async simpleTabletInput(isRestart) {
+  async simpleTabletInput(isRestart, parserSettings = { isDoubleReport: false, isAvg: false }) {
     if (isRestart && this.tabletHID !== null) {
       this.tabletHID.pause()
       this.tabletHID = null
@@ -39,7 +39,7 @@ class Tablet {
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
 
-    // init the X display and pointer
+    // init the X display before setting pointer positions
     initPointer()
 
     // TODO read directly from hidraw instead of node-hid?
@@ -51,10 +51,23 @@ class Tablet {
     // })
 
     if (this.settings.name !== 'Wacom PTH-460') {
-      this.tabletHID.on('data', (reportBuffer) => {
-        standardBufferParser(reportBuffer, this)
-        // rps++
-      })
+      if (parserSettings.isDoubleReport) {
+        console.log('Using doubleReportBufferParser')
+        this.tabletHID.on('data', (reportBuffer) => {
+          doubleReportBufferParser(reportBuffer, this)
+        })
+      } else if (parserSettings.isAvg) {
+        console.log('Using standardAvgBufferParser')
+        this.tabletHID.on('data', (reportBuffer) => {
+          standardAvgBufferParser(reportBuffer, this)
+        })
+      } else {
+        console.log('Using standardBufferParser')
+        this.tabletHID.on('data', (reportBuffer) => {
+          standardBufferParser(reportBuffer, this)
+          // rps++
+        })
+      }
     } else {
       this.tabletHID.on('data', (reportBuffer) => {
         proBufferParser(reportBuffer, this)
