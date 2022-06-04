@@ -174,7 +174,7 @@ function doubleReportBufferParser(reportBuffer, tablet) {
   if (isInp) {
     if (xInp.length > 1) {
       Pointer.setPointer(xInp[xInp.length - 2] + tablet.monitorConfig.xOffset, yInp[yInp.length - 2])
-
+      
       setTimeout(() => {
         Pointer.setPointer(
           (xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2 + tablet.monitorConfig.xOffset,
