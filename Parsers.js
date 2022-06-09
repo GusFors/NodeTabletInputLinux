@@ -6,7 +6,6 @@ let xS
 let yS
 let isClick = false
 
-// TODO return values without scaling? set position elsewhere?
 function standardBufferParser(reportBuffer, tablet) {
   if (reportBuffer[0] !== 0x02) {
     return
@@ -45,6 +44,63 @@ function standardBufferParser(reportBuffer, tablet) {
   Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
 
   // different pens can have different button/click values, try and make it pen agnostic
+  switch (reportBuffer[1] & 0x07) {
+    case 0x01:
+      if (isClick === false) {
+        isClick = true
+        Pointer.mouseLeftClickDown()
+      }
+      break
+
+    case 0x04:
+      if (!isClick) {
+        isClick = true
+        Pointer.mouseRightClickDown()
+        Pointer.mouseRightClickUp()
+      }
+      break
+
+    default:
+      if (isClick) {
+        isClick = false
+        Pointer.mouseLeftClickUp()
+      }
+  }
+}
+
+function standardVirtualBufferParser(reportBuffer, tablet) {
+  if (reportBuffer[0] !== 0x02) {
+    return
+  }
+
+  x = reportBuffer[2] | (reportBuffer[3] << 8)
+  y = reportBuffer[4] | (reportBuffer[5] << 8)
+
+  xS = (x - tablet.settings.left) * tablet.xScale
+  yS = (y - tablet.settings.top) * tablet.yScale
+
+  if (xS > tablet.monitorConfig.width) {
+    xS = tablet.monitorConfig.width
+  }
+
+  if (xS < 0) {
+    xS = 0
+  }
+
+  if (yS > tablet.monitorConfig.height) {
+    yS = tablet.monitorConfig.height
+  }
+
+  if (yS < 0) {
+    yS = 0
+  }
+
+  if (x === 0 && y === 0) {
+    return
+  }
+
+  Pointer.setUinputPointer(xS + tablet.monitorConfig.xOffset, yS)
+
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
       if (isClick === false) {
@@ -174,7 +230,7 @@ function doubleReportBufferParser(reportBuffer, tablet) {
   if (isInp) {
     if (xInp.length > 1) {
       Pointer.setPointer(xInp[xInp.length - 2] + tablet.monitorConfig.xOffset, yInp[yInp.length - 2])
-      
+
       setTimeout(() => {
         Pointer.setPointer(
           (xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2 + tablet.monitorConfig.xOffset,
@@ -295,8 +351,12 @@ function standardAvgBufferParser(reportBuffer, tablet) {
   }
 }
 
-function initPointer() {
+function initXPointer() {
   return Pointer.initDisplay()
+}
+
+function initUinput(testString) {
+  return Pointer.initUinput(testString)
 }
 
 // just trying stuff, experimental
@@ -325,7 +385,15 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   }
 }
 
-module.exports = { standardBufferParser, doubleReportBufferParser, proBufferParser, standardAvgBufferParser, initPointer }
+module.exports = {
+  standardBufferParser,
+  doubleReportBufferParser,
+  proBufferParser,
+  standardAvgBufferParser,
+  initXPointer,
+  initUinput,
+  standardVirtualBufferParser,
+}
 
 // let positions = []
 // let offset = 2560

@@ -6,6 +6,7 @@ let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
 let isAutomaticRestart = process.argv.includes('-r')
 let isDoubleReport = process.argv.includes('-d')
+let isVirtualDevice = process.argv.includes('-v')
 
 const Tablet = require('./Tablet')
 
@@ -28,19 +29,19 @@ const run = async () => {
   const DetectedTablet = new Tablet()
 
   if (isAvg) {
-    DetectedTablet.tabletInput()
+    DetectedTablet.tabletInput(false, { isVirtual: isVirtualDevice })
     console.log('Using avg position')
   } else if (isDoubleReport) {
-    DetectedTablet.simpleTabletInput(false, { isDoubleReport: true })
+    DetectedTablet.simpleTabletInput(false, { isDoubleReport: true, isVirtual: isVirtualDevice })
     console.log('Using double report position')
   } else {
-    DetectedTablet.simpleTabletInput()
+    DetectedTablet.simpleTabletInput(false, { isVirtual: isVirtualDevice })
     console.log('Using raw position')
   }
 
   isRunning = true
 
-  // start in forked process?
+  // start in forked process?, alternatively start gtk instead
   if (isWebSocket) {
     const { spawn } = require('child_process')
     const WebSocketServer = require('ws').WebSocketServer
@@ -72,7 +73,7 @@ const run = async () => {
 run()
 
 let restartInterval
-
+// a bit buggy
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error.message)
   isRunning = false

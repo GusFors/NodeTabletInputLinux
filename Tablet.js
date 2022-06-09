@@ -3,7 +3,15 @@ const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector()
 const Display = require('./build/Release/display.node')
-const { standardBufferParser, doubleReportBufferParser, proBufferParser, standardAvgBufferParser, initPointer } = require('./Parsers')
+const {
+  standardBufferParser,
+  standardVirtualBufferParser,
+  doubleReportBufferParser,
+  proBufferParser,
+  standardAvgBufferParser,
+  initXPointer,
+  initUinput,
+} = require('./Parsers')
 
 class Tablet {
   constructor() {
@@ -20,7 +28,7 @@ class Tablet {
     }
   }
 
-  async simpleTabletInput(isRestart, parserSettings = { isDoubleReport: false, isAvg: false }) {
+  async simpleTabletInput(isRestart, parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false }) {
     if (isRestart && this.tabletHID !== null) {
       this.tabletHID.pause()
       this.tabletHID = null
@@ -39,8 +47,18 @@ class Tablet {
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
 
-    // init the X display before setting pointer positions
-    initPointer()
+    // init the pointer and display before setting pointer positions and clicks
+    initXPointer() // optionally run when clicks by uinput are implemented
+
+    if (parserSettings.isVirtual) {
+      console.log('Created uinput device')
+      console.log('Using standardVirtualBufferParser')
+      initUinput(this.settings.name)
+      this.tabletHID.on('data', (reportBuffer) => {
+        standardVirtualBufferParser(reportBuffer, this)
+      })
+      return 1
+    }
 
     // TODO read directly from hidraw instead of node-hid?
     // const fs = require('fs')
@@ -111,7 +129,8 @@ class Tablet {
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
 
-    initPointer()
+    initXPointer()
+
     this.tabletHID.on('data', (reportBuffer) => {
       standardAvgBufferParser(reportBuffer, this)
     })

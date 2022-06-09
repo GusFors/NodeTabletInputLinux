@@ -1,20 +1,29 @@
+#include <cstdio>
+#include <iostream>
 #include <nan.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/extensions/XTest.h>
-
-using namespace v8;
-using namespace Nan;
+#include <linux/uinput.h>
+#include <nan_converters.h>
+#include <node.h>
+#include <nan.h>
+#include <v8-primitive.h>
+#include <v8.h>
+#include <cstring>
+#include <string.h>
+#include <stdio.h>
 
 Display *display = NULL;
 Window root = 0;
+int fd;
+struct uinput_user_dev uiPointer;
 
-// TODO fix an actual formatter for c++, place nan.h first after formatting or
+// formatter might change include order, place nan.h first after formatting or
 // rebuild might fail
 NAN_METHOD(setPointer) {
-
   // scaled x and y values from node
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
   int32_t y = Nan::To<int32_t>(info[1]).FromJust();
@@ -34,6 +43,68 @@ NAN_METHOD(initDisplay) {
     root = XDefaultRootWindow(display);
     info.GetReturnValue().Set(Nan::New(1));
   }
+}
+
+NAN_METHOD(initUinput) {
+  fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+
+  std::string devName = "Virtual uinput " + std::string(*Nan::Utf8String(info[0]));
+
+  ioctl(fd, UI_SET_EVBIT, EV_KEY);
+  ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
+  ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
+
+  ioctl(fd, UI_SET_EVBIT, EV_ABS);
+  ioctl(fd, UI_SET_ABSBIT, ABS_X);
+  ioctl(fd, UI_SET_ABSBIT, ABS_Y);
+  // ioctl(fd, UI_SET_EVBIT, EV_REL);
+
+  memset(&uiPointer, 0, sizeof(uiPointer));
+  snprintf(uiPointer.name, UINPUT_MAX_NAME_SIZE, "%s", devName.c_str());
+
+  uiPointer.id.bustype = BUS_USB;
+  uiPointer.id.version = 1;
+  uiPointer.id.vendor = 0x1;
+  uiPointer.id.product = 0x1;
+
+  // TODO send as args
+  uiPointer.absmin[ABS_X] = 0;
+  uiPointer.absmax[ABS_X] = 7680;
+  uiPointer.absmin[ABS_Y] = 0;
+  uiPointer.absmax[ABS_Y] = 1440;
+
+  write(fd, &uiPointer, sizeof(uiPointer));
+  ioctl(fd, UI_DEV_CREATE);
+}
+
+NAN_METHOD(setUinputPointer) {
+  int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+  int32_t y = Nan::To<int32_t>(info[1]).FromJust();
+
+  struct input_event positionEvents[2];
+  memset(positionEvents, 0, sizeof(positionEvents));
+
+  positionEvents[0].type = EV_ABS;
+  positionEvents[0].code = ABS_X;
+  positionEvents[0].value = x;
+  positionEvents[0].time.tv_sec = 0;
+  positionEvents[0].time.tv_usec = 0;
+
+  positionEvents[1].type = EV_ABS;
+  positionEvents[1].code = ABS_Y;
+  positionEvents[1].value = y;
+  positionEvents[1].time.tv_sec = 0;
+  positionEvents[1].time.tv_usec = 0;
+
+  int res_w = write(fd, positionEvents, sizeof(positionEvents));
+
+  struct input_event syncEvent;
+  memset(&syncEvent, 0, sizeof(syncEvent));
+
+  syncEvent.type = EV_SYN;
+  syncEvent.value = 0;
+  syncEvent.code = 0;
+  write(fd, &syncEvent, sizeof(syncEvent));
 }
 
 NAN_METHOD(setMotionEventPointer) {
@@ -72,6 +143,8 @@ NAN_METHOD(mouseRightClickUp) {
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setPointer", setPointer);
   Nan::SetMethod(target, "initDisplay", initDisplay);
+  Nan::SetMethod(target, "initUinput", initUinput);
+  Nan::SetMethod(target, "setUinputPointer", setUinputPointer);
   Nan::SetMethod(target, "setMotionEventPointer", setMotionEventPointer);
   Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
   Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
@@ -80,3 +153,11 @@ NAN_MODULE_INIT(init) {
 }
 
 NODE_MODULE(pointer, init);
+
+void cvstr(std::string str) {
+  char chcv[str.length() + 1];
+  for (int x = 0; x < sizeof(chcv); x++) {
+    chcv[x] = str[x];
+    std::cout << chcv[x];
+  }
+}
