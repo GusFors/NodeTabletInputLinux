@@ -1,4 +1,4 @@
-Node console app for tablet input. Just made for fun. things might be broken.
+Node console app for tablet input. Just made for fun, some stuff might be broken.
 
 1. Install with `npm install`
 2. If it doesn't build the native modules automatically run `node-gyp rebuild`
