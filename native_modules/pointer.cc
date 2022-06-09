@@ -7,14 +7,8 @@
 #include <X11/extensions/Xrandr.h>
 #include <X11/extensions/XTest.h>
 #include <linux/uinput.h>
-#include <nan_converters.h>
-#include <node.h>
 #include <nan.h>
-#include <v8-primitive.h>
-#include <v8.h>
-#include <cstring>
-#include <string.h>
-#include <stdio.h>
+
 
 Display *display = NULL;
 Window root = 0;
