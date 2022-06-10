@@ -4,8 +4,6 @@
 #include <X11/extensions/Xrandr.h>
 #include <X11/extensions/XTest.h>
 
-using namespace v8;
-
 Display *display = NULL;
 
 // TODO fix an actual formatter for c++, place nan.h first after formatting or
@@ -27,9 +25,23 @@ NAN_METHOD(getDisplaysTotalWidth) {
   }
 
   int x = 0;
-  int displayWidth = XDisplayWidth(display, x);
+  int displayWidth = XDisplayWidth(display, 0);
+
+  // auto Scr = DefaultScreen(display);
+  // int xWidth = XWidthOfScreen(ScreenOfDisplay(display, Scr));
 
   info.GetReturnValue().Set(Nan::New(displayWidth));
+}
+
+NAN_METHOD(getDisplaysTotalHeight) {
+  if (display == NULL) {
+    display = XOpenDisplay(NULL);
+  }
+
+  int x = 0;
+  int displayHeight = XDisplayHeight(display, 0);
+
+  info.GetReturnValue().Set(Nan::New(displayHeight));
 }
 
 NAN_METHOD(getPrimaryMonitorXoffset) {
@@ -37,8 +49,7 @@ NAN_METHOD(getPrimaryMonitorXoffset) {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes =
-      XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
 
   XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
 
@@ -50,8 +61,7 @@ NAN_METHOD(getPrimaryMonitorYoffset) {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes =
-      XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
 
   XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
 
@@ -63,8 +73,7 @@ NAN_METHOD(getPrimaryMonitorWidth) {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes =
-      XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
 
   XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
 
@@ -76,8 +85,7 @@ NAN_METHOD(getPrimaryMonitorHeight) {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes =
-      XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
 
   XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
 
@@ -87,6 +95,7 @@ NAN_METHOD(getPrimaryMonitorHeight) {
 // expose as a node module
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "getDisplaysTotalWidth", getDisplaysTotalWidth);
+  Nan::SetMethod(target, "getDisplaysTotalHeight", getDisplaysTotalHeight);
   Nan::SetMethod(target, "getNumberOfMonitors", getNumberOfMonitors);
   Nan::SetMethod(target, "getPrimaryMonitorXoffset", getPrimaryMonitorXoffset);
   Nan::SetMethod(target, "getPrimaryMonitorYoffset", getPrimaryMonitorYoffset);

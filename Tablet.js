@@ -25,6 +25,8 @@ class Tablet {
       xOffset: Display.getPrimaryMonitorXoffset(),
       yOffset: Display.getPrimaryMonitorYoffset(),
       numOfMonitors: Display.getNumberOfMonitors(),
+      xTotalWidth: Display.getDisplaysTotalWidth(),
+      xTotalHeight: Display.getDisplaysTotalHeight(),
     }
   }
 
@@ -41,7 +43,8 @@ class Tablet {
     this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorConfig.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
-    console.log('Total X screen width: ' + this.monitorConfig.width)
+    console.log('Total X screen width: ' + this.monitorConfig.xTotalWidth)
+    console.log('Total X screen height: ' + this.monitorConfig.xTotalHeight)
     console.log('Number of active monitors: ' + this.monitorConfig.numOfMonitors)
     console.log('Assumed primary monitor xOffset: ' + this.monitorConfig.xOffset)
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
@@ -51,9 +54,11 @@ class Tablet {
     initXPointer() // optionally run when clicks by uinput are implemented
 
     if (parserSettings.isVirtual) {
-      console.log('Created uinput device')
+      let uiDevice = initUinput(this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
+
+      console.log('Created uinput device:', uiDevice)
       console.log('Using standardVirtualBufferParser')
-      initUinput(this.settings.name)
+
       this.tabletHID.on('data', (reportBuffer) => {
         standardVirtualBufferParser(reportBuffer, this)
       })

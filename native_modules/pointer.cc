@@ -8,7 +8,7 @@
 #include <X11/extensions/XTest.h>
 #include <linux/uinput.h>
 #include <nan.h>
-
+#include <node.h>
 
 Display *display = NULL;
 Window root = 0;
@@ -17,6 +17,7 @@ struct uinput_user_dev uiPointer;
 
 // formatter might change include order, place nan.h first after formatting or
 // rebuild might fail
+
 NAN_METHOD(setPointer) {
   // scaled x and y values from node
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
@@ -43,6 +44,8 @@ NAN_METHOD(initUinput) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
   std::string devName = "Virtual uinput " + std::string(*Nan::Utf8String(info[0]));
+  int32_t xMax = Nan::To<int32_t>(info[1]).FromJust();
+  int32_t yMax = Nan::To<int32_t>(info[2]).FromJust();
 
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
@@ -61,14 +64,15 @@ NAN_METHOD(initUinput) {
   uiPointer.id.vendor = 0x1;
   uiPointer.id.product = 0x1;
 
-  // TODO send as args
   uiPointer.absmin[ABS_X] = 0;
-  uiPointer.absmax[ABS_X] = 7680;
+  uiPointer.absmax[ABS_X] = xMax;
   uiPointer.absmin[ABS_Y] = 0;
-  uiPointer.absmax[ABS_Y] = 1440;
+  uiPointer.absmax[ABS_Y] = yMax;
 
   write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);
+
+  info.GetReturnValue().Set(Nan::New(devName).ToLocalChecked());
 }
 
 NAN_METHOD(setUinputPointer) {

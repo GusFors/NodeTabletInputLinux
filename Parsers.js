@@ -355,8 +355,8 @@ function initXPointer() {
   return Pointer.initDisplay()
 }
 
-function initUinput(testString) {
-  return Pointer.initUinput(testString)
+function initUinput(devName, xMax, yMax) {
+  return Pointer.initUinput(devName, xMax, yMax)
 }
 
 // just trying stuff, experimental
