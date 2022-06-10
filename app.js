@@ -73,7 +73,7 @@ const run = async () => {
 run()
 
 let restartInterval
-// a bit buggy
+// a bit buggy, TODO close virtual device on error
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error.message)
   isRunning = false

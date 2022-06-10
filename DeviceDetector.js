@@ -67,34 +67,38 @@ class DeviceDetector {
     }
     // try open one of the possible paths
     let tabletDevice = new HID.HID(dataReadArray[i].path)
+    console.log('\nSuccess reading device with path', dataReadArray[i].path)
 
+    return promise.resolve(dataReadArray[i].path)
+
+    // not needed anymore?
     // if it can't be read, try the next device path
-    tabletDevice.read((err, data) => {
-      if (err) {
-        console.log('Unable to read device, trying next.. ', err)
-      }
+    // tabletDevice.read((err, data) => {
+    //   if (err) {
+    //     console.log('Unable to read device, trying next.. ', err)
+    //   }
 
-      // TODO, CTH-480 can have different buffer lengths?
-      if (data && data.length !== 64) {
-        // stop looping
-        clearTimeout(tryReadTimeout)
-        tabletDevice.close()
+    //   // TODO, CTH-480 can have different buffer lengths?
+    //   if (data && data.length !== 64) {
+    //     // stop looping
+    //     clearTimeout(tryReadTimeout)
+    //     tabletDevice.close()
 
-        // resolve the promise that got passed
-        console.log('\nSuccess reading device with path', dataReadArray[i].path)
-        return promise.resolve(dataReadArray[i].path)
-      }
-    })
+    //     // resolve the promise that got passed
+    //     console.log('\nSuccess reading device with path', dataReadArray[i].path)
+    //     return promise.resolve(dataReadArray[i].path)
+    //   }
+    // })
 
-    // try next path after timeout, might not work properly if set too low
-    let tryReadTimeout = setTimeout(() => {
-      tabletDevice.close()
-      if (i === dataReadArray.length - 1) {
-        this.tryReadDevice(0, promise.resolve, dataReadArray)
-      } else {
-        this.tryReadDevice(i + 1, promise.resolve, dataReadArray)
-      }
-    }, 200)
+    // // try next path after timeout, might not work properly if set too low
+    // let tryReadTimeout = setTimeout(() => {
+    //   tabletDevice.close()
+    //   if (i === dataReadArray.length - 1) {
+    //     this.tryReadDevice(0, promise.resolve, dataReadArray)
+    //   } else {
+    //     this.tryReadDevice(i + 1, promise.resolve, dataReadArray)
+    //   }
+    // }, 200)
   }
 }
 

@@ -54,7 +54,7 @@ class Tablet {
     initXPointer() // optionally run when clicks by uinput are implemented
 
     if (parserSettings.isVirtual) {
-      let uiDevice = initUinput(this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
+      let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
 
       console.log('Created uinput device:', uiDevice)
       console.log('Using standardVirtualBufferParser')
