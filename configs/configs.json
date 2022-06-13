@@ -10,7 +10,10 @@
     "multiplier": 1,
     "isForcedProportions": true,
     "xMax": 15200,
-    "yMax": 9500
+    "yMax": 9500,
+    "xBufferPositions": [2, 3],
+    "yBufferPositions": [4, 5],
+    "stdRps": 133
   },
   {
     "vendorId": 1386,
@@ -23,7 +26,10 @@
     "multiplier": 1,
     "isForcedProportions": true,
     "xMax": 15200,
-    "yMax": 9500
+    "yMax": 9500,
+    "xBufferPositions": [2, 3],
+    "yBufferPositions": [4, 5],
+    "stdRps": 133
   },
   {
     "vendorId": 1386,
@@ -36,7 +42,10 @@
     "multiplier": 1,
     "isForcedProportions": true,
     "xMax": 15200,
-    "yMax": 9500
+    "yMax": 9500,
+    "xBufferPositions": [2, 3],
+    "yBufferPositions": [4, 5],
+    "stdRps": 133
   },
   {
     "vendorId": 1386,
@@ -62,7 +71,10 @@
     "multiplier": 1,
     "isForcedProportions": true,
     "xMax": 15200,
-    "yMax": 9500
+    "yMax": 9500,
+    "xBufferPositions": [2, 3],
+    "yBufferPositions": [4, 5],
+    "stdRps": 133
   },
   {
     "vendorId": 1386,
@@ -75,6 +87,10 @@
     "multiplier": 1,
     "isForcedProportions": true,
     "xMax": 31920,
-    "yMax": 19950
+    "yMax": 19950,
+    "parser": "proBufferParser",
+    "xBufferPositions": [2, 3],
+    "yBufferPositions": [5, 6],
+    "stdRps": 200
   }
 ]

@@ -7,6 +7,7 @@ let isWebSocket = process.argv.includes('-w')
 let isAutomaticRestart = process.argv.includes('-r')
 let isDoubleReport = process.argv.includes('-d')
 let isVirtualDevice = process.argv.includes('-v')
+let isNewConfig = process.argv.includes('-c')
 
 const Tablet = require('./Tablet')
 
@@ -29,13 +30,13 @@ const run = async () => {
   const DetectedTablet = new Tablet()
 
   if (isAvg) {
-    DetectedTablet.tabletInput(false, { isVirtual: isVirtualDevice })
+    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isAvg: true, isDoubleReport: true })
     console.log('Using avg position')
   } else if (isDoubleReport) {
-    DetectedTablet.simpleTabletInput(false, { isDoubleReport: true, isVirtual: isVirtualDevice })
+    DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice })
     console.log('Using double report position')
   } else {
-    DetectedTablet.simpleTabletInput(false, { isVirtual: isVirtualDevice })
+    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig })
     console.log('Using raw position')
   }
 
@@ -74,20 +75,26 @@ run()
 
 let restartInterval
 // a bit buggy, TODO close virtual device on error
-process.on('uncaughtException', function (error) {
-  console.log('Crashed with error: ', error.message)
-  isRunning = false
 
-  if (isAutomaticRestart) {
-    restartInterval = setInterval(() => {
-      if (!isRunning) {
-        console.log('trying to restart.. \n')
-        run()
-        clearInterval(restartInterval)
-      }
-    }, 1000)
-  }
-  // setInterval(() => {
-  //   run()
-  // }, 1000)
-})
+if (isAutomaticRestart) {
+  process.on('uncaughtException', function (error) {
+    console.log('Crashed with error: ', error.message)
+    isRunning = false
+
+    if (isAutomaticRestart) {
+      restartInterval = setInterval(() => {
+        if (!isRunning) {
+          console.log('trying to restart.. \n')
+          run()
+          clearInterval(restartInterval)
+        }
+      }, 1000)
+    }
+    // setInterval(() => {
+    //   run()
+    // }, 1000)
+  })
+}
+// setInterval(() => {
+//   run()
+// }, 1000)

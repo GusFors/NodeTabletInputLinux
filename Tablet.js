@@ -11,7 +11,10 @@ const {
   standardAvgBufferParser,
   initXPointer,
   initUinput,
+  Pointer,
+  simpleBufferParser,
 } = require('./Parsers')
+// const Parser = require('./experimental/Parsers')
 
 class Tablet {
   constructor() {
@@ -28,14 +31,10 @@ class Tablet {
       xTotalWidth: Display.getDisplaysTotalWidth(),
       xTotalHeight: Display.getDisplaysTotalHeight(),
     }
+    this.parser = null
   }
 
-  async simpleTabletInput(isRestart, parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false }) {
-    if (isRestart && this.tabletHID !== null) {
-      this.tabletHID.pause()
-      this.tabletHID = null
-    }
-
+  async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false }) {
     this.tabletHID = new HID.HID(await deviceDetector.getPath())
     this.settings = await deviceDetector.getConfig()
     console.log('Getting input from', this.settings.name)
@@ -50,19 +49,18 @@ class Tablet {
     console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
 
+    console.log(this.settings)
+
     // init the pointer and display before setting pointer positions and clicks
     initXPointer() // optionally run when clicks by uinput are implemented
 
     if (parserSettings.isVirtual) {
       let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
-
       console.log('Created uinput device:', uiDevice)
-      console.log('Using standardVirtualBufferParser')
-
-      this.tabletHID.on('data', (reportBuffer) => {
-        standardVirtualBufferParser(reportBuffer, this)
-      })
-      return 1
+      Pointer.setPointerPosition = Pointer.setPointerPosition = Pointer['setUinputPointer']
+      // return 1
+    } else {
+      Pointer.setPointerPosition = Pointer.setPointerPosition = Pointer['setPointer']
     }
 
     // TODO read directly from hidraw instead of node-hid?
@@ -72,32 +70,28 @@ class Tablet {
     //   standardBufferParser(chunk, this)
     //   // console.log(chunk)
     // })
-
-    if (this.settings.name !== 'Wacom PTH-460') {
-      if (parserSettings.isDoubleReport) {
-        console.log('Using doubleReportBufferParser')
-        this.tabletHID.on('data', (reportBuffer) => {
-          doubleReportBufferParser(reportBuffer, this)
-        })
-      } else if (parserSettings.isAvg) {
-        console.log('Using standardAvgBufferParser')
-        this.tabletHID.on('data', (reportBuffer) => {
-          standardAvgBufferParser(reportBuffer, this)
-        })
-      } else {
-        console.log('Using standardBufferParser')
-        this.tabletHID.on('data', (reportBuffer) => {
-          standardBufferParser(reportBuffer, this)
-          // rps++
-        })
-      }
+    if (parserSettings.isAvg) {
+      console.log('Using standardAvgBufferParser')
+      this.parser = standardAvgBufferParser.bind(this)
+      this.tabletHID.on('data', this.parser)
+    } else if (parserSettings.isDoubleReport) {
+      console.log('Using doubleReportBufferParser')
+      this.parser = doubleReportBufferParser.bind(this)
+      this.tabletHID.on('data', this.parser)
+    } else if (parserSettings.isNewConfig) {
+      console.log('Using newConfig')
+      this.parser = standardBufferParser.bind(this)
+      this.tabletHID.on('data', this.parser)
     } else {
-      this.tabletHID.on('data', (reportBuffer) => {
-        proBufferParser(reportBuffer, this)
-        // rps++
-      })
+      console.log('Using standardBufferParser')
+      this.parser = standardBufferParser.bind(this)
+      this.tabletHID.on('data', this.parser)
     }
-    return 1
+
+    // this.tabletHID.on('data', (reportBuffer) => {
+    //   proBufferParser(reportBuffer, this)
+    //   // rps++
+    // })
   }
 
   closeTablet() {

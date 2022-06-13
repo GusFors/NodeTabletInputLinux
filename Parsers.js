@@ -1,35 +1,90 @@
 const Pointer = require('./build/Release/pointer.node')
 
+Pointer.setPointerPosition = null
+console.log(Pointer)
+
 let x
 let y
 let xS
 let yS
 let isClick = false
 
-function standardBufferParser(reportBuffer, tablet) {
-  if (reportBuffer[0] !== 0x02) {
+function simpleBufferParser(reportBuffer, xBufferPositions, yBufferPositions) {
+  // if (reportBuffer[0] !== 0x02) {
+  //   return
+  // }
+
+  if (reportBuffer[0] > 0x10) {
     return
   }
 
-  // get x and y position from the tablet buffer
-  x = reportBuffer[2] | (reportBuffer[3] << 8)
-  y = reportBuffer[4] | (reportBuffer[5] << 8)
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
 
-  // scale the values to monitor resolution
-  xS = (x - tablet.settings.left) * tablet.xScale
-  yS = (y - tablet.settings.top) * tablet.yScale
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
 
-  // extra checks to keep cursor on primary monitor
-  if (xS > tablet.monitorConfig.width) {
-    xS = tablet.monitorConfig.width
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
   }
 
   if (xS < 0) {
     xS = 0
   }
 
-  if (yS > tablet.monitorConfig.height) {
-    yS = tablet.monitorConfig.height
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
+  }
+
+  if (yS < 0) {
+    yS = 0
+  }
+
+  if (x === 0 && y === 0) {
+    return
+  }
+
+  Pointer.setPointerPosition(xS + 2560, yS)
+
+  return { x, y }
+}
+
+function standardBufferParser(reportBuffer) {
+  // console.log(reportBuffer)
+
+  // if (reportBuffer[0] !== 0x02) {
+  //   return
+  // }
+
+  if (reportBuffer[0] > 0x10) {
+    return
+  }
+
+  // if (reportBuffer[1] > 0xe1) {
+  //   return
+  // }
+
+  // get x and y position from the this.settings buffer
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
+
+  // scale the values to monitor resolution
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
+
+  // console.log(xS, xS)
+
+  // extra checks to keep cursor on primary monitor
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
+  }
+
+  if (xS < 0) {
+    xS = 0
+  }
+
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
   }
 
   if (yS < 0) {
@@ -41,7 +96,7 @@ function standardBufferParser(reportBuffer, tablet) {
   }
 
   // add offset to xS since in my case the main monitor is not the leftmost monitor
-  Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
+  Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
   // different pens can have different button/click values, try and make it pen agnostic
   switch (reportBuffer[1] & 0x07) {
@@ -68,27 +123,31 @@ function standardBufferParser(reportBuffer, tablet) {
   }
 }
 
-function standardVirtualBufferParser(reportBuffer, tablet) {
-  if (reportBuffer[0] !== 0x02) {
+function standardVirtualBufferParser(reportBuffer) {
+  if (reportBuffer[0] > 0x10) {
     return
   }
 
-  x = reportBuffer[2] | (reportBuffer[3] << 8)
-  y = reportBuffer[4] | (reportBuffer[5] << 8)
+  // if (reportBuffer[0] !== 0x02) {
+  //   return
+  // }
 
-  xS = (x - tablet.settings.left) * tablet.xScale
-  yS = (y - tablet.settings.top) * tablet.yScale
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
 
-  if (xS > tablet.monitorConfig.width) {
-    xS = tablet.monitorConfig.width
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
+
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
   }
 
   if (xS < 0) {
     xS = 0
   }
 
-  if (yS > tablet.monitorConfig.height) {
-    yS = tablet.monitorConfig.height
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
   }
 
   if (yS < 0) {
@@ -99,7 +158,7 @@ function standardVirtualBufferParser(reportBuffer, tablet) {
     return
   }
 
-  Pointer.setUinputPointer(xS + tablet.monitorConfig.xOffset, yS)
+  Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
@@ -125,7 +184,7 @@ function standardVirtualBufferParser(reportBuffer, tablet) {
   }
 }
 
-function proBufferParser(reportBuffer, tablet) {
+function proBufferParser(reportBuffer) {
   if (reportBuffer[0] === 17) {
     // if touch wheel
   }
@@ -134,22 +193,22 @@ function proBufferParser(reportBuffer, tablet) {
     return
   }
 
-  x = reportBuffer[2] | (reportBuffer[3] << 8)
-  y = reportBuffer[5] | (reportBuffer[6] << 8)
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
 
-  xS = (x - tablet.settings.left) * tablet.xScale
-  yS = (y - tablet.settings.top) * tablet.yScale
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
 
-  if (xS > tablet.monitorConfig.width) {
-    xS = tablet.monitorConfig.width
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
   }
 
   if (xS < 0) {
     xS = 0
   }
 
-  if (yS > tablet.monitorConfig.height) {
-    yS = tablet.monitorConfig.height
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
   }
 
   if (yS < 0) {
@@ -160,7 +219,7 @@ function proBufferParser(reportBuffer, tablet) {
     return
   }
 
-  Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
+  Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
@@ -186,34 +245,38 @@ function proBufferParser(reportBuffer, tablet) {
   }
 }
 
-let isInp = true
 let xInp = []
 let yInp = []
+let isInp = true
 
-// experimental, calculate an extra position value between the two most recent position reports from the tablet buffer,
-function doubleReportBufferParser(reportBuffer, tablet) {
-  if (reportBuffer[0] !== 0x02) {
-    // xInp = []
-    // yInp = []
+// experimental, calculate an extra position value between the two most recent position reports from the buffer,
+function doubleReportBufferParser(reportBuffer) {
+  // if (reportBuffer[0] !== 0x02) {
+  //   // xInp = []
+  //   // yInp = []
+  //   return
+  // }
+
+  if (reportBuffer[0] > 0x10) {
     return
   }
 
-  x = reportBuffer[2] | (reportBuffer[3] << 8)
-  y = reportBuffer[4] | (reportBuffer[5] << 8)
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
 
-  xS = (x - tablet.settings.left) * tablet.xScale
-  yS = (y - tablet.settings.top) * tablet.yScale
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
 
-  if (xS > tablet.monitorConfig.width) {
-    xS = tablet.monitorConfig.width
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
   }
 
   if (xS < 0) {
     xS = 0
   }
 
-  if (yS > tablet.monitorConfig.height) {
-    yS = tablet.monitorConfig.height
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
   }
 
   if (yS < 0) {
@@ -229,17 +292,17 @@ function doubleReportBufferParser(reportBuffer, tablet) {
 
   if (isInp) {
     if (xInp.length > 1) {
-      Pointer.setPointer(xInp[xInp.length - 2] + tablet.monitorConfig.xOffset, yInp[yInp.length - 2])
+      Pointer.setPointerPosition(xInp[xInp.length - 2] + this.monitorConfig.xOffset, yInp[yInp.length - 2])
 
       setTimeout(() => {
-        Pointer.setPointer(
-          (xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2 + tablet.monitorConfig.xOffset,
+        Pointer.setPointerPosition(
+          (xInp[xInp.length - 1] + xInp[xInp.length - 2]) / 2 + this.monitorConfig.xOffset,
           (yInp[yInp.length - 1] + yInp[yInp.length - 2]) / 2
         )
-      }, 3.76)
+      }, 1000 / this.stdRps / 2)
     }
   } else {
-    Pointer.setPointer(xS + tablet.monitorConfig.xOffset, yS)
+    Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
   }
 
   switch (reportBuffer[1] & 0x07) {
@@ -278,33 +341,40 @@ function doubleReportBufferParser(reportBuffer, tablet) {
 
 let xBuffer = []
 let yBuffer = []
-const avgPositionStrength = 4
+const avgPositionStrength = 8
 const currentPositionStrength = 3
 
-function standardAvgBufferParser(reportBuffer, tablet) {
-  if (reportBuffer[0] !== 0x02) {
+setTimeout(() => {
+  console.log(xBuffer.length)
+}, 5000)
+
+function standardAvgBufferParser(reportBuffer, isDouble = true) {
+  if (reportBuffer[0] > 0x10) {
     return
   }
 
-  // get x and y position from the tablet buffer
-  x = reportBuffer[2] | (reportBuffer[3] << 8)
-  y = reportBuffer[4] | (reportBuffer[5] << 8)
+  // console.log(this)
 
-  // scale the values to monitor resolution
-  xS = (x - tablet.settings.left) * tablet.xScale
-  yS = (y - tablet.settings.top) * tablet.yScale
+  // if (reportBuffer[0] !== 0x02) {
+  //   return
+  // }
 
-  // extra checks to keep cursor on primary monitor
-  if (xS > tablet.monitorConfig.width) {
-    xS = tablet.monitorConfig.width
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
+
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
+
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
   }
 
   if (xS < 0) {
     xS = 0
   }
 
-  if (yS > tablet.monitorConfig.height) {
-    yS = tablet.monitorConfig.height
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
   }
 
   if (yS < 0) {
@@ -320,13 +390,25 @@ function standardAvgBufferParser(reportBuffer, tablet) {
   xBuffer.push(xS)
   yBuffer.push(yS)
 
-  // add offset to xS since in this case the main monitor is not the leftmost monitor
-  Pointer.setPointer(
-    averagePosition(xBuffer, avgPositionStrength, currentPositionStrength) + tablet.monitorConfig.xOffset,
+  if (isDouble && xBuffer.length > 1) {
+    setTimeout(() => {
+      xBuffer.push((xBuffer[xBuffer.length - 1] + xBuffer[xBuffer.length - 2]) / 2)
+      yBuffer.push((yBuffer[yBuffer.length - 1] + yBuffer[yBuffer.length - 2]) / 2)
+
+      Pointer.setPointerPosition(
+        averagePosition(xBuffer, avgPositionStrength, currentPositionStrength) + this.monitorConfig.xOffset,
+        averagePosition(yBuffer, avgPositionStrength, currentPositionStrength)
+      )
+    }, 1000 / this.stdRps / 2)
+  }
+
+  Pointer.setPointerPosition(
+    averagePosition(xBuffer, avgPositionStrength, currentPositionStrength) + this.monitorConfig.xOffset,
     averagePosition(yBuffer, avgPositionStrength, currentPositionStrength)
   )
 
-  // different pens can have different button/click values, try and make it pen agnostic
+  // console.log(xBuffer)
+
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
       if (isClick === false) {
@@ -393,7 +475,34 @@ module.exports = {
   initXPointer,
   initUinput,
   standardVirtualBufferParser,
+  Pointer,
+  simpleBufferParser,
 }
+
+// function mouseClickParser(buttonBuffer) {
+//   switch (buttonBuffer[1] & 0x07) {
+//     case 0x01:
+//       if (isClick === false) {
+//         isClick = true
+//         Pointer.mouseLeftClickDown()
+//       }
+//       break
+
+//     case 0x04:
+//       if (!isClick) {
+//         isClick = true
+//         Pointer.mouseRightClickDown()
+//         Pointer.mouseRightClickUp()
+//       }
+//       break
+
+//     default:
+//       if (isClick) {
+//         isClick = false
+//         Pointer.mouseLeftClickUp()
+//       }
+//   }
+// }
 
 // let positions = []
 // let offset = 2560
@@ -407,7 +516,7 @@ module.exports = {
 //   }
 // }, 1)
 
-// let xT = xS + tablet.monitorConfig.xOffset
+// let xT = xS + this.monitorConfig.xOffset
 // let yT = yS
 // setTimeout(() => {
 //   Pointer.setPointer(xT, yT)
@@ -419,7 +528,7 @@ module.exports = {
 // robot.setKeyboardDelay(0)
 
 // console.log(reportBuffer[4] - 127)
-// // try and make use of the wheel of the pro tablet, buggy for now
+// // try and make use of the wheel of the pro this.settings, buggy for now
 // if (reportBuffer[4] === 0x7f) {
 //   previousTouchWheelValue = 0
 //   return
