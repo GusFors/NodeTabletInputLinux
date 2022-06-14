@@ -75,7 +75,6 @@ run()
 
 let restartInterval
 // a bit buggy, TODO close virtual device on error
-
 if (isAutomaticRestart) {
   process.on('uncaughtException', function (error) {
     console.log('Crashed with error: ', error.message)

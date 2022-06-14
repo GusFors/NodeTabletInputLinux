@@ -14,7 +14,6 @@ const {
   Pointer,
   simpleBufferParser,
 } = require('./Parsers')
-// const Parser = require('./experimental/Parsers')
 
 class Tablet {
   constructor() {
@@ -139,33 +138,3 @@ class Tablet {
 }
 
 module.exports = Tablet
-
-// setInterval(() => {
-//   this.tabletHID.read((err, reportBuffer) => {
-//     standardBufferParser(reportBuffer, this)
-//     //  console.log(data)
-//     rps++
-//   })
-// }, 1)
-
-// let execTimes = []
-//     const t0 = performance.now()
-//     standardBufferParser(reportBuffer, this)
-//     const t1 = performance.now()
-//     execTimes.push(t1 - t0)
-//     setInterval(() => {
-//       let sum = 0
-//       for (let i = 0; i < execTimes.length; i++) {
-//         sum += execTimes[i]
-//       }
-//       console.log(sum / execTimes.length)
-//       execTimes = []
-//     }, 5000)
-
-// let rps = 0
-// setInterval(() => {
-//   console.log(rps)
-//   rps = 0
-// }, 1000)
-
-// console.log(this.tabletHID.setNonBlocking(1))
