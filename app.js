@@ -18,6 +18,8 @@ if (process.argv.includes('-de')) {
   process.exit()
 }
 
+console.log(process.pid)
+
 if (isExit) {
   setTimeout(() => {
     process.exit()

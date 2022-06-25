@@ -2,8 +2,8 @@ const HID = require('node-hid')
 const ConfigHandler = require('./configs/ConfigHandler')
 
 class DeviceDetector {
-  constructor() {
-    this.configs = new ConfigHandler().readConfigSync()
+  constructor(configPath) {
+    this.configs = new ConfigHandler().readConfigSync(configPath)
   }
 
   tabletDetector() {

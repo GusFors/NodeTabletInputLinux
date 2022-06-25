@@ -18,10 +18,10 @@ class ConfigHandler {
     )
   }
 
-  readConfigSync(tabletName) {
+  readConfigSync(configPath) {
     console.log('Reading config file from:', __dirname)
     return JSON.parse(
-      readFileSync(__dirname + '/configs.json', (err) => {
+      readFileSync(__dirname + configPath, (err) => {
         if (err) {
           console.log('Error when reading file')
         }

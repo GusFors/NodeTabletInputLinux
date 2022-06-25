@@ -1,19 +1,10 @@
 const HID = require('node-hid')
 const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./configs/ConfigHandler')
-const deviceDetector = new DeviceDetector()
+const deviceDetector = new DeviceDetector('/mmConfigs.json')
 const Display = require('./build/Release/display.node')
-const {
-  standardBufferParser,
-  standardVirtualBufferParser,
-  doubleReportBufferParser,
-  proBufferParser,
-  standardAvgBufferParser,
-  initXPointer,
-  initUinput,
-  Pointer,
-  simpleBufferParser,
-} = require('./Parsers')
+const { mmToWac } = require('./utils/converters')
+const { standardBufferParser, doubleReportBufferParser, standardAvgBufferParser, initXPointer, initUinput, Pointer } = require('./Parsers')
 
 class Tablet {
   constructor() {
@@ -35,7 +26,8 @@ class Tablet {
 
   async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false }) {
     this.tabletHID = new HID.HID(await deviceDetector.getPath())
-    this.settings = await deviceDetector.getConfig()
+    this.settings = mmToWac(await deviceDetector.getConfig())
+    // this.settings = await deviceDetector.getConfig()
     console.log('Getting input from', this.settings.name)
 
     this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
