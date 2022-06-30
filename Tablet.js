@@ -4,7 +4,15 @@ const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector('/mmConfigs.json')
 const Display = require('./build/Release/display.node')
 const { mmToWac } = require('./utils/converters')
-const { standardBufferParser, doubleReportBufferParser, standardAvgBufferParser, initXPointer, initUinput, Pointer } = require('./Parsers')
+const {
+  standardBufferParser,
+  doubleReportBufferParser,
+  standardAvgBufferParser,
+  initXPointer,
+  initUinput,
+  Pointer,
+  touchBufferParser,
+} = require('./Parsers')
 
 class Tablet {
   constructor() {
@@ -80,9 +88,7 @@ class Tablet {
       let touchBuffer = fs.createReadStream(assumedTouchPath)
       touchBuffer.on('data', (chunk) => {
         //  console.log(chunk[4])
-        let x = chunk[4] | (chunk[5] << 8)
-        let y = chunk[6] | (chunk[7] << 8)
-        console.log({ x, y })
+        touchBufferParser(chunk, this)
       })
     }
   }

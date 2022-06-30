@@ -375,6 +375,19 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
   }
 }
 
+function touchBufferParser(reportBuffer, tablet) {
+  let x = reportBuffer[4] | (reportBuffer[5] << 8)
+  let y = reportBuffer[6] | (reportBuffer[7] << 8)
+  // console.log({ x, y })
+
+  let xS = (tablet.monitorConfig.width / 6399) * x
+  let yS = (tablet.monitorConfig.height / 3999) * y
+
+  console.log({ xS, yS })
+
+  Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
+}
+
 function initXPointer() {
   return Pointer.initDisplay()
 }
@@ -456,5 +469,5 @@ module.exports = {
   initUinput,
   standardVirtualBufferParser,
   Pointer,
-  simpleBufferParser,
+  touchBufferParser,
 }
