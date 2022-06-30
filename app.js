@@ -1,6 +1,3 @@
-// let isForcedProportions = process.argv.includes('-f')
-// let isFastLogging = process.argv.includes('-l')
-// let isDraftLog = process.argv.includes('-d')
 let isExit = process.argv.includes('-t')
 let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
@@ -8,23 +5,23 @@ let isAutomaticRestart = process.argv.includes('-r')
 let isDoubleReport = process.argv.includes('-d')
 let isVirtualDevice = process.argv.includes('-v')
 let isNewConfig = process.argv.includes('-c')
+let isListDevices = process.argv.includes('-de')
 
-const Tablet = require('./Tablet')
-
-if (process.argv.includes('-de')) {
+if (isListDevices) {
   const HID = require('node-hid')
   let devices = HID.devices()
   console.log(devices)
   process.exit()
 }
 
-console.log(process.pid)
-
 if (isExit) {
   setTimeout(() => {
     process.exit()
   }, 10000)
 }
+
+const Tablet = require('./Tablet')
+// console.log(process.pid)
 
 let isRunning = false
 
@@ -44,7 +41,6 @@ const run = async () => {
 
   isRunning = true
 
-  // start in forked process?, alternatively start gtk instead
   if (isWebSocket) {
     const { spawn } = require('child_process')
     const WebSocketServer = require('ws').WebSocketServer
@@ -76,7 +72,7 @@ const run = async () => {
 run()
 
 let restartInterval
-// a bit buggy, TODO close virtual device on error
+// buggy, doesn't properly close unused tablets
 if (isAutomaticRestart) {
   process.on('uncaughtException', function (error) {
     console.log('Crashed with error: ', error.message)
@@ -91,11 +87,5 @@ if (isAutomaticRestart) {
         }
       }, 1000)
     }
-    // setInterval(() => {
-    //   run()
-    // }, 1000)
   })
 }
-// setInterval(() => {
-//   run()
-// }, 1000)

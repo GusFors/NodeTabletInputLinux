@@ -1,6 +1,6 @@
 const { getArgValue } = require('./args')
 
-// example: node utils/Converter.js -x 76 -y 36.5625 -w 100 -h 56.25 -c 100 -m
+// example: node utils/converters.js -x 76 -y 36.5625 -w 100 -h 56.25 -c 100 -m
 // -c 200 for PTH tablets
 function mmToWac(config, isLog = false) {
   let convObj = {}
@@ -32,7 +32,7 @@ function mmToWac(config, isLog = false) {
   return { ...config, ...convObj }
 }
 
-// example: node utils/Converter.js -l 2600 -r 12600 -t 843.75 -b 6468.75 -c 100
+// example: node utils/converters.js -l 2600 -r 12600 -t 843.75 -b 6468.75 -c 100
 // -c 200 for PTH tablets
 function wacToMm(config, isLog = false) {
   let left = config ? config.left : getArgValue('-l', 'number')
@@ -55,7 +55,6 @@ function wacToMm(config, isLog = false) {
     console.log('"x": ' + x + ',')
     console.log('"y": ' + y + ',')
   }
-
   return
 }
 
@@ -68,39 +67,3 @@ if (require.main === module) {
 }
 
 module.exports = { mmToWac }
-
-// let c = 100 // 100 for most, 200 for PTH?
-
-// if (process.argv.includes('-r')) {
-//   let x = 76
-//   let y = 36.5625
-//   let width = 100
-//   let height = 56.25
-
-//   let left = (x - width / 2) * c
-//   let right = (x + width / 2) * c
-//   let top = (y - height / 2) * c
-//   let bottom = (y + height / 2) * c
-
-//   console.log('"left": ' + left + ',')
-//   console.log('"right": ' + right + ',')
-//   console.log('"top": ' + top + ',')
-//   console.log('"bottom": ' + bottom + ',')
-// } else {
-//   let left = 5472
-//   let right = 24928
-//   let top = 1078
-//   let bottom = 12022
-//   let width = right - left
-//   let height = bottom - top
-
-//   let x = (left + width / 2) / c
-//   let y = (top + height / 2) / c
-//   width = width / c
-//   height = height / c
-
-//   console.log('"width": ' + width + ',')
-//   console.log('"height": ' + height + ',')
-//   console.log('"x": ' + x + ',')
-//   console.log('"y": ' + y + ',')
-// }

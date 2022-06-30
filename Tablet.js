@@ -27,7 +27,6 @@ class Tablet {
   async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false }) {
     this.tabletHID = new HID.HID(await deviceDetector.getPath())
     this.settings = mmToWac(await deviceDetector.getConfig())
-    // this.settings = await deviceDetector.getConfig()
     console.log('Getting input from', this.settings.name)
 
     this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
@@ -49,18 +48,10 @@ class Tablet {
       let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
       console.log('Created uinput device:', uiDevice)
       Pointer.setPointerPosition = Pointer.setPointerPosition = Pointer['setUinputPointer']
-      // return 1
     } else {
       Pointer.setPointerPosition = Pointer.setPointerPosition = Pointer['setPointer']
     }
 
-    // TODO read directly from hidraw instead of node-hid?
-    // const fs = require('fs')
-    // let rawHidPath = fs.createReadStream('/dev/hidraw6') // path might change
-    // rawHidPath.on('data', (chunk) => {
-    //   standardBufferParser(chunk, this)
-    //   // console.log(chunk)
-    // })
     if (parserSettings.isAvg) {
       console.log('Using standardAvgBufferParser')
       this.parser = standardAvgBufferParser.bind(this)
@@ -78,11 +69,6 @@ class Tablet {
       this.parser = standardBufferParser.bind(this)
       this.tabletHID.on('data', this.parser)
     }
-
-    // this.tabletHID.on('data', (reportBuffer) => {
-    //   proBufferParser(reportBuffer, this)
-    //   // rps++
-    // })
   }
 
   closeTablet() {
@@ -97,35 +83,6 @@ class Tablet {
 
   saveSettings() {
     new ConfigHandler().writeConfigSync(this.settings)
-  }
-
-  // TODO
-  async tabletInput(isRestart) {
-    if (isRestart && this.tabletHID !== null) {
-      this.tabletHID.pause()
-      this.tabletHID = null
-    }
-
-    this.tabletHID = new HID.HID(await deviceDetector.getPath())
-    this.settings = await deviceDetector.getConfig()
-    console.log('Getting input from', this.settings.name)
-
-    this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
-    this.yScale = this.monitorConfig.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
-
-    console.log('Total X screen width: ' + this.monitorConfig.width)
-    console.log('Number of active monitors: ' + this.monitorConfig.numOfMonitors)
-    console.log('Assumed primary monitor xOffset: ' + this.monitorConfig.xOffset)
-    console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
-    console.log('Assumed primary monitor width: ' + this.monitorConfig.width)
-
-    initXPointer()
-
-    this.tabletHID.on('data', (reportBuffer) => {
-      standardAvgBufferParser(reportBuffer, this)
-    })
-
-    return 1
   }
 }
 

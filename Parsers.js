@@ -394,14 +394,8 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
       // if position difference is over a certain value, increase the latest position amount
       if (Math.abs(positionBufferArr[latest] - positionBufferArr[latest - amountOfPositions]) > 70) {
         sum += (positionBufferArr[i - 1] + positionBufferArr[latest] + positionBufferArr[latest] + positionBufferArr[latest]) / 4
-        // currentPositionPrio = currentPositionPrio + 20
-        // positionBufferArr[i - 1] = positionBufferArr[latest]
-        // return (positionBufferArr[latest] + positionBufferArr[latest - 1]) / 2
       } else if (Math.abs(positionBufferArr[latest] - positionBufferArr[i]) > 30) {
         sum += (positionBufferArr[i - 1] + positionBufferArr[latest] + positionBufferArr[i + 1]) / 3
-        // positionBufferArr[i - 1] = positionBufferArr[latest]
-        // positionBufferArr[i - 1] = positionBufferArr[latest]
-        // sum += (positionBufferArr[i - 1] + positionBufferArr[latest] + positionBufferArr[i + 1]) / 3
       } else {
         sum += positionBufferArr[i - 1]
       }
