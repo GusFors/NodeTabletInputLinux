@@ -79,7 +79,10 @@ class Tablet {
       const fs = require('fs')
       let touchBuffer = fs.createReadStream(assumedTouchPath)
       touchBuffer.on('data', (chunk) => {
-        console.log(chunk)
+        //  console.log(chunk[4])
+        let x = chunk[4] | (chunk[5] << 8)
+        let y = chunk[6] | (chunk[7] << 8)
+        console.log({ x, y })
       })
     }
   }
