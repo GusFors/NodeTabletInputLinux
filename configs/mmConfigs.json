@@ -45,7 +45,11 @@
     "xBufferPositions": [2, 3],
     "yBufferPositions": [4, 5],
     "stdRps": 133,
-    "convM": 100
+    "convM": 100,
+    "touch": {
+      "xBufferPositions": [4],
+      "yBufferPositions": [5]
+    }
   },
   {
     "vendorId": 1386,
@@ -62,7 +66,11 @@
     "xBufferPositions": [2, 3],
     "yBufferPositions": [5, 6],
     "stdRps": 200,
-    "convM": 200
+    "convM": 200,
+    "touch": {
+      "xBufferPositions": [4, 5],
+      "yBufferPositions": [6, 7]
+    }
   },
   {
     "vendorId": 1386,

@@ -376,16 +376,82 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
 }
 
 function touchBufferParser(reportBuffer, tablet) {
-  let x = reportBuffer[4] | (reportBuffer[5] << 8)
-  let y = reportBuffer[6] | (reportBuffer[7] << 8)
-  // console.log({ x, y })
+  // console.log(reportBuffer)
 
-  let xS = (tablet.monitorConfig.width / 6399) * x
-  let yS = (tablet.monitorConfig.height / 3999) * y
+  if (tablet.settings.name === 'Wacom PTH-460') {
+    let x = reportBuffer[4] | (reportBuffer[5] << 8)
+    let y = reportBuffer[6] | (reportBuffer[7] << 8)
+    // console.log({ x: (tablet.monitorConfig.width / 65512) * x, y: (tablet.monitorConfig.height / 65512) * y })
+    let xScale = tablet.monitorConfig.width / 6399
+    let yScale = tablet.monitorConfig.height / 3999
 
-  console.log({ xS, yS })
+    let xS = x * xScale
+    let yS = y * yScale
 
-  Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
+    if (xS < 0) {
+      xS = 0
+    }
+
+    if (yS > tablet.monitorConfig.height) {
+      yS = tablet.monitorConfig.height
+    }
+
+    if (yS < 0) {
+      yS = 0
+    }
+
+    if (x === 0 && y === 0) {
+      return
+    }
+    console.log({ xS, yS })
+
+    Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
+  } else {
+    let x = reportBuffer[4] << 8
+    let y = reportBuffer[5] << 8
+
+    // console.log(reportBuffer)
+
+    // console.log(y)
+
+    let xScale = tablet.monitorConfig.width / 65280
+    let yScale = tablet.monitorConfig.height / 65280
+
+    let xS = x * xScale
+    let yS = y * yScale
+
+    console.log(xS, yS)
+
+    if (xS < 0) {
+      xS = 0
+    }
+
+    if (yS > tablet.monitorConfig.height) {
+      yS = tablet.monitorConfig.height
+    }
+
+    if (yS < 0) {
+      yS = 0
+    }
+
+    if (x === 0 && y === 0) {
+      return
+    }
+
+     Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
+  }
+
+  // pro
+  // let x = reportBuffer[4] | (reportBuffer[5] << 8)
+  // let y = reportBuffer[6] | (reportBuffer[7] << 8)
+  // console.log({ x: (tablet.monitorConfig.width / 65512) * x, y: (tablet.monitorConfig.height / 65512) * y })
+
+  // let xS = (tablet.monitorConfig.width / 6399) * x
+  // let yS = (tablet.monitorConfig.height / 3999) * y
+
+  // console.log({ xS, yS })
+
+  // Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
 }
 
 function initXPointer() {

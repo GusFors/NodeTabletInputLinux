@@ -82,13 +82,13 @@ class Tablet {
 
     if (parserSettings.isTouch) {
       let tabletPath = await deviceDetector.getPath()
-      let assumedTouchPath = `/dev/hidraw${parseInt(tabletPath.substring(tabletPath.length - 1)) + 1}`
+      let assumedTouchPath = `/dev/hidraw${parseInt(tabletPath.replace(/\D/g, '')) + 1}`
 
       const fs = require('fs')
       let touchBuffer = fs.createReadStream(assumedTouchPath)
-      touchBuffer.on('data', (chunk) => {
+      touchBuffer.on('data', (buffer) => {
         //  console.log(chunk[4])
-        touchBufferParser(chunk, this)
+        touchBufferParser(buffer, this)
       })
     }
   }
