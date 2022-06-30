@@ -24,7 +24,9 @@ class Tablet {
     this.parser = null
   }
 
-  async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false }) {
+  async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false, isTouch: false }) {
+    console.log(parserSettings)
+
     this.tabletHID = new HID.HID(await deviceDetector.getPath())
     this.settings = mmToWac(await deviceDetector.getConfig())
     console.log('Getting input from', this.settings.name)
@@ -68,6 +70,17 @@ class Tablet {
       console.log('Using standardBufferParser')
       this.parser = standardBufferParser.bind(this)
       this.tabletHID.on('data', this.parser)
+    }
+
+    if (parserSettings.isTouch) {
+      let tabletPath = await deviceDetector.getPath()
+      let assumedTouchPath = `/dev/hidraw${parseInt(tabletPath.substring(tabletPath.length - 1)) + 1}`
+
+      const fs = require('fs')
+      let touchBuffer = fs.createReadStream(assumedTouchPath)
+      touchBuffer.on('data', (chunk) => {
+        console.log(chunk)
+      })
     }
   }
 

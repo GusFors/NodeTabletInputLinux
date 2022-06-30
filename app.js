@@ -1,4 +1,4 @@
-let isExit = process.argv.includes('-t')
+let isExit = process.argv.includes('-e')
 let isAvg = process.argv.includes('-s')
 let isWebSocket = process.argv.includes('-w')
 let isAutomaticRestart = process.argv.includes('-r')
@@ -6,11 +6,18 @@ let isDoubleReport = process.argv.includes('-d')
 let isVirtualDevice = process.argv.includes('-v')
 let isNewConfig = process.argv.includes('-c')
 let isListDevices = process.argv.includes('-de')
+let isTouch = process.argv.includes('-t')
 
 if (isListDevices) {
   const HID = require('node-hid')
   let devices = HID.devices()
-  console.log(devices)
+
+  // for (let i = 0; i < devices.length; i++) {
+  //   if (devices[i].vendorId === 1386) {
+  //     console.log(devices[i])
+  //   }
+  // }
+
   process.exit()
 }
 
@@ -29,13 +36,13 @@ const run = async () => {
   const DetectedTablet = new Tablet()
 
   if (isAvg) {
-    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isAvg: true, isDoubleReport: true })
+    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isAvg: true, isDoubleReport: true, isTouch })
     console.log('Using avg position')
   } else if (isDoubleReport) {
-    DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice })
+    DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice, isTouch })
     console.log('Using double report position')
   } else {
-    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig })
+    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch })
     console.log('Using raw position')
   }
 
@@ -73,19 +80,19 @@ run()
 
 let restartInterval
 // buggy, doesn't properly close unused tablets
-if (isAutomaticRestart) {
-  process.on('uncaughtException', function (error) {
-    console.log('Crashed with error: ', error.message)
-    isRunning = false
+process.on('uncaughtException', function (error) {
+  console.log('Crashed with error: ', error.message)
+  isRunning = false
 
-    if (isAutomaticRestart) {
-      restartInterval = setInterval(() => {
-        if (!isRunning) {
-          console.log('trying to restart.. \n')
-          run()
-          clearInterval(restartInterval)
-        }
-      }, 1000)
-    }
-  })
-}
+  console.log(error)
+
+  if (isAutomaticRestart) {
+    restartInterval = setInterval(() => {
+      if (!isRunning) {
+        console.log('trying to restart.. \n')
+        run()
+        clearInterval(restartInterval)
+      }
+    }, 1000)
+  }
+})
