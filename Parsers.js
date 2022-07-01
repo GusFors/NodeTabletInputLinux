@@ -388,6 +388,8 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
 function touchBufferParser(reportBuffer, tablet) {
   if (inRange) return
 
+  console.log(reportBuffer)
+
   if (tablet.settings.name === 'Wacom PTH-460') {
     let x = reportBuffer[4] | (reportBuffer[5] << 8)
     let y = reportBuffer[6] | (reportBuffer[7] << 8)
@@ -415,6 +417,21 @@ function touchBufferParser(reportBuffer, tablet) {
     }
 
     Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
+
+    switch (reportBuffer[3]) {
+      case 0x01:
+        if (isClick === false) {
+          isClick = true
+          Pointer.mouseLeftClickDown()
+        }
+        break
+
+        case 0x00:
+        if (isClick) {
+          isClick = false
+          Pointer.mouseLeftClickUp()
+        }
+    }
   } else {
     let x = reportBuffer[4] << 8
     let y = reportBuffer[5] << 8
