@@ -12,11 +12,11 @@ if (isListDevices) {
   const HID = require('node-hid')
   let devices = HID.devices()
 
-  // for (let i = 0; i < devices.length; i++) {
-  //   if (devices[i].vendorId === 1386) {
-  //     console.log(devices[i])
-  //   }
-  // }
+  for (let i = 0; i < devices.length; i++) {
+    if (devices[i].vendorId === 1386) {
+      console.log(devices[i])
+    }
+  }
 
   process.exit()
 }
