@@ -6,15 +6,12 @@ let y
 let xS
 let yS
 let isClick = false
+let inRange = false
 
 function standardBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
     return
   }
-
-  // if (reportBuffer[1] > 0xe1) {
-  //   return
-  // }
 
   // get x and y position from the buffer, get the indexes from the tablets config file
   x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
@@ -71,6 +68,10 @@ function standardBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
+
+  // used when touch is active
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 function standardVirtualBufferParser(reportBuffer) {
@@ -132,6 +133,9 @@ function standardVirtualBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 function proBufferParser(reportBuffer) {
@@ -193,6 +197,9 @@ function proBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 let xInp = []
@@ -287,16 +294,15 @@ function doubleReportBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 let xBuffer = []
 let yBuffer = []
 const avgPositionStrength = 8
 const currentPositionStrength = 3
-
-// setTimeout(() => {
-//   console.log(xBuffer.length)
-// }, 5000)
 
 function standardAvgBufferParser(reportBuffer, isDouble = true) {
   if (reportBuffer[0] > 0x10) {
@@ -373,15 +379,19 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
         Pointer.mouseLeftClickUp()
       }
   }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 }
 
+// experimental
 function touchBufferParser(reportBuffer, tablet) {
-  // console.log(reportBuffer)
+  if (inRange) return
 
   if (tablet.settings.name === 'Wacom PTH-460') {
     let x = reportBuffer[4] | (reportBuffer[5] << 8)
     let y = reportBuffer[6] | (reportBuffer[7] << 8)
-    // console.log({ x: (tablet.monitorConfig.width / 65512) * x, y: (tablet.monitorConfig.height / 65512) * y })
+
     let xScale = tablet.monitorConfig.width / 6399
     let yScale = tablet.monitorConfig.height / 3999
 
@@ -403,24 +413,17 @@ function touchBufferParser(reportBuffer, tablet) {
     if (x === 0 && y === 0) {
       return
     }
-    console.log({ xS, yS })
 
     Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
   } else {
     let x = reportBuffer[4] << 8
     let y = reportBuffer[5] << 8
 
-    // console.log(reportBuffer)
-
-    // console.log(y)
-
     let xScale = tablet.monitorConfig.width / 65280
     let yScale = tablet.monitorConfig.height / 65280
 
     let xS = x * xScale
     let yS = y * yScale
-
-    console.log(xS, yS)
 
     if (xS < 0) {
       xS = 0
@@ -438,20 +441,8 @@ function touchBufferParser(reportBuffer, tablet) {
       return
     }
 
-     Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
+    Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
   }
-
-  // pro
-  // let x = reportBuffer[4] | (reportBuffer[5] << 8)
-  // let y = reportBuffer[6] | (reportBuffer[7] << 8)
-  // console.log({ x: (tablet.monitorConfig.width / 65512) * x, y: (tablet.monitorConfig.height / 65512) * y })
-
-  // let xS = (tablet.monitorConfig.width / 6399) * x
-  // let yS = (tablet.monitorConfig.height / 3999) * y
-
-  // console.log({ xS, yS })
-
-  // Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
 }
 
 function initXPointer() {

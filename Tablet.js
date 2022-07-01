@@ -52,7 +52,7 @@ class Tablet {
     console.log(this.settings)
 
     // init the pointer and display before setting pointer positions and clicks
-    initXPointer() // optionally run when clicks by uinput are implemented
+    initXPointer()
 
     if (parserSettings.isVirtual) {
       let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
@@ -80,16 +80,18 @@ class Tablet {
       this.tabletHID.on('data', this.parser)
     }
 
-    if (parserSettings.isTouch) {
+    if (parserSettings.isTouch && this.settings.touch) {
       let tabletPath = await deviceDetector.getPath()
       let assumedTouchPath = `/dev/hidraw${parseInt(tabletPath.replace(/\D/g, '')) + 1}`
 
       const fs = require('fs')
-      let touchBuffer = fs.createReadStream(assumedTouchPath)
+      let touchBuffer = fs.createReadStream(assumedTouchPath).on('error', (err) => {
+        console.log('Could not open stream, tablet might not support touch, wrong hidraw was opened or other permission error. Error:', err)
+      })
       touchBuffer.on('data', (buffer) => {
-        //  console.log(chunk[4])
         touchBufferParser(buffer, this)
       })
+      console.log('Using touchBufferParser')
     }
   }
 
