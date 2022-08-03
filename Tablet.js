@@ -13,6 +13,7 @@ const {
   Pointer,
   touchBufferParser,
 } = require('./Parsers')
+const getTabletHidrawPath = require('./utils/hid')
 
 class Tablet {
   constructor() {
@@ -35,7 +36,8 @@ class Tablet {
   async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false, isTouch: false }) {
     console.log(parserSettings)
 
-    this.tabletHID = new HID.HID(await deviceDetector.getPath())
+    this.tabletHID = new HID.HID(await getTabletHidrawPath())
+    // this.tabletHID = new HID.HID(await deviceDetector.getPath())
     this.settings = mmToWac(await deviceDetector.getConfig())
     console.log('Getting input from', this.settings.name)
 

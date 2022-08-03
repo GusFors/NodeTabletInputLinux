@@ -1,6 +1,6 @@
 const fs = require('fs/promises')
 
-;(async () => {
+const getTabletHidrawPath = async () => {
   let hidrawDirs = await fs.readdir('/sys/class/hidraw')
 
   let foundTablets = []
@@ -27,4 +27,11 @@ const fs = require('fs/promises')
   }
 
   console.log(foundTablets)
-})()
+
+  return '/dev/' + foundTablets[0].hidpath
+}
+if (require.main === module) {
+  getTabletHidrawPath()
+}
+
+module.exports = getTabletHidrawPath

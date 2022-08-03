@@ -426,7 +426,7 @@ function touchBufferParser(reportBuffer, tablet) {
         }
         break
 
-        case 0x00:
+      case 0x00:
         if (isClick) {
           isClick = false
           Pointer.mouseLeftClickUp()
