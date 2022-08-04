@@ -77,6 +77,7 @@ const run = async () => {
     })
   }
 }
+
 run()
 
 let restartInterval
