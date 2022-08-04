@@ -545,3 +545,26 @@ module.exports = {
   Pointer,
   touchBufferParser,
 }
+
+// switch (reportBuffer[1] & 0x07) {
+//   case 0x01:
+//     if (isClick === false) {
+//       isClick = true
+//       Pointer.uMouseLeftClickDown()
+//     }
+//     break
+
+//   case 0x04:
+//     if (!isClick) {
+//       isClick = true
+//       Pointer.uMouseRightClickDown()
+//       Pointer.uMouseRightClickUp()
+//     }
+//     break
+
+//   default:
+//     if (isClick) {
+//       isClick = false
+//       Pointer.uMouseLeftClickUp()
+//     }
+// }

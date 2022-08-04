@@ -6,6 +6,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
 #include <X11/extensions/XTest.h>
+#include <linux/input-event-codes.h>
 #include <linux/uinput.h>
 #include <nan.h>
 #include <node.h>
@@ -105,6 +106,94 @@ NAN_METHOD(setUinputPointer) {
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
+NAN_METHOD(uMouseLeftClickDown) {
+
+  struct input_event positionEvents[1];
+  memset(positionEvents, 0, sizeof(positionEvents));
+
+  positionEvents[0].type = EV_KEY;
+  positionEvents[0].code = BTN_LEFT;
+  positionEvents[0].value = 1;
+  positionEvents[0].time.tv_sec = 0;
+  positionEvents[0].time.tv_usec = 0;
+
+  int res_w = write(fd, positionEvents, sizeof(positionEvents));
+
+  struct input_event syncEvent;
+  memset(&syncEvent, 0, sizeof(syncEvent));
+
+  syncEvent.type = EV_SYN;
+  syncEvent.value = 0;
+  syncEvent.code = 0;
+  write(fd, &syncEvent, sizeof(syncEvent));
+}
+
+NAN_METHOD(uMouseLeftClickUp) {
+
+  struct input_event positionEvents[1];
+  memset(positionEvents, 0, sizeof(positionEvents));
+
+  positionEvents[0].type = EV_KEY;
+  positionEvents[0].code = BTN_LEFT;
+  positionEvents[0].value = 0;
+  positionEvents[0].time.tv_sec = 0;
+  positionEvents[0].time.tv_usec = 0;
+
+  int res_w = write(fd, positionEvents, sizeof(positionEvents));
+
+  struct input_event syncEvent;
+  memset(&syncEvent, 0, sizeof(syncEvent));
+
+  syncEvent.type = EV_SYN;
+  syncEvent.value = 0;
+  syncEvent.code = 0;
+  write(fd, &syncEvent, sizeof(syncEvent));
+}
+
+NAN_METHOD(uMouseRightClickDown) {
+
+  struct input_event positionEvents[1];
+  memset(positionEvents, 0, sizeof(positionEvents));
+
+  positionEvents[0].type = EV_KEY;
+  positionEvents[0].code = BTN_RIGHT;
+  positionEvents[0].value = 1;
+  positionEvents[0].time.tv_sec = 0;
+  positionEvents[0].time.tv_usec = 0;
+
+  int res_w = write(fd, positionEvents, sizeof(positionEvents));
+
+  struct input_event syncEvent;
+  memset(&syncEvent, 0, sizeof(syncEvent));
+
+  syncEvent.type = EV_SYN;
+  syncEvent.value = 0;
+  syncEvent.code = 0;
+  write(fd, &syncEvent, sizeof(syncEvent));
+}
+
+NAN_METHOD(uMouseRightClickUp) {
+
+  struct input_event positionEvents[1];
+  memset(positionEvents, 0, sizeof(positionEvents));
+
+  positionEvents[0].type = EV_KEY;
+  positionEvents[0].code = BTN_RIGHT;
+  positionEvents[0].value = 0;
+  positionEvents[0].time.tv_sec = 0;
+  positionEvents[0].time.tv_usec = 0;
+
+  int res_w = write(fd, positionEvents, sizeof(positionEvents));
+
+  struct input_event syncEvent;
+  memset(&syncEvent, 0, sizeof(syncEvent));
+
+  syncEvent.type = EV_SYN;
+  syncEvent.value = 0;
+  syncEvent.code = 0;
+  write(fd, &syncEvent, sizeof(syncEvent));
+}
+
 NAN_METHOD(setMotionEventPointer) {
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
   int32_t y = Nan::To<int32_t>(info[1]).FromJust();
@@ -146,6 +235,10 @@ NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setMotionEventPointer", setMotionEventPointer);
   Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
   Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
+  Nan::SetMethod(target, "uMouseLeftClickDown", uMouseLeftClickDown);
+  Nan::SetMethod(target, "uMouseLeftClickUp", uMouseLeftClickUp);
+  Nan::SetMethod(target, "uMouseRightClickDown", uMouseRightClickDown);
+  Nan::SetMethod(target, "uMouseRightClickUp", uMouseRightClickUp);
   Nan::SetMethod(target, "mouseRightClickDown", mouseRightClickDown);
   Nan::SetMethod(target, "mouseRightClickUp", mouseRightClickUp);
 }
