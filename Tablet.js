@@ -1,8 +1,8 @@
-const HID = require('node-hid')
 const DeviceDetector = require('./DeviceDetector')
 const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector('/mmConfigs.json')
 const Display = require('./build/Release/display.node')
+const fs = require('fs')
 const { mmToWac } = require('./utils/converters')
 const {
   standardBufferParser,
@@ -13,11 +13,11 @@ const {
   Pointer,
   touchBufferParser,
 } = require('./Parsers')
-// const getTabletHidrawPath = require('./utils/hid')
 
 class Tablet {
   constructor() {
     this.tabletHID = null
+    this.rawInfo = null
     this.settings = null
     this.xScale = null
     this.yScale = null
@@ -35,10 +35,11 @@ class Tablet {
 
   async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false, isTouch: false }) {
     console.log(parserSettings)
+
     const detectedTablets = await deviceDetector.getTabletHidInfo()
-    console.log(detectedTablets[0])
-    this.tabletHID = new HID.HID(detectedTablets[0].hidpath)
-    // this.tabletHID = new HID.HID(await deviceDetector.getPath())
+    this.tabletHID = fs.createReadStream(detectedTablets[0].hidpath)
+    this.rawInfo = detectedTablets[0]
+
     this.settings = mmToWac(await deviceDetector.getConfig())
     console.log('Getting input from', this.settings.name)
 
@@ -53,6 +54,7 @@ class Tablet {
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
 
     console.log(this.settings)
+    console.log(this.rawInfo)
 
     // init the pointer and display before setting pointer positions and clicks
     initXPointer()
@@ -84,10 +86,9 @@ class Tablet {
     }
 
     if (parserSettings.isTouch && this.settings.touch) {
-      let tabletPath = await deviceDetector.getPath()
+      let tabletPath = detectedTablets[0].hidpath
       let assumedTouchPath = `/dev/hidraw${parseInt(tabletPath.replace(/\D/g, '')) + 1}`
 
-      const fs = require('fs')
       let touchBuffer = fs.createReadStream(assumedTouchPath).on('error', (err) => {
         console.log('Could not open stream, tablet might not support touch, wrong hidraw was opened or other permission error. Error:', err)
       })

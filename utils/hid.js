@@ -1,6 +1,5 @@
 const fs = require('fs/promises')
 
-// move to DeviceDetector?
 const getTabletHidInfo = async () => {
   let hidrawDirs = await fs.readdir('/sys/class/hidraw')
 
@@ -21,12 +20,8 @@ const getTabletHidInfo = async () => {
     }
 
     if (isTablet) {
-      // console.log(currentDevice)
-      // let param = new URLSearchParams(currentDevice)
-      // let convObj = Object.fromEntries(param.entries())
-      // console.log(convObj)
       let deviceInfo = currentDevice.split('\n')
-      // console.log(tablet.info)
+
       let sObj = {}
       for (let j = 0; j < deviceInfo.length; j++) {
         let kv = deviceInfo[j].split('=')
@@ -36,12 +31,11 @@ const getTabletHidInfo = async () => {
           let ids = kv[1].split(':')
           let conv = parseInt(ids[2], 16)
           sObj.PRODUCT_ID = ids[2]
-          // console.log(conv)
         }
       }
-      // console.log(sObj)
+
       tablet.info = sObj
-      // console.log(tablet.info[1].split('='))
+
       tablet.hidpath = hidrawDirs[i]
 
       foundTablets.push(tablet)
@@ -49,7 +43,7 @@ const getTabletHidInfo = async () => {
   }
 
   console.log(foundTablets)
-  // console.log(foundTablets[0].)
+
   return '/dev/' + foundTablets[0].hidpath
 }
 if (require.main === module) {

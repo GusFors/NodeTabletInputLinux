@@ -8,17 +8,19 @@ let isNewConfig = process.argv.includes('-c')
 let isListDevices = process.argv.includes('-de')
 let isTouch = process.argv.includes('-t')
 
-if (isListDevices) {
-  const HID = require('node-hid')
-  let devices = HID.devices()
+const DeviceDetector = require('./DeviceDetector')
+const Tablet = require('./Tablet')
 
-  for (let i = 0; i < devices.length; i++) {
-    if (devices[i].vendorId === 1386) {
+if (isListDevices) {
+  ;(async () => {
+    const d = new DeviceDetector()
+    let devices = await d.getHidInfo()
+
+    for (let i = 0; i < devices.length; i++) {
       console.log(devices[i])
     }
-  }
-
-  process.exit()
+    process.exit()
+  })()
 }
 
 if (isExit) {
@@ -27,7 +29,6 @@ if (isExit) {
   }, 10000)
 }
 
-const Tablet = require('./Tablet')
 // console.log(process.pid)
 
 let isRunning = false
@@ -79,7 +80,7 @@ const run = async () => {
 run()
 
 let restartInterval
-// buggy, doesn't properly close unused tablets
+// buggy, might not properly close unused tablets
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error.message)
   isRunning = false

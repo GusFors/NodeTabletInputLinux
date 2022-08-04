@@ -1,5 +1,5 @@
 {
-  "name": "nodelinux",
+  "name": "nodetabletinputlinux",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -12,7 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "node-hid": "^2.1.1",
+    "nan": "^2.16.0",
     "ws": "^8.5.0"
   }
 }

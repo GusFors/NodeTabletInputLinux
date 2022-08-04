@@ -1,16 +1,14 @@
-const HID = require('node-hid')
 const ConfigHandler = require('./configs/ConfigHandler')
 const fs = require('fs/promises')
 
 class DeviceDetector {
-  constructor(configPath) {
+  constructor(configPath = '/mmConfigs.json') {
     this.configs = new ConfigHandler().readConfigSync(configPath)
-    // console.log(this.configs)
   }
 
-  tabletDetector() {
-    let allDevices = HID.devices()
-    let wacDevices = allDevices.filter((device) => device.vendorId === 1386)
+  async tabletDetector() {
+    // let allDevices = HID.devices()
+    let wacDevices = await this.getTabletHidInfo()
     let tabletMatches = []
     let tabletName
 
@@ -31,9 +29,9 @@ class DeviceDetector {
     })
   }
 
-  getName() {
-    return new Promise((resolve, reject) => {
-      let wacomDevices = HID.devices().filter((device) => device.vendorId === 1386)
+  async getName() {
+    return new Promise(async (resolve, reject) => {
+      let wacomDevices = await this.getTabletHidInfo()
       this.configs.forEach((config) => {
         wacomDevices.forEach((device) => {
           if (config.productId === device.productId) {
@@ -61,18 +59,16 @@ class DeviceDetector {
 
   tryReadDevice(i, promise, dataReadArray) {
     // keep looping until cancelled or succesful, some tablets might not get detected until pen is in range
-    if (i === dataReadArray.length) {
-      i = 0
-    }
-
-    if (dataReadArray.length === 0) {
-      return promise.reject('No devices to read')
-    }
-    // try open one of the possible paths
-    let tabletDevice = new HID.HID(dataReadArray[i].path)
-    console.log('\nSuccess reading device with path', dataReadArray[i].path)
-
-    return promise.resolve(dataReadArray[i].path)
+    // if (i === dataReadArray.length) {
+    //   i = 0
+    // }
+    // if (dataReadArray.length === 0) {
+    //   return promise.reject('No devices to read')
+    // }
+    // // try open one of the possible paths
+    // let tabletDevice = new HID.HID(dataReadArray[i].path)
+    // console.log('\nSuccess reading device with path', dataReadArray[i].path)
+    // return promise.resolve(dataReadArray[i].path)
   }
 
   async getTabletHidInfo() {
@@ -94,34 +90,58 @@ class DeviceDetector {
       }
 
       if (isTablet) {
-        // console.log(currentDevice)
         let deviceInfo = currentDevice.split('\n')
-        // console.log(tablet.info)
         let sObj = {}
+
         for (let j = 0; j < deviceInfo.length; j++) {
           let kv = deviceInfo[j].split('=')
           if (kv[0]) sObj[kv[0]] = kv[1]
-          // console.log(kv)
+
           if (kv[0] === 'HID_ID') {
             let ids = kv[1].split(':')
             let conv = parseInt(ids[2], 16)
             tablet.productId = conv
-            // console.log(conv)
           }
         }
-        // console.log(sObj)
-        tablet.rawInfo = sObj
-        // console.log(tablet.info[1].split('='))
-        tablet.hidpath = '/dev/' + hidrawDirs[i]
 
+        tablet.rawInfo = sObj
+        tablet.hidpath = '/dev/' + hidrawDirs[i]
         foundTablets.push(tablet)
       }
     }
 
-    // console.log(foundTablets)
-    // console.log(foundTablets[0].)
-    //  return '/dev/' + foundTablets[0].hidpath
     return foundTablets
+  }
+
+  async getHidInfo() {
+    let hidrawDirs = await fs.readdir('/sys/class/hidraw')
+
+    let devices = []
+    for (let i = 0; i < hidrawDirs.length; i++) {
+      let currentDevice = await fs.readFile(`/sys/class/hidraw/${hidrawDirs[i]}/device/uevent`, { encoding: 'utf8' })
+      let r = currentDevice.split('\n')
+      let devObj = {}
+
+      let deviceInfo = currentDevice.split('\n')
+
+      let sObj = {}
+      for (let j = 0; j < deviceInfo.length; j++) {
+        let kv = deviceInfo[j].split('=')
+        if (kv[0]) sObj[kv[0]] = kv[1]
+
+        if (kv[0] === 'HID_ID') {
+          let ids = kv[1].split(':')
+          let conv = parseInt(ids[2], 16)
+          devObj.productId = conv
+        }
+      }
+
+      devObj.rawInfo = sObj
+      devObj.hidpath = '/dev/' + hidrawDirs[i]
+      devices.push(devObj)
+    }
+
+    return devices
   }
 }
 

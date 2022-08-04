@@ -388,7 +388,7 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
 function touchBufferParser(reportBuffer, tablet) {
   if (inRange) return
 
-  console.log(reportBuffer)
+  // console.log(reportBuffer)
 
   if (tablet.settings.name === 'Wacom PTH-460') {
     let x = reportBuffer[4] | (reportBuffer[5] << 8)
