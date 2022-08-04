@@ -17,7 +17,6 @@ const {
 class Tablet {
   constructor() {
     this.tabletHID = null
-    this.rawInfo = null
     this.settings = null
     this.xScale = null
     this.yScale = null
@@ -36,12 +35,11 @@ class Tablet {
   async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false, isTouch: false }) {
     console.log(parserSettings)
 
-    const detectedTablets = await deviceDetector.getTabletHidInfo()
-    this.tabletHID = fs.createReadStream(detectedTablets[0].hidpath)
-    this.rawInfo = detectedTablets[0]
+    this.tabletHID = await deviceDetector.getTabletHidBuffer()
+    // this.tabletHID.buffer = fs.createReadStream('/dev/hidraw7')
 
     this.settings = mmToWac(await deviceDetector.getConfig())
-    console.log('Getting input from', this.settings.name)
+    console.log('\nGetting input from', this.settings.name)
 
     this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorConfig.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
@@ -54,7 +52,7 @@ class Tablet {
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
 
     console.log(this.settings)
-    console.log(this.rawInfo)
+    console.log(this.tabletHID.rawInfo)
 
     // init the pointer and display before setting pointer positions and clicks
     initXPointer()
@@ -70,23 +68,23 @@ class Tablet {
     if (parserSettings.isAvg) {
       console.log('Using standardAvgBufferParser')
       this.parser = standardAvgBufferParser.bind(this)
-      this.tabletHID.on('data', this.parser)
+      this.tabletHID.buffer.on('data', this.parser)
     } else if (parserSettings.isDoubleReport) {
       console.log('Using doubleReportBufferParser')
       this.parser = doubleReportBufferParser.bind(this)
-      this.tabletHID.on('data', this.parser)
+      this.tabletHID.buffer.on('data', this.parser)
     } else if (parserSettings.isNewConfig) {
       console.log('Using newConfig')
       this.parser = standardBufferParser.bind(this)
-      this.tabletHID.on('data', this.parser)
+      this.tabletHID.buffer.on('data', this.parser)
     } else {
       console.log('Using standardBufferParser')
       this.parser = standardBufferParser.bind(this)
-      this.tabletHID.on('data', this.parser)
+      this.tabletHID.buffer.on('data', this.parser)
     }
 
     if (parserSettings.isTouch && this.settings.touch) {
-      let tabletPath = detectedTablets[0].hidpath
+      let tabletPath = this.tabletHID.rawInfo.hidpath
       let assumedTouchPath = `/dev/hidraw${parseInt(tabletPath.replace(/\D/g, '')) + 1}`
 
       let touchBuffer = fs.createReadStream(assumedTouchPath).on('error', (err) => {
@@ -100,8 +98,8 @@ class Tablet {
   }
 
   closeTablet() {
-    this.tabletHID.pause()
-    this.tabletHID = null
+    this.tabletHID.buffer.pause()
+    this.tabletHID.buffer = null
   }
 
   updateScale() {

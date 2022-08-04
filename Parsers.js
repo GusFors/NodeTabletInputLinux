@@ -38,6 +38,10 @@ function standardBufferParser(reportBuffer) {
     yS = 0
   }
 
+  // used when touch is active
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
+
   if (x === 0 && y === 0) {
     return
   }
@@ -68,10 +72,6 @@ function standardBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
-
-  // used when touch is active
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 function standardVirtualBufferParser(reportBuffer) {
@@ -105,6 +105,9 @@ function standardVirtualBufferParser(reportBuffer) {
     yS = 0
   }
 
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
+
   if (x === 0 && y === 0) {
     return
   }
@@ -133,9 +136,6 @@ function standardVirtualBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 function proBufferParser(reportBuffer) {
@@ -169,6 +169,9 @@ function proBufferParser(reportBuffer) {
     yS = 0
   }
 
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
+
   if (x === 0 && y === 0) {
     return
   }
@@ -197,9 +200,6 @@ function proBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 let xInp = []
@@ -239,6 +239,9 @@ function doubleReportBufferParser(reportBuffer) {
   if (yS < 0) {
     yS = 0
   }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 
   if (x === 0 && y === 0) {
     return
@@ -294,9 +297,6 @@ function doubleReportBufferParser(reportBuffer) {
         Pointer.mouseLeftClickUp()
       }
   }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 let xBuffer = []
@@ -330,6 +330,9 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
   if (yS < 0) {
     yS = 0
   }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
 
   if (x === 0 && y === 0) {
     xBuffer = []
@@ -379,16 +382,11 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
         Pointer.mouseLeftClickUp()
       }
   }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 }
 
 // experimental
 function touchBufferParser(reportBuffer, tablet) {
   if (inRange) return
-
-  // console.log(reportBuffer)
 
   if (tablet.settings.name === 'Wacom PTH-460') {
     let x = reportBuffer[4] | (reportBuffer[5] << 8)
