@@ -82,7 +82,7 @@ function pressureBufferParser(reportBuffer) {
     return
   }
 
-  console.log(reportBuffer[6] | (reportBuffer[7] << 8)) // pressure?
+  // console.log(reportBuffer[6] | (reportBuffer[7] << 8)) // pressure?
 
   x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
   y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
@@ -114,6 +114,7 @@ function pressureBufferParser(reportBuffer) {
   }
 
   Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
+  Pointer.uPressure(reportBuffer[6] | (reportBuffer[7] << 8))
 
   switch (reportBuffer[1] & 0x07) {
     case 0x01:

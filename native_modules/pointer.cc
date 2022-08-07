@@ -15,6 +15,7 @@ Display *display = NULL;
 Window root = 0;
 int fd;
 struct uinput_user_dev uiPointer;
+// struct uinput_abs_setup uiPressure;
 
 // formatter might change include order, place nan.h first after formatting or
 // rebuild might fail
@@ -55,7 +56,7 @@ NAN_METHOD(initUinput) {
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
   ioctl(fd, UI_SET_ABSBIT, ABS_X);
   ioctl(fd, UI_SET_ABSBIT, ABS_Y);
-  // ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
+  ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
   // ioctl(fd, UI_SET_EVBIT, EV_REL);
 
   memset(&uiPointer, 0, sizeof(uiPointer));
@@ -70,6 +71,12 @@ NAN_METHOD(initUinput) {
   uiPointer.absmax[ABS_X] = xMax;
   uiPointer.absmin[ABS_Y] = 0;
   uiPointer.absmax[ABS_Y] = yMax;
+
+  uiPointer.absmin[ABS_PRESSURE] = 0;
+  uiPointer.absmax[ABS_PRESSURE] = 1023;
+
+  // uiPressure.absinfo.minimum = 0;
+  // uiPressure.absinfo.maximum = 1023;
 
   write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);
@@ -95,6 +102,32 @@ NAN_METHOD(setUinputPointer) {
   positionEvents[1].value = y;
   positionEvents[1].time.tv_sec = 0;
   positionEvents[1].time.tv_usec = 0;
+
+  int res_w = write(fd, positionEvents, sizeof(positionEvents));
+
+  struct input_event syncEvent;
+  memset(&syncEvent, 0, sizeof(syncEvent));
+
+  syncEvent.type = EV_SYN;
+  syncEvent.value = 0;
+  syncEvent.code = 0;
+  write(fd, &syncEvent, sizeof(syncEvent));
+}
+
+NAN_METHOD(uPressure) {
+
+  int32_t pressure = Nan::To<int32_t>(info[0]).FromJust();
+
+  std::cout << pressure << "\n";
+
+  struct input_event positionEvents[1];
+  memset(positionEvents, 0, sizeof(positionEvents));
+
+  positionEvents[0].type = EV_ABS;
+  positionEvents[0].code = ABS_PRESSURE;
+  positionEvents[0].value = pressure;
+  positionEvents[0].time.tv_sec = 0;
+  positionEvents[0].time.tv_usec = 0;
 
   int res_w = write(fd, positionEvents, sizeof(positionEvents));
 
@@ -236,6 +269,7 @@ NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setMotionEventPointer", setMotionEventPointer);
   Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
   Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
+  Nan::SetMethod(target, "uPressure", uPressure);
   Nan::SetMethod(target, "uMouseLeftClickDown", uMouseLeftClickDown);
   Nan::SetMethod(target, "uMouseLeftClickUp", uMouseLeftClickUp);
   Nan::SetMethod(target, "uMouseRightClickDown", uMouseRightClickDown);
