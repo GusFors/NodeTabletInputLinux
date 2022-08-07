@@ -9,6 +9,7 @@
 #include <linux/input-event-codes.h>
 #include <linux/uinput.h>
 #include <nan.h>
+#include <nan_converters.h>
 #include <node.h>
 
 Display *display = NULL;
@@ -48,6 +49,7 @@ NAN_METHOD(initUinput) {
   std::string devName = "Virtual uinput " + std::string(*Nan::Utf8String(info[0]));
   int32_t xMax = Nan::To<int32_t>(info[1]).FromJust();
   int32_t yMax = Nan::To<int32_t>(info[2]).FromJust();
+  bool isPressure = Nan::To<bool>(info[3]).FromJust();
 
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
@@ -56,7 +58,13 @@ NAN_METHOD(initUinput) {
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
   ioctl(fd, UI_SET_ABSBIT, ABS_X);
   ioctl(fd, UI_SET_ABSBIT, ABS_Y);
-  ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
+
+  if (isPressure) {
+    std::string pStr = (isPressure) ? "true" : "false";
+    std::cout << "Pressure: " << pStr << "\n";
+    ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
+  }
+
   // ioctl(fd, UI_SET_EVBIT, EV_REL);
 
   memset(&uiPointer, 0, sizeof(uiPointer));
@@ -72,11 +80,12 @@ NAN_METHOD(initUinput) {
   uiPointer.absmin[ABS_Y] = 0;
   uiPointer.absmax[ABS_Y] = yMax;
 
-  uiPointer.absmin[ABS_PRESSURE] = 0;
-  uiPointer.absmax[ABS_PRESSURE] = 1023;
-
-  // uiPressure.absinfo.minimum = 0;
-  // uiPressure.absinfo.maximum = 1023;
+  if (isPressure) {
+    uiPointer.absmin[ABS_PRESSURE] = 0;
+    uiPointer.absmax[ABS_PRESSURE] = 1023;
+    // uiPressure.absinfo.minimum = 0;
+    // uiPressure.absinfo.maximum = 1023;
+  }
 
   write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);

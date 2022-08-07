@@ -530,8 +530,8 @@ function initXPointer() {
   return Pointer.initDisplay()
 }
 
-function initUinput(devName, xMax, yMax) {
-  return Pointer.initUinput(devName, xMax, yMax)
+function initUinput(devName, xMax, yMax, isPressure) {
+  return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
 
 // just trying stuff, experimental

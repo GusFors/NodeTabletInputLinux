@@ -59,7 +59,7 @@ class Tablet {
     initXPointer()
 
     if (parserSettings.isVirtual) {
-      let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight)
+      let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight, parserSettings.isPressure)
       console.log('Created uinput device:', uiDevice)
       Pointer.setPointerPosition = Pointer.setPointerPosition = Pointer['setUinputPointer']
     } else {
@@ -79,7 +79,6 @@ class Tablet {
       this.parser = standardBufferParser.bind(this)
       this.tabletHID.buffer.on('data', this.parser)
     } else if (parserSettings.isPressure) {
-      console.log('Using pressure')
       this.parser = pressureBufferParser.bind(this)
       this.tabletHID.buffer.on('data', this.parser)
     } else {
