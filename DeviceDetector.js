@@ -103,7 +103,8 @@ class DeviceDetector {
       const detectedTablets = await this.getTabletHidInfo()
 
       let deviceBuffers = []
-
+      let detected = false
+      
       for (let i = 0; i < detectedTablets.length; i++) {
         let currentPath = detectedTablets[i].hidpath
         deviceBuffers.push(fsStream.createReadStream(currentPath))

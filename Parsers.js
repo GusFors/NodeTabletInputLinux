@@ -74,6 +74,71 @@ function standardBufferParser(reportBuffer) {
   }
 }
 
+function pressureBufferParser(reportBuffer) {
+  // standardBufferParser.bind(this)
+
+  // standardBufferParser(reportBuffer)
+  if (reportBuffer[0] > 0x10) {
+    return
+  }
+
+  console.log(reportBuffer[6] | (reportBuffer[7] << 8)) // pressure?
+
+  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
+  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
+
+  xS = (x - this.settings.left) * this.xScale
+  yS = (y - this.settings.top) * this.yScale
+
+  if (xS > this.monitorConfig.width) {
+    xS = this.monitorConfig.width
+  }
+
+  if (xS < 0) {
+    xS = 0
+  }
+
+  if (yS > this.monitorConfig.height) {
+    yS = this.monitorConfig.height
+  }
+
+  if (yS < 0) {
+    yS = 0
+  }
+
+  if (reportBuffer[1] === 0x00) inRange = false
+  if (reportBuffer[1] > 0x00) inRange = true
+
+  if (x === 0 && y === 0) {
+    return
+  }
+
+  Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
+
+  switch (reportBuffer[1] & 0x07) {
+    case 0x01:
+      if (isClick === false) {
+        isClick = true
+        Pointer.mouseLeftClickDown()
+      }
+      break
+
+    case 0x04:
+      if (!isClick) {
+        isClick = true
+        Pointer.mouseRightClickDown()
+        Pointer.mouseRightClickUp()
+      }
+      break
+
+    default:
+      if (isClick) {
+        isClick = false
+        Pointer.mouseLeftClickUp()
+      }
+  }
+}
+
 function standardVirtualBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
     return
@@ -534,6 +599,7 @@ function simpleBufferParser(reportBuffer, xBufferPositions, yBufferPositions) {
 
 module.exports = {
   standardBufferParser,
+  pressureBufferParser,
   doubleReportBufferParser,
   proBufferParser,
   standardAvgBufferParser,

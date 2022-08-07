@@ -55,6 +55,7 @@ NAN_METHOD(initUinput) {
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
   ioctl(fd, UI_SET_ABSBIT, ABS_X);
   ioctl(fd, UI_SET_ABSBIT, ABS_Y);
+  // ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
   // ioctl(fd, UI_SET_EVBIT, EV_REL);
 
   memset(&uiPointer, 0, sizeof(uiPointer));

@@ -12,6 +12,7 @@ const {
   initUinput,
   Pointer,
   touchBufferParser,
+  pressureBufferParser,
 } = require('./Parsers')
 
 class Tablet {
@@ -32,7 +33,7 @@ class Tablet {
     this.parser = null
   }
 
-  async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isNewConfig: false, isTouch: false }) {
+  async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isTouch: false, isPressure: false }) {
     console.log(parserSettings)
 
     this.tabletHID = await deviceDetector.getTabletHidBuffer()
@@ -76,6 +77,10 @@ class Tablet {
     } else if (parserSettings.isNewConfig) {
       console.log('Using newConfig')
       this.parser = standardBufferParser.bind(this)
+      this.tabletHID.buffer.on('data', this.parser)
+    } else if (parserSettings.isPressure) {
+      console.log('Using pressure')
+      this.parser = pressureBufferParser.bind(this)
       this.tabletHID.buffer.on('data', this.parser)
     } else {
       console.log('Using standardBufferParser')

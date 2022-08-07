@@ -7,6 +7,7 @@ let isVirtualDevice = process.argv.includes('-v')
 let isNewConfig = process.argv.includes('-c')
 let isListDevices = process.argv.includes('-de')
 let isTouch = process.argv.includes('-t')
+let isPressure = process.argv.includes('-p')
 
 const DeviceDetector = require('./DeviceDetector')
 const Tablet = require('./Tablet')
@@ -43,7 +44,7 @@ const run = async () => {
     DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice, isTouch })
     console.log('Using double report position')
   } else {
-    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch })
+    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure })
     console.log('Using raw position')
   }
 
