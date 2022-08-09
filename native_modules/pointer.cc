@@ -11,12 +11,13 @@
 #include <nan.h>
 #include <nan_converters.h>
 #include <node.h>
+#include <sys/ioctl.h>
 
 Display *display = NULL;
 Window root = 0;
 int fd;
 struct uinput_user_dev uiPointer;
-// struct uinput_abs_setup uiPressure;
+struct uinput_abs_setup uiPressure;
 
 // formatter might change include order, place nan.h first after formatting or
 // rebuild might fail
@@ -51,6 +52,7 @@ NAN_METHOD(initUinput) {
   int32_t yMax = Nan::To<int32_t>(info[2]).FromJust();
   bool isPressure = Nan::To<bool>(info[3]).FromJust();
 
+  ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
@@ -59,10 +61,13 @@ NAN_METHOD(initUinput) {
   ioctl(fd, UI_SET_ABSBIT, ABS_X);
   ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
+  std::string pStr = (isPressure) ? "true" : "false";
+  std::cout << "Pressure: " << pStr << "\n";
   if (isPressure) {
-    std::string pStr = (isPressure) ? "true" : "false";
-    std::cout << "Pressure: " << pStr << "\n";
     ioctl(fd, UI_SET_ABSBIT, ABS_PRESSURE);
+    // ioctl(fd, UI_SET_KEYBIT, BTN_TOUCH);
+    // ioctl(fd, UI_SET_ABSBIT, BTN_STYLUS);
+    // ioctl(fd, UI_SET_ABSBIT, BTN_TOOL_PEN); // crashar med keybit, inte andra värden?
   }
 
   // ioctl(fd, UI_SET_EVBIT, EV_REL);
@@ -77,12 +82,21 @@ NAN_METHOD(initUinput) {
 
   uiPointer.absmin[ABS_X] = 0;
   uiPointer.absmax[ABS_X] = xMax;
+
   uiPointer.absmin[ABS_Y] = 0;
   uiPointer.absmax[ABS_Y] = yMax;
+
+  // uiPressure.absinfo.value =
+  // uiPointer.
 
   if (isPressure) {
     uiPointer.absmin[ABS_PRESSURE] = 0;
     uiPointer.absmax[ABS_PRESSURE] = 1023;
+    uiPointer.absflat[ABS_Y] = 0;
+    uiPointer.absfuzz[ABS_Y] = 0;
+    uiPointer.absflat[ABS_X] = 0;
+    uiPointer.absfuzz[ABS_X] = 0;
+
     // uiPressure.absinfo.minimum = 0;
     // uiPressure.absinfo.maximum = 1023;
   }
@@ -96,26 +110,70 @@ NAN_METHOD(initUinput) {
 NAN_METHOD(setUinputPointer) {
   int32_t x = Nan::To<int32_t>(info[0]).FromJust();
   int32_t y = Nan::To<int32_t>(info[1]).FromJust();
+  int32_t pressure = Nan::To<int32_t>(info[2]).FromJust();
+  int32_t mouseClick = Nan::To<int32_t>(info[3]).FromJust();
 
-  struct input_event positionEvents[2];
+  //   std::cout << "pressure:" << pressure << "\n";
+  // std::cout << "mouseclick:" << mouseClick << "\n";
+
+  struct input_event positionEvents[info.Length() + 1];
   memset(positionEvents, 0, sizeof(positionEvents));
 
-  positionEvents[0].type = EV_ABS;
-  positionEvents[0].code = ABS_X;
-  positionEvents[0].value = x;
+  positionEvents[0].type = EV_KEY;
+  positionEvents[0].code = BTN_TOOL_PEN;
+  positionEvents[0].value = 1;
   positionEvents[0].time.tv_sec = 0;
   positionEvents[0].time.tv_usec = 0;
 
   positionEvents[1].type = EV_ABS;
-  positionEvents[1].code = ABS_Y;
-  positionEvents[1].value = y;
+  positionEvents[1].code = ABS_X;
+  positionEvents[1].value = x;
   positionEvents[1].time.tv_sec = 0;
   positionEvents[1].time.tv_usec = 0;
+
+  positionEvents[2].type = EV_ABS;
+  positionEvents[2].code = ABS_Y;
+  positionEvents[2].value = y;
+  positionEvents[2].time.tv_sec = 0;
+  positionEvents[2].time.tv_usec = 0;
+
+  positionEvents[3].type = EV_ABS;
+  positionEvents[3].code = ABS_PRESSURE;
+  positionEvents[3].value = pressure;
+  positionEvents[3].time.tv_sec = 0;
+  positionEvents[3].time.tv_usec = 0;
+
+  if (mouseClick > -1) {
+    positionEvents[3].type = EV_KEY;
+    positionEvents[3].code = BTN_LEFT;
+    positionEvents[3].value = mouseClick;
+    positionEvents[3].time.tv_sec = 0;
+    positionEvents[3].time.tv_usec = 0;
+    //  std::cout << "mouseclick:" << mouseClick << "\n";
+  }
+
+  // if (mouseClick == 1) {
+  //   std::cout << "leftdown"
+  //             << "\n";
+  //   positionEvents[4].type = EV_KEY;
+  //   positionEvents[4].code = BTN_LEFT;
+  //   positionEvents[4].value = 1;
+  //   positionEvents[4].time.tv_sec = 0;
+  //   positionEvents[4].time.tv_usec = 0;
+  // } else if (mouseClick == 0) {
+  //   std::cout << "leftup"
+  //             << "\n";
+  //   positionEvents[4].type = EV_KEY;
+  //   positionEvents[4].code = BTN_LEFT;
+  //   positionEvents[4].value = 0;
+  //   positionEvents[4].time.tv_sec = 0;
+  //   positionEvents[4].time.tv_usec = 0;
+  // }
 
   int res_w = write(fd, positionEvents, sizeof(positionEvents));
 
   struct input_event syncEvent;
-  memset(&syncEvent, 0, sizeof(syncEvent));
+  memset(&syncEvent, 0, sizeof(syncEvent)); // opt?
 
   syncEvent.type = EV_SYN;
   syncEvent.value = 0;
@@ -123,7 +181,7 @@ NAN_METHOD(setUinputPointer) {
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
-NAN_METHOD(uPressure) {
+NAN_METHOD(setUPressurePointer) {
 
   int32_t pressure = Nan::To<int32_t>(info[0]).FromJust();
 
@@ -151,6 +209,8 @@ NAN_METHOD(uPressure) {
 
 NAN_METHOD(uMouseLeftClickDown) {
 
+  std::cout << "leftdown";
+
   struct input_event positionEvents[1];
   memset(positionEvents, 0, sizeof(positionEvents));
 
@@ -172,6 +232,8 @@ NAN_METHOD(uMouseLeftClickDown) {
 }
 
 NAN_METHOD(uMouseLeftClickUp) {
+
+  std::cout << "leftup";
 
   struct input_event positionEvents[1];
   memset(positionEvents, 0, sizeof(positionEvents));
@@ -278,7 +340,7 @@ NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "setMotionEventPointer", setMotionEventPointer);
   Nan::SetMethod(target, "mouseLeftClickDown", mouseLeftClickDown);
   Nan::SetMethod(target, "mouseLeftClickUp", mouseLeftClickUp);
-  Nan::SetMethod(target, "uPressure", uPressure);
+  Nan::SetMethod(target, "setUPressurePointer", setUPressurePointer);
   Nan::SetMethod(target, "uMouseLeftClickDown", uMouseLeftClickDown);
   Nan::SetMethod(target, "uMouseLeftClickUp", uMouseLeftClickUp);
   Nan::SetMethod(target, "uMouseRightClickDown", uMouseRightClickDown);

@@ -113,31 +113,36 @@ function pressureBufferParser(reportBuffer) {
     return
   }
 
-  Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
-  Pointer.uPressure(reportBuffer[6] | (reportBuffer[7] << 8))
-
+  let pressure = reportBuffer[6] | (reportBuffer[7] << 8)
+  let mouseClick = -1
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
       if (isClick === false) {
         isClick = true
-        Pointer.mouseLeftClickDown()
+        mouseClick = 1
+        //Pointer.uMouseLeftClickDown()
       }
       break
 
-    case 0x04:
-      if (!isClick) {
-        isClick = true
-        Pointer.mouseRightClickDown()
-        Pointer.mouseRightClickUp()
-      }
-      break
+    // case 0x04:
+    //   if (!isClick) {
+    //     isClick = true
+    //     Pointer.uMouseRightClickDown()
+    //     Pointer.uMouseRightClickUp()
+    //   }
+    //   break
 
     default:
       if (isClick) {
         isClick = false
-        Pointer.mouseLeftClickUp()
+        mouseClick = 0
+        // Pointer.uMouseLeftClickUp()
+      } else {
+        mouseClick = -1
       }
   }
+  // console.log(mouseClick)
+  Pointer.setUinputPointer(xS + this.monitorConfig.xOffset, yS, pressure, mouseClick)
 }
 
 function standardVirtualBufferParser(reportBuffer) {
