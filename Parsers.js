@@ -76,13 +76,10 @@ function standardBufferParser(reportBuffer) {
 
 function pressureBufferParser(reportBuffer) {
   // standardBufferParser.bind(this)
-
   // standardBufferParser(reportBuffer)
   if (reportBuffer[0] > 0x10) {
     return
   }
-
-  // console.log(reportBuffer[6] | (reportBuffer[7] << 8)) // pressure?
 
   x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
   y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
@@ -539,6 +536,10 @@ function initUinput(devName, xMax, yMax, isPressure) {
   return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
 
+function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale) {
+  return Pointer.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale)
+}
+
 // just trying stuff, experimental
 function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {
   let sum = 0
@@ -567,42 +568,6 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   }
 }
 
-function simpleBufferParser(reportBuffer, xBufferPositions, yBufferPositions) {
-  if (reportBuffer[0] > 0x10) {
-    return
-  }
-
-  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
-  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
-
-  xS = (x - this.settings.left) * this.xScale
-  yS = (y - this.settings.top) * this.yScale
-
-  if (xS > this.monitorConfig.width) {
-    xS = this.monitorConfig.width
-  }
-
-  if (xS < 0) {
-    xS = 0
-  }
-
-  if (yS > this.monitorConfig.height) {
-    yS = this.monitorConfig.height
-  }
-
-  if (yS < 0) {
-    yS = 0
-  }
-
-  if (x === 0 && y === 0) {
-    return
-  }
-
-  Pointer.setPointerPosition(xS + 2560, yS)
-
-  return { x, y }
-}
-
 module.exports = {
   standardBufferParser,
   pressureBufferParser,
@@ -611,10 +576,16 @@ module.exports = {
   standardAvgBufferParser,
   initXPointer,
   initUinput,
+  initRead,
   standardVirtualBufferParser,
   Pointer,
   touchBufferParser,
 }
+
+// const INPUTS = {
+// BTN_LEFT: 0x110,
+// BTN_RIGHT: 0x111,
+// }
 
 // switch (reportBuffer[1] & 0x07) {
 //   case 0x01:

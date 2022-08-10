@@ -13,6 +13,7 @@ const {
   Pointer,
   touchBufferParser,
   pressureBufferParser,
+  initRead,
 } = require('./Parsers')
 
 class Tablet {
@@ -37,8 +38,6 @@ class Tablet {
     console.log(parserSettings)
 
     this.tabletHID = await deviceDetector.getTabletHidBuffer()
-    // this.tabletHID.buffer = fs.createReadStream('/dev/hidraw7')
-
     this.settings = mmToWac(await deviceDetector.getConfig())
     console.log('\nGetting input from', this.settings.name)
 
@@ -53,7 +52,24 @@ class Tablet {
     console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
 
     console.log(this.settings)
+    console.log(this.monitorConfig)
     console.log(this.tabletHID.rawInfo)
+
+    // experimental, ignores other options
+    if (parserSettings.isNative) {
+      console.log('reading native hidraw ')
+      initRead(
+        await this.tabletHID.rawInfo.hidpath,
+        await this.settings.name,
+        this.monitorConfig.xTotalWidth,
+        this.monitorConfig.xTotalHeight,
+        this.settings.left,
+        this.settings.top,
+        this.xScale,
+        this.yScale
+      )
+      return
+    }
 
     // init the pointer and display before setting pointer positions and clicks
     initXPointer()
