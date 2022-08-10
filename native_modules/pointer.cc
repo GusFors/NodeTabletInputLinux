@@ -364,7 +364,12 @@ void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
   ioctl(fd, UI_DEV_CREATE);
 }
 
-void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t mouseClick) {
+bool isClick = false;
+int32_t clickValue = 0;
+int32_t mBtn = 0;
+bool isActive = false;
+
+void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 
   if (x > 2560)
     x = 2560;
@@ -405,14 +410,49 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t mouseClic
   positionEvents[2].time.tv_sec = 0;
   positionEvents[2].time.tv_usec = 0;
 
-  // if (mouseClick > -1) {
-  //   positionEvents[3].type = EV_KEY;
-  //   positionEvents[3].code = BTN_LEFT;
-  //   positionEvents[3].value = mouseClick;
-  //   positionEvents[3].time.tv_sec = 0;
-  //   positionEvents[3].time.tv_usec = 0;
-  //   //  std::cout << "mouseclick:" << mouseClick << "\n";
-  // }
+  // std::cout << ((btn & 0xff) & 0x07);
+
+  switch (((btn & 0xff) & 0x07)) {
+  case 0x01:
+    clickValue = 1;
+    mBtn = BTN_LEFT;
+    if (isClick == false) {
+      // std::cout << mBtn << "down\n";
+      isClick = true;
+      positionEvents[3].type = EV_KEY;
+      positionEvents[3].code = mBtn;
+      positionEvents[3].value = clickValue;
+      positionEvents[3].time.tv_sec = 0;
+      positionEvents[3].time.tv_usec = 0;
+    }
+    break;
+
+  case 0x04:
+    clickValue = 1;
+    mBtn = BTN_RIGHT;
+    if (isClick == false) {
+      // std::cout << mBtn << "down\n";
+      isClick = true;
+      positionEvents[3].type = EV_KEY;
+      positionEvents[3].code = mBtn;
+      positionEvents[3].value = clickValue;
+      positionEvents[3].time.tv_sec = 0;
+      positionEvents[3].time.tv_usec = 0;
+    }
+    break;
+
+  case 0x00:
+    clickValue = 0;
+    if (isClick) {
+      isClick = false;
+      // std::cout << mBtn << " up\n";
+      positionEvents[3].type = EV_KEY;
+      positionEvents[3].code = mBtn;
+      positionEvents[3].value = clickValue;
+      positionEvents[3].time.tv_sec = 0;
+      positionEvents[3].time.tv_usec = 0;
+    }
+  }
 
   int32_t res_w = write(fd, positionEvents, sizeof(positionEvents));
 
@@ -435,7 +475,6 @@ struct hidraw_report_descriptor rd;
 struct hidraw_devinfo hinf;
 char *device;
 bool running = 0;
-bool isClick = false;
 
 NAN_METHOD(initRead) {
   device = (*Nan::Utf8String(info[0]));
@@ -458,7 +497,7 @@ NAN_METHOD(initRead) {
   int32_t top = Nan::To<int32_t>(info[5]).FromJust();
   double xScale = Nan::To<double>(info[6]).FromJust();
   double yScale = Nan::To<double>(info[7]).FromJust();
-  
+
   int32_t x = 0;
   int32_t y = 0;
   double xS = 0;
@@ -484,7 +523,8 @@ NAN_METHOD(initRead) {
         yS = 0;
 
       if ((buf[0] & 0xff) < 0x10) {
-        setUinputPointerN(xS, yS, 0, -1);
+        // std::cout << ((buf[1] & 0xff) & 0x07) << "\n";
+        setUinputPointerN(xS, yS, 0, buf[1]);
       }
     }
   }
