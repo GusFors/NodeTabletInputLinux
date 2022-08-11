@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <nan.h>
 #include <X11/X.h>
@@ -508,6 +509,7 @@ NAN_METHOD(initRead) {
 
     if (res < 0) {
       perror("read err");
+      std::exit(EXIT_FAILURE);
     } else {
 
       x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
