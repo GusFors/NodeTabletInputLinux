@@ -416,8 +416,8 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   switch (((btn & 0xff) & 0x07)) {
   case 0x01:
     clickValue = 1;
-    mBtn = BTN_LEFT;
     if (isClick == false) {
+      mBtn = BTN_LEFT;
       // std::cout << mBtn << "down\n";
       isClick = true;
       positionEvents[3].type = EV_KEY;
@@ -430,8 +430,8 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 
   case 0x04:
     clickValue = 1;
-    mBtn = BTN_RIGHT;
     if (isClick == false) {
+      mBtn = BTN_RIGHT;
       // std::cout << mBtn << "down\n";
       isClick = true;
       positionEvents[3].type = EV_KEY;
@@ -442,7 +442,7 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
     }
     break;
 
-  case 0x00:
+  case 0x00: // elr default?
     clickValue = 0;
     if (isClick) {
       isClick = false;
@@ -452,6 +452,7 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
       positionEvents[3].value = clickValue;
       positionEvents[3].time.tv_sec = 0;
       positionEvents[3].time.tv_usec = 0;
+      mBtn = 0;
     }
   }
 

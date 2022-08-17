@@ -7,6 +7,14 @@ let xS
 let yS
 let isClick = false
 let inRange = false
+// let buttonBindings = {
+//   0x01: false
+// }
+// const BTN_LEFT = 0x110
+// const BTN_RIGHT = 0x111
+// console.log(reportBuffer[1] & (1 << 0))
+// console.log(reportBuffer[1].toString(2))
+// console.log(reportBuffer)
 
 function standardBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
