@@ -74,7 +74,7 @@ function standardBufferParser(reportBuffer) {
       }
       break
 
-    default:
+    case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -137,7 +137,7 @@ function pressureBufferParser(reportBuffer) {
     //   }
     //   break
 
-    default:
+   case 0x00:
       if (isClick) {
         isClick = false
         mouseClick = 0
@@ -206,7 +206,7 @@ function standardVirtualBufferParser(reportBuffer) {
       }
       break
 
-    default:
+   case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -270,7 +270,7 @@ function proBufferParser(reportBuffer) {
       }
       break
 
-    default:
+   case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -367,7 +367,7 @@ function doubleReportBufferParser(reportBuffer) {
       }
       break
 
-    default:
+   case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -452,7 +452,7 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
       }
       break
 
-    default:
+   case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -611,7 +611,7 @@ module.exports = {
 //     }
 //     break
 
-//   default:
+//  case 0x00:
 //     if (isClick) {
 //       isClick = false
 //       Pointer.uMouseLeftClickUp()
