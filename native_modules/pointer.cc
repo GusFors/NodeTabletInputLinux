@@ -14,6 +14,7 @@
 #include <node.h>
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
+#include <json-c/json.h>
 
 Display *display = NULL;
 Window root = 0;

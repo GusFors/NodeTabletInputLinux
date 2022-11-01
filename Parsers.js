@@ -137,7 +137,7 @@ function pressureBufferParser(reportBuffer) {
     //   }
     //   break
 
-   case 0x00:
+    case 0x00:
       if (isClick) {
         isClick = false
         mouseClick = 0
@@ -206,7 +206,7 @@ function standardVirtualBufferParser(reportBuffer) {
       }
       break
 
-   case 0x00:
+    case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -270,7 +270,7 @@ function proBufferParser(reportBuffer) {
       }
       break
 
-   case 0x00:
+    case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -367,7 +367,7 @@ function doubleReportBufferParser(reportBuffer) {
       }
       break
 
-   case 0x00:
+    case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -377,8 +377,8 @@ function doubleReportBufferParser(reportBuffer) {
 
 let xBuffer = []
 let yBuffer = []
-const avgPositionStrength = 8
-const currentPositionStrength = 3
+const avgPositionStrength = 5
+const currentPositionStrength = 2
 
 function standardAvgBufferParser(reportBuffer, isDouble = true) {
   if (reportBuffer[0] > 0x10) {
@@ -452,7 +452,7 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
       }
       break
 
-   case 0x00:
+    case 0x00:
       if (isClick) {
         isClick = false
         Pointer.mouseLeftClickUp()
@@ -555,6 +555,21 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
 
   // wait until there are enough values, prevent cursor getting stuck at display border
   if (positionBufferArr.length >= amountOfPositions) {
+    // let s = 0
+    // for (let y = 0; y < 5; y++) {
+    //   s += Math.abs(positionBufferArr[latest - y] - positionBufferArr[latest - (y + 1)])
+    // }
+
+    // if (isNaN(s) || s > 65) {
+    //    console.log('vrooom ', s)
+    //   let l = positionBufferArr[latest]
+    //   // for (let j = 0; j < avgPositionStrength; j++) {
+    //   //   positionBufferArr[latest - j] = (positionBufferArr[latest - j] - l) / 2
+    //   // }
+
+    //   return l
+    // }
+
     for (let i = positionBufferArr.length; i > positionBufferArr.length - amountOfPositions; i--) {
       // if position difference is over a certain value, increase the latest position amount
       if (Math.abs(positionBufferArr[latest] - positionBufferArr[latest - amountOfPositions]) > 70) {
