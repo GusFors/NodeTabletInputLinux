@@ -10,11 +10,8 @@
 #include <X11/extensions/XTest.h>
 #include <linux/input-event-codes.h>
 #include <linux/uinput.h>
-#include <nan.h>
-#include <node.h>
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
-#include <json-c/json.h>
 
 Display *display = NULL;
 Window root = 0;
@@ -536,11 +533,6 @@ NAN_METHOD(initRead) {
 
 void readDeviceN() {
   res = read(fdn, buf, 16);
-
-  // v8::Local<v8::Object> o = Nan::New<v8::Object>();
-  // Nan::Set(o, Nan::New("x").ToLocalChecked(), Nan::New<v8::Number>(2560));
-  // Nan::Set(o, Nan::New("y").ToLocalChecked(), Nan::New<v8::Number>(1440));
-  // Nan::Set(obj, Nan::New(i), Nan::New<v8::Number>(buf[i]));
 
   int32_t x = 0;
   if (res < 0) {
