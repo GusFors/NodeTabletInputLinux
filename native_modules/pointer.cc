@@ -18,6 +18,7 @@ Window root = 0;
 int32_t fd;
 struct uinput_user_dev uiPointer;
 struct uinput_abs_setup uiPressure;
+struct input_absinfo uInfo;
 
 // formatter might change include order, place nan.h first after formatting or
 // rebuild might fail
@@ -105,8 +106,9 @@ NAN_METHOD(setUinputPointer) {
   int32_t y = Nan::To<int32_t>(info[1]).FromJust();
   int32_t pressure = Nan::To<int32_t>(info[2]).FromJust();
   int32_t mouseClick = Nan::To<int32_t>(info[3]).FromJust();
+  float pressurePercentage = pressure / 1023.0;
 
-  //   std::cout << "pressure:" << pressure << "\n";
+  std::cout << "pressure:" << pressure << ", " << pressurePercentage * 100 << "%\n";
   // std::cout << "mouseclick:" << mouseClick << "\n";
 
   struct input_event positionEvents[info.Length() + 1];
