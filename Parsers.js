@@ -1,4 +1,5 @@
 const Pointer = require('./build/Release/pointer.node')
+const PointerN = require('./build/Release/pointerN.node')
 Pointer.setPointerPosition = null
 
 let x
@@ -537,7 +538,7 @@ function initUinput(devName, xMax, yMax, isPressure) {
 }
 
 function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale) {
-  return Pointer.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale)
+  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale)
 }
 
 // just trying stuff, experimental
@@ -594,6 +595,7 @@ module.exports = {
   initRead,
   standardVirtualBufferParser,
   Pointer,
+  PointerN,
   touchBufferParser,
 }
 

@@ -11,6 +11,7 @@ const {
   initXPointer,
   initUinput,
   Pointer,
+  PointerN,
   touchBufferParser,
   pressureBufferParser,
   initRead,
