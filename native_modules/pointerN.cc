@@ -236,4 +236,4 @@ void readDeviceN() {
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "initRead", initRead); }
 
-NODE_MODULE(pointer, init);
+NODE_MODULE(pointerN, init);

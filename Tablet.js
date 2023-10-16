@@ -70,6 +70,9 @@ class Tablet {
         this.yScale
       )
       return
+    } else {
+      console.log('using node parsers are currently broken, exiting..')
+      process.exit()
     }
 
     // init the pointer and display before setting pointer positions and clicks
