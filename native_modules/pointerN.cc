@@ -165,6 +165,22 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
+void readDeviceN() {
+  res = read(fdn, buf, 16);
+
+  int32_t x = 0;
+  if (res < 0) {
+    perror("read err");
+  } else {
+    x = buf[2] | (buf[3] << 8);
+    for (i = 0; i < res; i++) {
+      //   printf("%hhx ", buf[i]);
+      printf("%02hhx ", buf[i]);
+    }
+    printf("\n");
+  }
+};
+
 NAN_METHOD(initRead) {
   device = (*Nan::Utf8String(info[0]));
   std::cout << "Created uinput device:" << *Nan::Utf8String(info[1]);
@@ -199,6 +215,7 @@ NAN_METHOD(initRead) {
       perror("read err");
       std::exit(EXIT_FAILURE);
     } else {
+      readDeviceN();
 
       x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
       y = (buf[4] & 0xff) | ((buf[5] & 0xff) << 8);
@@ -219,20 +236,6 @@ NAN_METHOD(initRead) {
     }
   }
 }
-
-void readDeviceN() {
-  res = read(fdn, buf, 16);
-
-  int32_t x = 0;
-  if (res < 0) {
-    perror("read err");
-  } else {
-    x = buf[2] | (buf[3] << 8);
-    for (i = 0; i < res; i++) {
-      printf("%hhx ", buf[i]);
-    }
-  }
-};
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "initRead", initRead); }
 
