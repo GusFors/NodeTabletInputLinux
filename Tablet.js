@@ -59,6 +59,7 @@ class Tablet {
     // experimental, ignores other options
     if (parserSettings.isNative) {
       console.log('reading native hidraw ')
+      // TODO: skip going through node
       initRead(
         await this.tabletHID.rawInfo.hidpath,
         await this.settings.name,

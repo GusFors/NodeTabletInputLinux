@@ -38,16 +38,16 @@ let isRunning = false
 const run = async () => {
   const DetectedTablet = new Tablet()
 
-  if (isAvg) {
-    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isAvg: true, isDoubleReport: true, isTouch })
-    console.log('Using avg position')
-  } else if (isDoubleReport) {
-    DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice, isTouch })
-    console.log('Using double report position')
-  } else {
-    DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative })
-    console.log('Using raw position')
-  }
+  // if (isAvg) {
+  //   DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isAvg: true, isDoubleReport: true, isTouch })
+  //   console.log('Using avg position')
+  // } else if (isDoubleReport) {
+  //   DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice, isTouch })
+  //   console.log('Using double report position')
+  // } else {
+  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative })
+  console.log('Using raw position')
+  // }
 
   isRunning = true
 

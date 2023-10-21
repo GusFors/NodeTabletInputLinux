@@ -536,7 +536,7 @@ function initXPointer() {
 function initUinput(devName, xMax, yMax, isPressure) {
   return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
-
+// TODO read directly instead of passing through node
 function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset, width, height, xBufferPositions, yBufferPositions) {
   return PointerN.initRead(
     devPath,

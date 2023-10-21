@@ -210,7 +210,7 @@ NAN_METHOD(initRead) {
   running = true;
   initUinputN(*Nan::Utf8String(info[1]), Nan::To<int32_t>(info[2]).FromJust(), Nan::To<int32_t>(info[3]).FromJust());
 
-  // TODO just read from json config file instead of going through node to send all values
+  // TODO: read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();
   int32_t top = Nan::To<int32_t>(info[5]).FromJust();
   double xScale = Nan::To<double>(info[6]).FromJust();
