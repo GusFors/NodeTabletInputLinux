@@ -176,20 +176,20 @@ void readDeviceN() {
   if (res < 0) {
     perror("read err");
   } else {
-    x = buf[2] | (buf[3] << 8);
+    // x = buf[2] | (buf[3] << 8);
     // for (i = 0; i < res; i++) {
     //   //   printf("%hhx ", buf[i]);
     //   printf("%02hhx ", buf[i]);
     // }
     printf("\n");
     // printf("%d ", (buf[1] & (2 ^ 7)) );
-    printf("%08x ", (buf[1] & 0b00000001));
-    // for (i = 0; i < 8; i++) {
-    //   //   printf("%hhx ", buf[i]);
-    //   int32_t bit = 2 ^ i;
-    //   printf("%x ", (buf[1] & bit) );
-    // //   printf("%d ", (buf[1] & (2 ^ i)) );
-    // }
+    // printf("%08x ", (buf[1] & 0b00000001));
+    for (i = 0; i < 8; i++) {
+      printf("%hhx ", buf[i]);
+      // int32_t bit = 2 ^ i;
+      // printf("%x ", (buf[1] & bit) );
+      //   printf("%d ", (buf[1] & (2 ^ i)) );
+    }
   }
 };
 
@@ -210,6 +210,7 @@ NAN_METHOD(initRead) {
   running = true;
   initUinputN(*Nan::Utf8String(info[1]), Nan::To<int32_t>(info[2]).FromJust(), Nan::To<int32_t>(info[3]).FromJust());
 
+  // TODO just read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();
   int32_t top = Nan::To<int32_t>(info[5]).FromJust();
   double xScale = Nan::To<double>(info[6]).FromJust();
@@ -220,8 +221,15 @@ NAN_METHOD(initRead) {
   xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
   yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
 
-  std::cout << "\n" << "xOffset: " << xOffset << " yOffset: " << yOffset;
-  std::cout << "\n" << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
+  int32_t xBufferPos = Nan::To<int32_t>(info[12]).FromJust();
+  int32_t yBufferPos = Nan::To<int32_t>(info[13]).FromJust();
+
+  std::cout << "\n"
+            << "xOffset: " << xOffset << " yOffset: " << yOffset;
+  std::cout << "\n"
+            << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
+  std::cout << "\n"
+            << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos;
 
   int32_t x = 0;
   int32_t y = 0;
@@ -237,8 +245,11 @@ NAN_METHOD(initRead) {
     } else {
       // readDeviceN();
 
-      x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
-      y = (buf[4] & 0xff) | ((buf[5] & 0xff) << 8);
+      x = (buf[xBufferPos] & 0xff) | ((buf[xBufferPos + 1] & 0xff) << 8);
+      y = (buf[yBufferPos] & 0xff) | ((buf[yBufferPos + 1] & 0xff) << 8);
+
+      // x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
+      // y = (buf[4] & 0xff) | ((buf[5] & 0xff) << 8);
 
       xS = (x - left) * xScale;
       yS = (y - top) * yScale;
@@ -249,10 +260,15 @@ NAN_METHOD(initRead) {
       if (yS < 0)
         yS = 0;
 
-      if ((buf[0] & 0xff) < 0x10) {
+      if ((buf[0] & 0xff) < 0x11) {
         // std::cout << ((buf[1] & 0xff) & 0x07) << "\n";
         setUinputPointerN(xS, yS, 0, buf[1]);
       }
+
+      // if ((buf[0] & 0xff) < 0x10) {
+      //   // std::cout << ((buf[1] & 0xff) & 0x07) << "\n";
+      //   setUinputPointerN(xS, yS, 0, buf[1]);
+      // }
     }
   }
 }
