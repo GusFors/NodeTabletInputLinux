@@ -9,7 +9,7 @@ let yS
 let isClick = false
 let inRange = false
 
-  // console.log(Array.from(reportBuffer[1].toString(2)[5]))
+// console.log(Array.from(reportBuffer[1].toString(2)[5]))
 
 function standardBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
@@ -537,8 +537,8 @@ function initUinput(devName, xMax, yMax, isPressure) {
   return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
 
-function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset) {
-  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset)
+function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset, width, height) {
+  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset, width, height)
 }
 
 // just trying stuff, experimental

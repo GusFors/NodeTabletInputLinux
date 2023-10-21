@@ -69,11 +69,13 @@ int32_t mBtn = 0;
 bool isActive = false;
 int32_t xOffset;
 int32_t yOffset;
+int32_t yPrimaryHeight;
+int32_t xPrimaryWidth;
 
 void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 
-  if (x > 2560)
-    x = 2560;
+  if (x > xPrimaryWidth)
+    x = xPrimaryWidth;
 
   if (x < 0)
     x = 0;
@@ -81,8 +83,8 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   if (y < 0)
     y = 0;
 
-  if (y > 1440)
-    y = 1440;
+  if (y > yPrimaryHeight)
+    y = yPrimaryHeight;
 
   if (x == 0 && y == 0) {
     return;
@@ -212,10 +214,14 @@ NAN_METHOD(initRead) {
   int32_t top = Nan::To<int32_t>(info[5]).FromJust();
   double xScale = Nan::To<double>(info[6]).FromJust();
   double yScale = Nan::To<double>(info[7]).FromJust();
+
   xOffset = Nan::To<int32_t>(info[8]).FromJust();
   yOffset = Nan::To<int32_t>(info[9]).FromJust();
+  xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
+  yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
 
   std::cout << "\n" << "xOffset: " << xOffset << " yOffset: " << yOffset;
+  std::cout << "\n" << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
 
   int32_t x = 0;
   int32_t y = 0;
