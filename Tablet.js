@@ -67,7 +67,9 @@ class Tablet {
         this.settings.left,
         this.settings.top,
         this.xScale,
-        this.yScale
+        this.yScale,
+        this.monitorConfig.xOffset,
+        this.monitorConfig.yOffset
       )
       return
     } else {

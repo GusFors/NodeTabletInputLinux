@@ -537,8 +537,8 @@ function initUinput(devName, xMax, yMax, isPressure) {
   return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
 
-function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale) {
-  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale)
+function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset) {
+  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset)
 }
 
 // just trying stuff, experimental

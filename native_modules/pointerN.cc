@@ -67,6 +67,8 @@ bool isClick = false;
 int32_t clickValue = 0;
 int32_t mBtn = 0;
 bool isActive = false;
+int32_t xOffset;
+int32_t yOffset;
 
 void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 
@@ -99,13 +101,13 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 
   positionEvents[1].type = EV_ABS;
   positionEvents[1].code = ABS_X;
-  positionEvents[1].value = x + 2560;
+  positionEvents[1].value = x + xOffset;
   positionEvents[1].time.tv_sec = 0;
   positionEvents[1].time.tv_usec = 0;
 
   positionEvents[2].type = EV_ABS;
   positionEvents[2].code = ABS_Y;
-  positionEvents[2].value = y;
+  positionEvents[2].value = y + yOffset;
   positionEvents[2].time.tv_sec = 0;
   positionEvents[2].time.tv_usec = 0;
 
@@ -173,11 +175,19 @@ void readDeviceN() {
     perror("read err");
   } else {
     x = buf[2] | (buf[3] << 8);
-    for (i = 0; i < res; i++) {
-      //   printf("%hhx ", buf[i]);
-      printf("%02hhx ", buf[i]);
-    }
+    // for (i = 0; i < res; i++) {
+    //   //   printf("%hhx ", buf[i]);
+    //   printf("%02hhx ", buf[i]);
+    // }
     printf("\n");
+    // printf("%d ", (buf[1] & (2 ^ 7)) );
+    printf("%08x ", (buf[1] & 0b00000001));
+    // for (i = 0; i < 8; i++) {
+    //   //   printf("%hhx ", buf[i]);
+    //   int32_t bit = 2 ^ i;
+    //   printf("%x ", (buf[1] & bit) );
+    // //   printf("%d ", (buf[1] & (2 ^ i)) );
+    // }
   }
 };
 
@@ -202,6 +212,10 @@ NAN_METHOD(initRead) {
   int32_t top = Nan::To<int32_t>(info[5]).FromJust();
   double xScale = Nan::To<double>(info[6]).FromJust();
   double yScale = Nan::To<double>(info[7]).FromJust();
+  xOffset = Nan::To<int32_t>(info[8]).FromJust();
+  yOffset = Nan::To<int32_t>(info[9]).FromJust();
+
+  std::cout << "\n" << "xOffset: " << xOffset << " yOffset: " << yOffset;
 
   int32_t x = 0;
   int32_t y = 0;
@@ -215,7 +229,7 @@ NAN_METHOD(initRead) {
       perror("read err");
       std::exit(EXIT_FAILURE);
     } else {
-      readDeviceN();
+      // readDeviceN();
 
       x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
       y = (buf[4] & 0xff) | ((buf[5] & 0xff) << 8);
