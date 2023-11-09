@@ -18,6 +18,22 @@
   {
     "vendorId": 1386,
     "productId": 782,
+    "name": "Wacom CTL-480 Small",
+    "width": 80,
+    "height": 45,
+    "xOffset": 76,
+    "yOffset": 36.5625,
+    "multiplier": 1,
+    "xMax": 15200,
+    "yMax": 9500,
+    "xBufferPositions": [2, 3],
+    "yBufferPositions": [4, 5],
+    "stdRps": 133,
+    "convM": 100
+  },
+  {
+    "vendorId": 1386,
+    "productId": 782,
     "name": "Wacom CTL-480",
     "width": 100,
     "height": 56.25,
