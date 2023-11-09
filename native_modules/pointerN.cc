@@ -204,7 +204,7 @@ NAN_METHOD(initRead) {
   }
 
   memset(&rd, 0x0, sizeof(rd));
-  memset(&hinf, 0x0, sizeof(info));
+  memset(&hinf, 0x0, sizeof(hinf));
   memset(buf, 0x0, sizeof(buf));
 
   running = true;
