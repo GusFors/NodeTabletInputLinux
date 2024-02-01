@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <linux/input.h>
 #include <nan.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -13,11 +14,12 @@
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
 
-Display *display = NULL;
-Window root = 0;
 int32_t fd;
-struct uinput_user_dev uiPointer;
-struct uinput_abs_setup uiPressure;
+// struct uinput_user_dev uiPointer;
+struct uinput_abs_setup abs_xprops;
+struct uinput_abs_setup abs_yprops;
+struct uinput_setup uiPointer;
+// struct uinput_setup uiPointer;
 struct input_absinfo uInfo;
 
 int32_t fdn;
@@ -34,32 +36,52 @@ bool running = 0;
 void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
+  if (fd < 0) {
+    printf("error opening uinput");
+    exit(EXIT_FAILURE);
+  }
+
   std::string devName = "Virtual uinput " + std::string(name);
 
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
+  ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
 
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
-  ioctl(fd, UI_SET_ABSBIT, ABS_X);
-  ioctl(fd, UI_SET_ABSBIT, ABS_Y);
+  // ioctl(fd, UI_SET_ABSBIT, ABS_X);
+  // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
   memset(&uiPointer, 0, sizeof(uiPointer));
   snprintf(uiPointer.name, UINPUT_MAX_NAME_SIZE, "%s", devName.c_str());
 
   uiPointer.id.bustype = BUS_USB;
-  uiPointer.id.version = 1;
-  uiPointer.id.vendor = 0x1;
-  uiPointer.id.product = 0x1;
+  uiPointer.id.version = 0;
+  uiPointer.id.vendor = 0x0;
+  uiPointer.id.product = 0x0;
+  ioctl(fd, UI_DEV_SETUP, &uiPointer);
 
-  uiPointer.absmin[ABS_X] = 0;
-  uiPointer.absmax[ABS_X] = xMax;
+  abs_xprops.code = ABS_X;
+  abs_xprops.absinfo.minimum = 0;
+  abs_xprops.absinfo.maximum = xMax;
+  // abs_xprops.absinfo = (input_absinfo){.value = 0, .minimum = 0, .maximum = xMax, .fuzz = 0, .flat = 0, .resolution =
+  // 0};
+  ioctl(fd, UI_ABS_SETUP, &abs_xprops);
 
-  uiPointer.absmin[ABS_Y] = 0;
-  uiPointer.absmax[ABS_Y] = yMax;
+  abs_yprops.code = ABS_Y;
+  abs_yprops.absinfo.minimum = 0;
+  abs_yprops.absinfo.maximum = yMax;
+  // abs_yprops.absinfo = {.value = 0, .minimum = 0, .maximum = yMax, .fuzz = 0, .flat = 0, .resolution = 0};
+  ioctl(fd, UI_ABS_SETUP, &abs_yprops);
 
-  write(fd, &uiPointer, sizeof(uiPointer));
+  // uiPointer.absmin[ABS_X] = 0;
+  // uiPointer.absmax[ABS_X] = xMax;
+
+  // uiPointer.absmin[ABS_Y] = 0;
+  // uiPointer.absmax[ABS_Y] = yMax;
+
+  // write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);
 }
 
@@ -114,6 +136,7 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   positionEvents[2].time.tv_usec = 0;
 
   // std::cout << ((btn & 0xff) & 0x07);
+  // printf("%08b\n", btn & 0b00000111);
 
   switch (((btn & 0xff) & 0x07)) {
   case 0x01:
@@ -144,7 +167,7 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
     }
     break;
 
-  case 0x00: // elr default?
+  case 0x00:
     clickValue = 0;
     if (isClick) {
       isClick = false;
@@ -161,11 +184,12 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   int32_t res_w = write(fd, positionEvents, sizeof(positionEvents));
 
   struct input_event syncEvent;
-  memset(&syncEvent, 0, sizeof(syncEvent)); // opt?
+  memset(&syncEvent, 0, sizeof(syncEvent));
 
   syncEvent.type = EV_SYN;
   syncEvent.value = 0;
-  syncEvent.code = 0;
+  syncEvent.code = SYN_REPORT;
+
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
@@ -185,7 +209,7 @@ void readDeviceN() {
     // printf("%d ", (buf[1] & (2 ^ 7)) );
     // printf("%08x ", (buf[1] & 0b00000001));
     for (i = 0; i < 8; i++) {
-      printf("%hhx ", buf[i]);
+      printf("%02hhx ", buf[i]);
       // int32_t bit = 2 ^ i;
       // printf("%x ", (buf[1] & bit) );
       //   printf("%d ", (buf[1] & (2 ^ i)) );
@@ -241,7 +265,7 @@ NAN_METHOD(initRead) {
 
     if (res < 0) {
       perror("read err");
-      std::exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
     } else {
       // readDeviceN();
 
