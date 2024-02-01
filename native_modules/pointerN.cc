@@ -4,11 +4,6 @@
 #include <iostream>
 #include <linux/input.h>
 #include <nan.h>
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/Xrandr.h>
-#include <X11/extensions/XTest.h>
 #include <linux/input-event-codes.h>
 #include <linux/uinput.h>
 #include <sys/ioctl.h>
@@ -219,13 +214,16 @@ void readDeviceN() {
 
 NAN_METHOD(initRead) {
   device = (*Nan::Utf8String(info[0]));
-  std::cout << "Created uinput device:" << *Nan::Utf8String(info[1]);
+
+  std::cout << "Created uinput device: " << *Nan::Utf8String(info[1]) << "\n";
 
   fdn = open(device, O_RDONLY | O_SYNC);
 
   if (fdn < 0) {
-    perror("Unable to open device");
+    printf("Unable to open device");
+    exit(EXIT_FAILURE);
   }
+  printf("reading reports from: %s", device);
 
   memset(&rd, 0x0, sizeof(rd));
   memset(&hinf, 0x0, sizeof(hinf));
