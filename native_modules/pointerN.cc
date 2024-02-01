@@ -10,23 +10,7 @@
 #include <linux/hidraw.h>
 
 int32_t fd;
-// struct uinput_user_dev uiPointer;
-struct uinput_abs_setup abs_xprops;
-struct uinput_abs_setup abs_yprops;
-struct uinput_setup uiPointer;
-// struct uinput_setup uiPointer;
-struct input_absinfo uInfo;
-
 int32_t fdn;
-int32_t i;
-int32_t res;
-int32_t desc_size = 0;
-
-int8_t buf[256];
-struct hidraw_report_descriptor rd;
-struct hidraw_devinfo hinf;
-char *device;
-bool running = 0;
 
 void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
@@ -36,18 +20,19 @@ void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
     exit(EXIT_FAILURE);
   }
 
-  std::string devName = "Virtual uinput " + std::string(name);
-
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
+
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
-
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
   // ioctl(fd, UI_SET_ABSBIT, ABS_X);
   // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
+  std::string devName = "Virtual uinput " + std::string(name);
+
+  struct uinput_setup uiPointer;
   memset(&uiPointer, 0, sizeof(uiPointer));
   snprintf(uiPointer.name, UINPUT_MAX_NAME_SIZE, "%s", devName.c_str());
 
@@ -57,6 +42,7 @@ void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
   uiPointer.id.product = 0x0;
   ioctl(fd, UI_DEV_SETUP, &uiPointer);
 
+  struct uinput_abs_setup abs_xprops;
   abs_xprops.code = ABS_X;
   abs_xprops.absinfo.minimum = 0;
   abs_xprops.absinfo.maximum = xMax;
@@ -64,17 +50,12 @@ void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
   // 0};
   ioctl(fd, UI_ABS_SETUP, &abs_xprops);
 
+  struct uinput_abs_setup abs_yprops;
   abs_yprops.code = ABS_Y;
   abs_yprops.absinfo.minimum = 0;
   abs_yprops.absinfo.maximum = yMax;
   // abs_yprops.absinfo = {.value = 0, .minimum = 0, .maximum = yMax, .fuzz = 0, .flat = 0, .resolution = 0};
   ioctl(fd, UI_ABS_SETUP, &abs_yprops);
-
-  // uiPointer.absmin[ABS_X] = 0;
-  // uiPointer.absmax[ABS_X] = xMax;
-
-  // uiPointer.absmin[ABS_Y] = 0;
-  // uiPointer.absmax[ABS_Y] = yMax;
 
   // write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);
@@ -110,7 +91,7 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   // std::cout << "x: " << x << " y: " << y << "\n";
 
   struct input_event positionEvents[4];
-  memset(positionEvents, 0, sizeof(positionEvents));
+  memset(&positionEvents, 0, sizeof(positionEvents));
 
   positionEvents[0].type = EV_KEY;
   positionEvents[0].code = BTN_TOOL_PEN;
@@ -188,7 +169,8 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
-void readDeviceN() {
+void print_hex_buffer(int8_t *buf) {
+  int32_t res;
   res = read(fdn, buf, 16);
 
   int32_t x = 0;
@@ -203,7 +185,7 @@ void readDeviceN() {
     printf("\n");
     // printf("%d ", (buf[1] & (2 ^ 7)) );
     // printf("%08x ", (buf[1] & 0b00000001));
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       printf("%02hhx ", buf[i]);
       // int32_t bit = 2 ^ i;
       // printf("%x ", (buf[1] & bit) );
@@ -213,8 +195,10 @@ void readDeviceN() {
 };
 
 NAN_METHOD(initRead) {
-  device = (*Nan::Utf8String(info[0]));
+  bool running = false;
+  char *device;
 
+  device = (*Nan::Utf8String(info[0]));
   std::cout << "Created uinput device: " << *Nan::Utf8String(info[1]) << "\n";
 
   fdn = open(device, O_RDONLY | O_SYNC);
@@ -225,12 +209,13 @@ NAN_METHOD(initRead) {
   }
   printf("reading reports from: %s", device);
 
-  memset(&rd, 0x0, sizeof(rd));
-  memset(&hinf, 0x0, sizeof(hinf));
-  memset(buf, 0x0, sizeof(buf));
+  // struct hidraw_report_descriptor rd;
+  // struct hidraw_devinfo hinf;
+  // memset(&rd, 0x0, sizeof(rd));
+  // memset(&hinf, 0x0, sizeof(hinf));
 
-  running = true;
   initUinputN(*Nan::Utf8String(info[1]), Nan::To<int32_t>(info[2]).FromJust(), Nan::To<int32_t>(info[3]).FromJust());
+  running = true;
 
   // TODO: read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();
@@ -257,6 +242,10 @@ NAN_METHOD(initRead) {
   int32_t y = 0;
   double xS = 0;
   double yS = 0;
+  int32_t res;
+
+  int8_t buf[256];
+  memset(buf, 0x0, sizeof(buf));
 
   while (running) {
     res = read(fdn, buf, 16);
@@ -265,7 +254,7 @@ NAN_METHOD(initRead) {
       perror("read err");
       exit(EXIT_FAILURE);
     } else {
-      // readDeviceN();
+      // print_hex_buffer(buf);
 
       x = (buf[xBufferPos] & 0xff) | ((buf[xBufferPos + 1] & 0xff) << 8);
       y = (buf[yBufferPos] & 0xff) | ((buf[yBufferPos + 1] & 0xff) << 8);
