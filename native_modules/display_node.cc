@@ -1,8 +1,4 @@
 #include <nan.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/extensions/Xrandr.h>
-#include <X11/extensions/XTest.h>
 #include "display.h"
 
 // place nan.h first if rebuild fails
@@ -45,6 +41,11 @@ NAN_METHOD(getNumberOfMonitors) {
   info.GetReturnValue().Set(Nan::New(numMonitors));
 }
 
+NAN_METHOD(closeDisplay) {
+  int v = close_display();
+  info.GetReturnValue().Set(Nan::New(v));
+}
+
 // expose as a node module
 NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "getDisplaysTotalWidth", getDisplaysTotalWidth);
@@ -54,6 +55,7 @@ NAN_MODULE_INIT(init) {
   Nan::SetMethod(target, "getPrimaryMonitorWidth", getPrimaryMonitorWidth);
   Nan::SetMethod(target, "getPrimaryMonitorHeight", getPrimaryMonitorHeight);
   Nan::SetMethod(target, "getNumberOfMonitors", getNumberOfMonitors);
+  Nan::SetMethod(target, "closeDisplay", closeDisplay);
 }
 
 NODE_MODULE(display, init);

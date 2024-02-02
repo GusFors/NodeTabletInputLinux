@@ -1,5 +1,5 @@
-#ifndef DISPLAYS_H
-#define DISPLAYS_H
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,6 +12,7 @@ int get_primary_monitor_yoffset();
 int get_primary_monitor_width();
 int get_primary_monitor_height();
 int get_number_of_monitors();
+int close_display();
 
 #ifdef __cplusplus
 }

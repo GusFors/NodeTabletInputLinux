@@ -81,3 +81,5 @@ int get_number_of_monitors() {
 
   return numMonitors;
 }
+
+int close_display() { return XCloseDisplay(display); }

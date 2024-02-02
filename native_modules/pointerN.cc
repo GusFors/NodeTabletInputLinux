@@ -8,7 +8,7 @@
 #include <linux/uinput.h>
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
-// #include "display.h"
+#include "display.h"
 
 int32_t fd;
 int32_t fdn;
@@ -226,10 +226,16 @@ NAN_METHOD(initRead) {
   double xScale = Nan::To<double>(info[6]).FromJust();
   double yScale = Nan::To<double>(info[7]).FromJust();
 
-  xOffset = Nan::To<int32_t>(info[8]).FromJust();
-  yOffset = Nan::To<int32_t>(info[9]).FromJust();
-  xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
-  yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
+  xOffset = get_primary_monitor_xoffset();
+  yOffset = get_primary_monitor_yoffset();
+  xPrimaryWidth = get_primary_monitor_width();
+  yPrimaryHeight = get_primary_monitor_height();
+  int v = close_display();
+
+  // xOffset = Nan::To<int32_t>(info[8]).FromJust();
+  // yOffset = Nan::To<int32_t>(info[9]).FromJust();
+  // xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
+  // yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
 
   int32_t xBufferPos = Nan::To<int32_t>(info[12]).FromJust();
   int32_t yBufferPos = Nan::To<int32_t>(info[13]).FromJust();
