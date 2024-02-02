@@ -17,7 +17,7 @@
         },
         {
             'target_name': 'pointerN',
-            'sources': ['native_modules/pointerN.cc'],
+            'sources': ['native_modules/pointerN.cc','native_modules/display.c'],
             'include_dirs': ['<!(node -e \'require("nan")\')'],
             'link_settings': {
                 'libraries': [
@@ -29,10 +29,11 @@
             'cflags': [
                
             ],
+            
         },
         {
             'target_name': 'display',
-            'sources': ['native_modules/display.cc'],
+            'sources': ['native_modules/display_node.cc', 'native_modules/display.c'],
             'include_dirs': ['<!(node -e \'require("nan")\')'],
             'link_settings': {
                 'libraries': [

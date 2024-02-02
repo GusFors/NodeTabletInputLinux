@@ -8,6 +8,7 @@
 #include <linux/uinput.h>
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
+// #include "display.h"
 
 int32_t fd;
 int32_t fdn;
@@ -19,6 +20,8 @@ void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
     printf("error opening uinput");
     exit(EXIT_FAILURE);
   }
+  // int widthtest = get_displays_total_width();
+  // std::cout << widthtest << "widthtest\n";
 
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
