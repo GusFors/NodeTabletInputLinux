@@ -9,8 +9,6 @@ let yS
 let isClick = false
 let inRange = false
 
-// console.log(Array.from(reportBuffer[1].toString(2)[5]))
-
 function standardBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
     return
@@ -118,28 +116,17 @@ function pressureBufferParser(reportBuffer) {
       if (isClick === false) {
         isClick = true
         mouseClick = 1
-        //Pointer.uMouseLeftClickDown()
       }
       break
-
-    // case 0x04:
-    //   if (!isClick) {
-    //     isClick = true
-    //     Pointer.uMouseRightClickDown()
-    //     Pointer.uMouseRightClickUp()
-    //   }
-    //   break
 
     case 0x00:
       if (isClick) {
         isClick = false
         mouseClick = 0
-        // Pointer.uMouseLeftClickUp()
       } else {
         mouseClick = -1
       }
   }
-  // console.log(mouseClick)
   Pointer.setUinputPointer(xS + this.monitorConfig.xOffset, yS, pressure, mouseClick)
 }
 
@@ -209,7 +196,7 @@ function standardVirtualBufferParser(reportBuffer) {
 
 function proBufferParser(reportBuffer) {
   if (reportBuffer[0] === 17) {
-    // if touch wheel
+    // touch wheel
   }
 
   if (reportBuffer[0] != 0x10) {
@@ -536,27 +523,11 @@ function initXPointer() {
 function initUinput(devName, xMax, yMax, isPressure) {
   return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
-// TODO read directly instead of passing through node
-function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xOffset, yOffset, width, height, xBufferPositions, yBufferPositions) {
-  return PointerN.initRead(
-    devPath,
-    devName,
-    xMax,
-    yMax,
-    left,
-    top,
-    xScale,
-    yScale,
-    xOffset,
-    yOffset,
-    width,
-    height,
-    xBufferPositions,
-    yBufferPositions
-  )
+
+function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xBufferPositions, yBufferPositions) {
+  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xBufferPositions, yBufferPositions)
 }
 
-// just trying stuff, experimental
 function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {
   let sum = 0
   let latest = positionBufferArr.length - 1
@@ -569,12 +540,11 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
     // }
 
     // if (isNaN(s) || s > 65) {
-    //    console.log('vrooom ', s)
+    //    console.log('speed ', s)
     //   let l = positionBufferArr[latest]
     //   // for (let j = 0; j < avgPositionStrength; j++) {
     //   //   positionBufferArr[latest - j] = (positionBufferArr[latest - j] - l) / 2
     //   // }
-
     //   return l
     // }
 
@@ -610,34 +580,5 @@ module.exports = {
   initRead,
   standardVirtualBufferParser,
   Pointer,
-  PointerN,
   touchBufferParser,
 }
-
-// const INPUTS = {
-// BTN_LEFT: 0x110,
-// BTN_RIGHT: 0x111,
-// }
-
-// switch (reportBuffer[1] & 0x07) {
-//   case 0x01:
-//     if (isClick === false) {
-//       isClick = true
-//       Pointer.uMouseLeftClickDown()
-//     }
-//     break
-
-//   case 0x04:
-//     if (!isClick) {
-//       isClick = true
-//       Pointer.uMouseRightClickDown()
-//       Pointer.uMouseRightClickUp()
-//     }
-//     break
-
-//  case 0x00:
-//     if (isClick) {
-//       isClick = false
-//       Pointer.uMouseLeftClickUp()
-//     }
-// }

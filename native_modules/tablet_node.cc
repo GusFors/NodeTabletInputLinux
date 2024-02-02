@@ -44,8 +44,8 @@ NAN_METHOD(initRead) {
   // xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
   // yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
 
-  int32_t xBufferPos = Nan::To<int32_t>(info[12]).FromJust();
-  int32_t yBufferPos = Nan::To<int32_t>(info[13]).FromJust();
+  int32_t xBufferPos = Nan::To<int32_t>(info[8]).FromJust();
+  int32_t yBufferPos = Nan::To<int32_t>(info[9]).FromJust();
 
   struct tablet_config tablet;
   tablet.left = left;

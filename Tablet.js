@@ -11,7 +11,6 @@ const {
   initXPointer,
   initUinput,
   Pointer,
-  PointerN,
   touchBufferParser,
   pressureBufferParser,
   initRead,
@@ -69,10 +68,6 @@ class Tablet {
         this.settings.top,
         this.xScale,
         this.yScale,
-        this.monitorConfig.xOffset,
-        this.monitorConfig.yOffset,
-        this.monitorConfig.width,
-        this.monitorConfig.height,
         this.settings.xBufferPositions[0],
         this.settings.yBufferPositions[0]
       )
