@@ -13,12 +13,6 @@
 #include "tablet.h"
 
 NAN_METHOD(initRead) {
-  int32_t fd;
-  int32_t fdn;
-  bool isClick = false;
-  int32_t clickValue = 0;
-  int32_t mBtn = 0;
-  bool isActive = false;
   int32_t xOffset;
   int32_t yOffset;
   int32_t yPrimaryHeight;
@@ -30,7 +24,8 @@ NAN_METHOD(initRead) {
   int32_t xMax = Nan::To<int32_t>(info[2]).FromJust();
   int32_t yMax = Nan::To<int32_t>(info[3]).FromJust();
 
-  init_uinput(device_name, xMax, yMax);
+  init_uinput(("Virtual uinput " + device_name).c_str(), xMax, yMax);
+  std::cout << "Created device: " << "Virtual uinput " + device_name;
 
   // read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();

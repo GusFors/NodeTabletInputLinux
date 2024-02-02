@@ -1,21 +1,21 @@
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <linux/input.h>
-#include <nan.h>
 #include <linux/input-event-codes.h>
 #include <linux/uinput.h>
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
 #include "display.h"
 #include "tablet.h"
+#include <fcntl.h>
+#include <unistd.h>
 
 int32_t fd;
 int32_t fdn;
 
-void init_uinput(std::string name, int32_t xMax, int32_t yMax) {
+void init_uinput(const char *name, int32_t xMax, int32_t yMax) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
   if (fd < 0) {
@@ -33,12 +33,9 @@ void init_uinput(std::string name, int32_t xMax, int32_t yMax) {
   // ioctl(fd, UI_SET_ABSBIT, ABS_X);
   // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
-  std::string devName = "Virtual uinput " + std::string(name);
-  std::cout << "Created uinput device: " << devName << "\n";
-
   struct uinput_setup uiPointer;
   memset(&uiPointer, 0, sizeof(uiPointer));
-  snprintf(uiPointer.name, UINPUT_MAX_NAME_SIZE, "%s", devName.c_str());
+  snprintf(uiPointer.name, UINPUT_MAX_NAME_SIZE, "%s", name);
 
   uiPointer.id.bustype = BUS_USB;
   uiPointer.id.version = 0;
@@ -58,17 +55,16 @@ void init_uinput(std::string name, int32_t xMax, int32_t yMax) {
   abs_yprops.code = ABS_Y;
   abs_yprops.absinfo.minimum = 0;
   abs_yprops.absinfo.maximum = yMax;
-  // abs_yprops.absinfo = {.value = 0, .minimum = 0, .maximum = yMax, .fuzz = 0, .flat = 0, .resolution = 0};
   ioctl(fd, UI_ABS_SETUP, &abs_yprops);
 
   // write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);
 }
 
-bool isClick = false;
+int32_t isClick = 0;
 int32_t clickValue = 0;
 int32_t mBtn = 0;
-bool isActive = false;
+int32_t isActive = 0;
 int32_t xOffset;
 int32_t yOffset;
 int32_t yPrimaryHeight;
@@ -119,9 +115,9 @@ void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   switch (((btn & 0xff) & 0x07)) {
   case 0x01:
     clickValue = 1;
-    if (isClick == false) {
+    if (isClick == 0) {
       mBtn = BTN_LEFT;
-      isClick = true;
+      isClick = 1;
       positionEvents[3].type = EV_KEY;
       positionEvents[3].code = mBtn;
       positionEvents[3].value = clickValue;
@@ -132,9 +128,9 @@ void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 
   case 0x04:
     clickValue = 1;
-    if (isClick == false) {
+    if (isClick == 0) {
       mBtn = BTN_RIGHT;
-      isClick = true;
+      isClick = 1;
       positionEvents[3].type = EV_KEY;
       positionEvents[3].code = mBtn;
       positionEvents[3].value = clickValue;
@@ -146,7 +142,7 @@ void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   case 0x00:
     clickValue = 0;
     if (isClick) {
-      isClick = false;
+      isClick = 0;
       positionEvents[3].type = EV_KEY;
       positionEvents[3].code = mBtn;
       positionEvents[3].value = clickValue;
@@ -174,19 +170,18 @@ void print_hex_buffer(int8_t *buf) {
   // printf("%08x ", (buf[1] & 0b00000001));
   for (int i = 0; i < 8; i++) {
     printf("%02hhx ", buf[i]);
-    // int32_t bit = 2 ^ i;
     // printf("%x ", (buf[1] & bit) );
-    //   printf("%d ", (buf[1] & (2 ^ i)) );
+    // printf("%d ", (buf[1] & (2 ^ i)) );
   }
 }
 
-void parse_tablet_buffer(tablet_config tablet) {
+void parse_tablet_buffer(struct tablet_config tablet) {
   int32_t x = 0;
   int32_t y = 0;
   double xS = 0;
   double yS = 0;
   int32_t res;
-  bool active = true;
+  int32_t active = 1;
 
   int8_t buf[256];
   memset(buf, 0x0, sizeof(buf));
@@ -219,7 +214,7 @@ void parse_tablet_buffer(tablet_config tablet) {
   }
 }
 
-void init_read(tablet_config tablet, display_config display_conf, const char *hidraw_path) {
+void init_read(struct tablet_config tablet, struct display_config display_conf, const char *hidraw_path) {
   char tablet_path[32];
   strlcpy(tablet_path, hidraw_path, 32);
 
