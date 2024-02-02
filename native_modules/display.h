@@ -1,6 +1,15 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+struct display_config {
+  int total_width;
+  int total_height;
+  int xoffset;
+  int yoffset;
+  int primary_height;
+  int primary_width;
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif

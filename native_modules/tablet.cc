@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <linux/input.h>
 #include <nan.h>
@@ -9,19 +10,18 @@
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
 #include "display.h"
+#include "tablet.h"
 
 int32_t fd;
 int32_t fdn;
 
-void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
+void init_uinput(std::string name, int32_t xMax, int32_t yMax) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
   if (fd < 0) {
     printf("error opening uinput");
     exit(EXIT_FAILURE);
   }
-  // int widthtest = get_displays_total_width();
-  // std::cout << widthtest << "widthtest\n";
 
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
@@ -34,6 +34,7 @@ void initUinputN(std::string name, int32_t xMax, int32_t yMax) {
   // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
   std::string devName = "Virtual uinput " + std::string(name);
+  std::cout << "Created uinput device: " << devName << "\n";
 
   struct uinput_setup uiPointer;
   memset(&uiPointer, 0, sizeof(uiPointer));
@@ -73,8 +74,7 @@ int32_t yOffset;
 int32_t yPrimaryHeight;
 int32_t xPrimaryWidth;
 
-void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
-
+void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   if (x > xPrimaryWidth)
     x = xPrimaryWidth;
 
@@ -114,7 +114,6 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   positionEvents[2].time.tv_sec = 0;
   positionEvents[2].time.tv_usec = 0;
 
-  // std::cout << ((btn & 0xff) & 0x07);
   // printf("%08b\n", btn & 0b00000111);
 
   switch (((btn & 0xff) & 0x07)) {
@@ -122,7 +121,6 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
     clickValue = 1;
     if (isClick == false) {
       mBtn = BTN_LEFT;
-      // std::cout << mBtn << "down\n";
       isClick = true;
       positionEvents[3].type = EV_KEY;
       positionEvents[3].code = mBtn;
@@ -136,7 +134,6 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
     clickValue = 1;
     if (isClick == false) {
       mBtn = BTN_RIGHT;
-      // std::cout << mBtn << "down\n";
       isClick = true;
       positionEvents[3].type = EV_KEY;
       positionEvents[3].code = mBtn;
@@ -150,7 +147,6 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
     clickValue = 0;
     if (isClick) {
       isClick = false;
-      // std::cout << mBtn << " up\n";
       positionEvents[3].type = EV_KEY;
       positionEvents[3].code = mBtn;
       positionEvents[3].value = clickValue;
@@ -173,38 +169,16 @@ void setUinputPointerN(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
 }
 
 void print_hex_buffer(int8_t *buf) {
-  int32_t res;
-  res = read(fdn, buf, 16);
-
-  int32_t x = 0;
-  if (res < 0) {
-    perror("read err");
-  } else {
-    // x = buf[2] | (buf[3] << 8);
-    // for (i = 0; i < res; i++) {
-    //   //   printf("%hhx ", buf[i]);
-    //   printf("%02hhx ", buf[i]);
-    // }
-    printf("\n");
-    // printf("%d ", (buf[1] & (2 ^ 7)) );
-    // printf("%08x ", (buf[1] & 0b00000001));
-    for (int i = 0; i < 8; i++) {
-      printf("%02hhx ", buf[i]);
-      // int32_t bit = 2 ^ i;
-      // printf("%x ", (buf[1] & bit) );
-      //   printf("%d ", (buf[1] & (2 ^ i)) );
-    }
+  printf("\n");
+  // printf("%d ", (buf[1] & (2 ^ 7)) );
+  // printf("%08x ", (buf[1] & 0b00000001));
+  for (int i = 0; i < 8; i++) {
+    printf("%02hhx ", buf[i]);
+    // int32_t bit = 2 ^ i;
+    // printf("%x ", (buf[1] & bit) );
+    //   printf("%d ", (buf[1] & (2 ^ i)) );
   }
-};
-
-struct tablet_config {
-  int left;
-  int top;
-  int xindex;
-  int yindex;
-  double xscale;
-  double yscale;
-};
+}
 
 void parse_tablet_buffer(tablet_config tablet) {
   int32_t x = 0;
@@ -229,9 +203,6 @@ void parse_tablet_buffer(tablet_config tablet) {
       x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
       y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
 
-      // x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
-      // y = (buf[4] & 0xff) | ((buf[5] & 0xff) << 8);
-
       xS = (x - tablet.left) * tablet.xscale;
       yS = (y - tablet.top) * tablet.yscale;
 
@@ -242,79 +213,29 @@ void parse_tablet_buffer(tablet_config tablet) {
         yS = 0;
 
       if ((buf[0] & 0xff) < 0x11) {
-        // std::cout << ((buf[1] & 0xff) & 0x07) << "\n";
-        setUinputPointerN(xS, yS, 0, buf[1]);
+        tablet_input_event(xS, yS, 0, buf[1]);
       }
-
-      // if ((buf[0] & 0xff) < 0x10) {
-      //   // std::cout << ((buf[1] & 0xff) & 0x07) << "\n";
-      //   setUinputPointerN(xS, yS, 0, buf[1]);
-      // }
     }
   }
 }
 
-NAN_METHOD(initRead) {
-  char *device;
-  device = (*Nan::Utf8String(info[0]));
-  std::cout << "Created uinput device: " << *Nan::Utf8String(info[1]) << "\n";
+void init_read(tablet_config tablet, display_config display_conf, const char *hidraw_path) {
+  char tablet_path[32];
+  strlcpy(tablet_path, hidraw_path, 32);
 
-  fdn = open(device, O_RDONLY | O_SYNC);
+  xOffset = display_conf.xoffset;
+  yOffset = display_conf.yoffset;
+  xPrimaryWidth = display_conf.primary_width;
+  yPrimaryHeight = display_conf.primary_height;
+
+  fdn = open(tablet_path, O_RDONLY | O_SYNC);
 
   if (fdn < 0) {
-    printf("Unable to open device");
+    printf("Unable to open device with path %s:", tablet_path);
     exit(EXIT_FAILURE);
   }
-  printf("reading reports from: %s", device);
 
-  // struct hidraw_report_descriptor rd;
-  // struct hidraw_devinfo hinf;
-  // memset(&rd, 0x0, sizeof(rd));
-  // memset(&hinf, 0x0, sizeof(hinf));
-
-  initUinputN(*Nan::Utf8String(info[1]), Nan::To<int32_t>(info[2]).FromJust(), Nan::To<int32_t>(info[3]).FromJust());
-
-  // TODO: read from json config file instead of going through node to send all values
-  int32_t left = Nan::To<int32_t>(info[4]).FromJust();
-  int32_t top = Nan::To<int32_t>(info[5]).FromJust();
-  double xScale = Nan::To<double>(info[6]).FromJust();
-  double yScale = Nan::To<double>(info[7]).FromJust();
-
-  // this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
-  //   this.yScale = this.monitorConfig.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
-
-  xOffset = get_primary_monitor_xoffset();
-  yOffset = get_primary_monitor_yoffset();
-  xPrimaryWidth = get_primary_monitor_width();
-  yPrimaryHeight = get_primary_monitor_height();
-  int v = close_display();
-
-  // xOffset = Nan::To<int32_t>(info[8]).FromJust();
-  // yOffset = Nan::To<int32_t>(info[9]).FromJust();
-  // xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
-  // yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
-
-  int32_t xBufferPos = Nan::To<int32_t>(info[12]).FromJust();
-  int32_t yBufferPos = Nan::To<int32_t>(info[13]).FromJust();
-
-  struct tablet_config tablet;
-  tablet.left = left;
-  tablet.top = top;
-  tablet.xscale = xScale;
-  tablet.yscale = yScale;
-  tablet.xindex = xBufferPos;
-  tablet.yindex = yBufferPos;
-
-  std::cout << "\n"
-            << "xOffset: " << xOffset << " yOffset: " << yOffset;
-  std::cout << "\n"
-            << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
-  std::cout << "\n"
-            << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos;
+  printf("reading reports from: %s", tablet_path);
 
   parse_tablet_buffer(tablet);
 }
-
-NAN_MODULE_INIT(init) { Nan::SetMethod(target, "initRead", initRead); }
-
-NODE_MODULE(pointerN, init);

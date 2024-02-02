@@ -61,7 +61,9 @@ class DeviceDetector {
         }
       }
 
-      if (foundTablets.length < 1) reject('No tablets could be detected')
+      if (foundTablets.length < 1) {
+        reject('No tablets could be detected')
+      }
 
       resolve(foundTablets)
     })
@@ -100,30 +102,34 @@ class DeviceDetector {
 
   async getTabletHidBuffer() {
     return new Promise(async (resolve, reject) => {
-      const detectedTablets = await this.getTabletHidInfo()
+      try {
+        const detectedTablets = await this.getTabletHidInfo()
 
-      let deviceBuffers = []
-      let detected = false
-      
-      for (let i = 0; i < detectedTablets.length; i++) {
-        let currentPath = detectedTablets[i].hidpath
-        deviceBuffers.push(fsStream.createReadStream(currentPath))
-        deviceBuffers[i].on('data', (buffer) => {
-          // console.log(buffer, 'testbuffer' + i)
-          if (buffer.length > 31) {
-            console.log('try holding pen closer to tablet')
-            return
-          } else {
-            for (let y = 0; y < deviceBuffers.length; y++) {
-              if (y !== i) {
-                deviceBuffers[y].close()
-                deviceBuffers[y].push(null)
-                deviceBuffers[y].read(0)
+        let deviceBuffers = []
+        let detected = false
+
+        for (let i = 0; i < detectedTablets.length; i++) {
+          let currentPath = detectedTablets[i].hidpath
+          deviceBuffers.push(fsStream.createReadStream(currentPath))
+          deviceBuffers[i].on('data', (buffer) => {
+            // console.log(buffer, 'testbuffer' + i)
+            if (buffer.length > 31) {
+              console.log('try holding pen closer to tablet')
+              return
+            } else {
+              for (let y = 0; y < deviceBuffers.length; y++) {
+                if (y !== i) {
+                  deviceBuffers[y].close()
+                  deviceBuffers[y].push(null)
+                  deviceBuffers[y].read(0)
+                }
               }
+              resolve({ buffer: deviceBuffers[i], rawInfo: detectedTablets[i] })
             }
-            resolve({ buffer: deviceBuffers[i], rawInfo: detectedTablets[i] })
-          }
-        })
+          })
+        }
+      } catch (error) {
+        console.log('error:', error)
       }
     })
   }

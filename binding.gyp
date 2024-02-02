@@ -16,8 +16,8 @@
             ],
         },
         {
-            'target_name': 'pointerN',
-            'sources': ['native_modules/pointerN.cc','native_modules/display.c'],
+            'target_name': 'tablet',
+            'sources': ['native_modules/tablet_node.cc','native_modules/display.c', 'native_modules/tablet.c'],
             'include_dirs': ['<!(node -e \'require("nan")\')'],
             'link_settings': {
                 'libraries': [

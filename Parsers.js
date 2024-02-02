@@ -1,5 +1,5 @@
 const Pointer = require('./build/Release/pointer.node')
-const PointerN = require('./build/Release/pointerN.node')
+const PointerN = require('./build/Release/tablet.node')
 Pointer.setPointerPosition = null
 
 let x
