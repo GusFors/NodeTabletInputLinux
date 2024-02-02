@@ -197,66 +197,27 @@ void print_hex_buffer(int8_t *buf) {
   }
 };
 
-NAN_METHOD(initRead) {
-  bool running = false;
-  char *device;
+struct tablet_config {
+  int left;
+  int top;
+  int xindex;
+  int yindex;
+  double xscale;
+  double yscale;
+};
 
-  device = (*Nan::Utf8String(info[0]));
-  std::cout << "Created uinput device: " << *Nan::Utf8String(info[1]) << "\n";
-
-  fdn = open(device, O_RDONLY | O_SYNC);
-
-  if (fdn < 0) {
-    printf("Unable to open device");
-    exit(EXIT_FAILURE);
-  }
-  printf("reading reports from: %s", device);
-
-  // struct hidraw_report_descriptor rd;
-  // struct hidraw_devinfo hinf;
-  // memset(&rd, 0x0, sizeof(rd));
-  // memset(&hinf, 0x0, sizeof(hinf));
-
-  initUinputN(*Nan::Utf8String(info[1]), Nan::To<int32_t>(info[2]).FromJust(), Nan::To<int32_t>(info[3]).FromJust());
-  running = true;
-
-  // TODO: read from json config file instead of going through node to send all values
-  int32_t left = Nan::To<int32_t>(info[4]).FromJust();
-  int32_t top = Nan::To<int32_t>(info[5]).FromJust();
-  double xScale = Nan::To<double>(info[6]).FromJust();
-  double yScale = Nan::To<double>(info[7]).FromJust();
-
-  xOffset = get_primary_monitor_xoffset();
-  yOffset = get_primary_monitor_yoffset();
-  xPrimaryWidth = get_primary_monitor_width();
-  yPrimaryHeight = get_primary_monitor_height();
-  int v = close_display();
-
-  // xOffset = Nan::To<int32_t>(info[8]).FromJust();
-  // yOffset = Nan::To<int32_t>(info[9]).FromJust();
-  // xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
-  // yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
-
-  int32_t xBufferPos = Nan::To<int32_t>(info[12]).FromJust();
-  int32_t yBufferPos = Nan::To<int32_t>(info[13]).FromJust();
-
-  std::cout << "\n"
-            << "xOffset: " << xOffset << " yOffset: " << yOffset;
-  std::cout << "\n"
-            << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
-  std::cout << "\n"
-            << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos;
-
+void parse_tablet_buffer(tablet_config tablet) {
   int32_t x = 0;
   int32_t y = 0;
   double xS = 0;
   double yS = 0;
   int32_t res;
+  bool active = true;
 
   int8_t buf[256];
   memset(buf, 0x0, sizeof(buf));
 
-  while (running) {
+  while (active) {
     res = read(fdn, buf, 16);
 
     if (res < 0) {
@@ -265,14 +226,14 @@ NAN_METHOD(initRead) {
     } else {
       // print_hex_buffer(buf);
 
-      x = (buf[xBufferPos] & 0xff) | ((buf[xBufferPos + 1] & 0xff) << 8);
-      y = (buf[yBufferPos] & 0xff) | ((buf[yBufferPos + 1] & 0xff) << 8);
+      x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
+      y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
 
       // x = (buf[2] & 0xff) | ((buf[3] & 0xff) << 8);
       // y = (buf[4] & 0xff) | ((buf[5] & 0xff) << 8);
 
-      xS = (x - left) * xScale;
-      yS = (y - top) * yScale;
+      xS = (x - tablet.left) * tablet.xscale;
+      yS = (y - tablet.top) * tablet.yscale;
 
       if (xS < 0)
         xS = 0;
@@ -291,6 +252,67 @@ NAN_METHOD(initRead) {
       // }
     }
   }
+}
+
+NAN_METHOD(initRead) {
+  char *device;
+  device = (*Nan::Utf8String(info[0]));
+  std::cout << "Created uinput device: " << *Nan::Utf8String(info[1]) << "\n";
+
+  fdn = open(device, O_RDONLY | O_SYNC);
+
+  if (fdn < 0) {
+    printf("Unable to open device");
+    exit(EXIT_FAILURE);
+  }
+  printf("reading reports from: %s", device);
+
+  // struct hidraw_report_descriptor rd;
+  // struct hidraw_devinfo hinf;
+  // memset(&rd, 0x0, sizeof(rd));
+  // memset(&hinf, 0x0, sizeof(hinf));
+
+  initUinputN(*Nan::Utf8String(info[1]), Nan::To<int32_t>(info[2]).FromJust(), Nan::To<int32_t>(info[3]).FromJust());
+
+  // TODO: read from json config file instead of going through node to send all values
+  int32_t left = Nan::To<int32_t>(info[4]).FromJust();
+  int32_t top = Nan::To<int32_t>(info[5]).FromJust();
+  double xScale = Nan::To<double>(info[6]).FromJust();
+  double yScale = Nan::To<double>(info[7]).FromJust();
+
+  // this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
+  //   this.yScale = this.monitorConfig.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
+
+  xOffset = get_primary_monitor_xoffset();
+  yOffset = get_primary_monitor_yoffset();
+  xPrimaryWidth = get_primary_monitor_width();
+  yPrimaryHeight = get_primary_monitor_height();
+  int v = close_display();
+
+  // xOffset = Nan::To<int32_t>(info[8]).FromJust();
+  // yOffset = Nan::To<int32_t>(info[9]).FromJust();
+  // xPrimaryWidth = Nan::To<int32_t>(info[10]).FromJust();
+  // yPrimaryHeight = Nan::To<int32_t>(info[11]).FromJust();
+
+  int32_t xBufferPos = Nan::To<int32_t>(info[12]).FromJust();
+  int32_t yBufferPos = Nan::To<int32_t>(info[13]).FromJust();
+
+  struct tablet_config tablet;
+  tablet.left = left;
+  tablet.top = top;
+  tablet.xscale = xScale;
+  tablet.yscale = yScale;
+  tablet.xindex = xBufferPos;
+  tablet.yindex = yBufferPos;
+
+  std::cout << "\n"
+            << "xOffset: " << xOffset << " yOffset: " << yOffset;
+  std::cout << "\n"
+            << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
+  std::cout << "\n"
+            << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos;
+
+  parse_tablet_buffer(tablet);
 }
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "initRead", initRead); }
