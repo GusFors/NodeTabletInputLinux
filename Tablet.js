@@ -3,6 +3,7 @@ const ConfigHandler = require('./configs/ConfigHandler')
 const deviceDetector = new DeviceDetector('/mmConfigs.json')
 const Display = require('./build/Release/display.node')
 const fs = require('fs')
+const EventEmitter = require('node:events')
 const { mmToWac } = require('./utils/converters')
 const {
   standardBufferParser,
@@ -14,6 +15,7 @@ const {
   touchBufferParser,
   pressureBufferParser,
   initRead,
+  standardVirtualBufferParser,
 } = require('./Parsers')
 
 class Tablet {
@@ -55,10 +57,9 @@ class Tablet {
     console.log(this.monitorConfig)
     console.log(this.tabletHID.rawInfo)
 
-    // experimental, ignores other options
+    // ignores other options
     if (parserSettings.isNative) {
       console.log('reading native hidraw ')
-      // TODO: skip going through node
       initRead(
         await this.tabletHID.rawInfo.hidpath,
         await this.settings.name,
@@ -73,8 +74,17 @@ class Tablet {
       )
       return
     } else {
-      console.log('using node parsers are currently broken, exiting..')
-      process.exit()
+      console.log('using node parsers with readstreams are currently broken, using interval as workaround')
+      //  process.exit()
+      this.tabletHID.buffer.close()
+      this.tabletHID.buffer = new EventEmitter()
+      let buffer = Buffer.alloc(16)
+      let fd = fs.openSync(this.tabletHID.rawInfo.hidpath, 'r')
+
+      setInterval(() => {
+        fs.readSync(fd, buffer, { length: 16 })
+        this.tabletHID.buffer.emit('data', buffer)
+      }, 1)
     }
 
     // init the pointer and display before setting pointer positions and clicks
@@ -96,12 +106,12 @@ class Tablet {
       console.log('Using doubleReportBufferParser')
       this.parser = doubleReportBufferParser.bind(this)
       this.tabletHID.buffer.on('data', this.parser)
-    } else if (parserSettings.isNewConfig) {
-      console.log('Using newConfig')
-      this.parser = standardBufferParser.bind(this)
-      this.tabletHID.buffer.on('data', this.parser)
     } else if (parserSettings.isPressure) {
       this.parser = pressureBufferParser.bind(this)
+      this.tabletHID.buffer.on('data', this.parser)
+    } else if (parserSettings.isVirtual) {
+      console.log('using virtualBufferParser')
+      this.parser = standardVirtualBufferParser.bind(this)
       this.tabletHID.buffer.on('data', this.parser)
     } else {
       console.log('Using standardBufferParser')
@@ -124,7 +134,7 @@ class Tablet {
   }
 
   closeTablet() {
-    this.tabletHID.buffer.pause()
+    this.tabletHID.buffer.close()
     this.tabletHID.buffer = null
   }
 

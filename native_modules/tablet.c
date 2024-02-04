@@ -19,7 +19,8 @@ void init_uinput(const char *name, int32_t xMax, int32_t yMax) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
   if (fd < 0) {
-    printf("error opening uinput");
+    printf("error opening uinput\n");
+    perror("uinput open err");
     exit(EXIT_FAILURE);
   }
 
@@ -30,6 +31,7 @@ void init_uinput(const char *name, int32_t xMax, int32_t yMax) {
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
+
   // ioctl(fd, UI_SET_ABSBIT, ABS_X);
   // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
@@ -164,13 +166,10 @@ void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
-void print_hex_buffer(int8_t *buf) {
+void print_hex_buffer(int8_t *buf, int len) {
   printf("\n");
-  // printf("%d ", (buf[1] & (2 ^ 7)) );
-  // printf("%08x ", (buf[1] & 0b00000001));
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < len; i++) {
     printf("%02hhx ", buf[i]);
-    // printf("%x ", (buf[1] & bit) );
     // printf("%d ", (buf[1] & (2 ^ i)) );
   }
 }
@@ -180,20 +179,20 @@ void parse_tablet_buffer(struct tablet_config tablet) {
   int32_t y = 0;
   double xS = 0;
   double yS = 0;
-  int32_t res;
+  int32_t r;
   int32_t active = 1;
 
-  int8_t buf[256];
+  int8_t buf[64];
   memset(buf, 0x0, sizeof(buf));
 
   while (active) {
-    res = read(fdn, buf, 16);
+    r = read(fdn, buf, 16);
 
-    if (res < 0) {
-      perror("read err");
+    if (r < 0) {
+      perror("\nread err");
       exit(EXIT_FAILURE);
     } else {
-      // print_hex_buffer(buf);
+      // print_hex_buffer(buf, r);
 
       x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
       y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
@@ -224,9 +223,11 @@ void init_read(struct tablet_config tablet, struct display_config display_conf, 
   yPrimaryHeight = display_conf.primary_height;
 
   fdn = open(tablet_path, O_RDONLY | O_SYNC);
+  // fdn = open(tablet_path, O_RDONLY | O_NONBLOCK);
 
   if (fdn < 0) {
     printf("Unable to open device with path %s:", tablet_path);
+    perror("\nread err");
     exit(EXIT_FAILURE);
   }
 

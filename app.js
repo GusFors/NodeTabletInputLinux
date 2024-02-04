@@ -35,16 +35,7 @@ let isRunning = false
 
 const run = async () => {
   const DetectedTablet = new Tablet()
-  // if (isAvg) {
-  //   DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isAvg: true, isDoubleReport: true, isTouch })
-  //   console.log('Using avg position')
-  // } else if (isDoubleReport) {
-  //   DetectedTablet.simpleTabletInput({ isDoubleReport: true, isVirtual: isVirtualDevice, isTouch })
-  //   console.log('Using double report position')
-  // } else {
-  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative })
-  console.log('Using raw position')
-  // }
+  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative, isDoubleReport })
   isRunning = true
   // if (isWebSocket) {
   //   const { spawn } = require('child_process')
@@ -73,7 +64,7 @@ const run = async () => {
 run()
 
 let restartInterval
-// buggy, might not properly close unused tablets
+// might not properly close unused tablets
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error.message)
   isRunning = false

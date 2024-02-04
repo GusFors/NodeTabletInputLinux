@@ -47,10 +47,10 @@ function standardBufferParser(reportBuffer) {
     return
   }
 
-  // add offset to xS since in my case the main monitor is not the leftmost monitor
+  // add offset to xS
   Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
-  // different pens can have different button/click values, try and make it pen agnostic
+  // different pens can have different button bits
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
       if (isClick === false) {

@@ -64,23 +64,21 @@ class DeviceDetector {
       if (foundTablets.length < 1) {
         reject('No tablets could be detected')
       }
-
       resolve(foundTablets)
     })
   }
 
   async getHidInfo() {
     let hidrawDirs = await fs.readdir('/sys/class/hidraw')
-
     let devices = []
+    
     for (let i = 0; i < hidrawDirs.length; i++) {
       let currentDevice = await fs.readFile(`/sys/class/hidraw/${hidrawDirs[i]}/device/uevent`, { encoding: 'utf8' })
-      let r = currentDevice.split('\n')
       let devObj = {}
 
       let deviceInfo = currentDevice.split('\n')
-
       let sObj = {}
+
       for (let j = 0; j < deviceInfo.length; j++) {
         let kv = deviceInfo[j].split('=')
         if (kv[0]) sObj[kv[0]] = kv[1]
@@ -96,7 +94,6 @@ class DeviceDetector {
       devObj.hidpath = '/dev/' + hidrawDirs[i]
       devices.push(devObj)
     }
-
     return devices
   }
 
@@ -104,9 +101,7 @@ class DeviceDetector {
     return new Promise(async (resolve, reject) => {
       try {
         const detectedTablets = await this.getTabletHidInfo()
-
         let deviceBuffers = []
-        let detected = false
 
         for (let i = 0; i < detectedTablets.length; i++) {
           let currentPath = detectedTablets[i].hidpath
