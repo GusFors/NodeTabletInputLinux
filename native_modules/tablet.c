@@ -73,24 +73,6 @@ int32_t yPrimaryHeight;
 int32_t xPrimaryWidth;
 
 void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
-  if (x > xPrimaryWidth)
-    x = xPrimaryWidth;
-
-  if (x < 0)
-    x = 0;
-
-  if (y < 0)
-    y = 0;
-
-  if (y > yPrimaryHeight)
-    y = yPrimaryHeight;
-
-  if (x == 0 && y == 0) {
-    return;
-  }
-
-  // std::cout << "x: " << x << " y: " << y << "\n";
-
   struct input_event positionEvents[4];
   memset(&positionEvents, 0, sizeof(positionEvents));
 
@@ -166,12 +148,28 @@ void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   write(fd, &syncEvent, sizeof(syncEvent));
 }
 
-void print_hex_buffer(int8_t *buf, int len) {
-  printf("\n");
-  for (int i = 0; i < len; i++) {
-    printf("%02hhx ", buf[i]);
-    // printf("%d ", (buf[1] & (2 ^ i)) );
+int area_boundary_clamp(double x, double y, double *px, double *py) {
+  if (x > xPrimaryWidth)
+    *px = xPrimaryWidth;
+
+  if (x < 0)
+    *px = 0;
+
+  if (y < 0)
+    *py = 0;
+
+  if (y > yPrimaryHeight)
+    *py = yPrimaryHeight;
+
+  // if (x == 0 && y == 0) {
+  //   return 0;
+  // }
+
+  if (*px == 0 && *py == 0) {
+    return 0;
   }
+
+  return 1;
 }
 
 void parse_tablet_buffer(struct tablet_config tablet) {
@@ -182,7 +180,7 @@ void parse_tablet_buffer(struct tablet_config tablet) {
   int32_t r;
   int32_t active = 1;
 
-  int8_t buf[64];
+  uint8_t buf[64];
   memset(buf, 0x0, sizeof(buf));
 
   while (active) {
@@ -191,24 +189,20 @@ void parse_tablet_buffer(struct tablet_config tablet) {
     if (r < 0) {
       perror("\nread err");
       exit(EXIT_FAILURE);
-    } else {
-      // print_hex_buffer(buf, r);
+    }
 
+    if (buf[0] <= 0x10) {
+      // print_hex_buffer(buf, r);
       x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
       y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
 
       xS = (x - tablet.left) * tablet.xscale;
       yS = (y - tablet.top) * tablet.yscale;
 
-      if (xS < 0)
-        xS = 0;
-
-      if (yS < 0)
-        yS = 0;
-
-      if ((buf[0] & 0xff) < 0x11) {
+      // if ((buf[0] & 0xff) < 0x11) {
+      if (area_boundary_clamp(xS, yS, &xS, &yS))
         tablet_input_event(xS, yS, 0, buf[1]);
-      }
+      // }
     }
   }
 }
@@ -234,4 +228,73 @@ void init_read(struct tablet_config tablet, struct display_config display_conf, 
   printf("reading reports from: %s", tablet_path);
 
   parse_tablet_buffer(tablet);
+}
+
+// int32_t xpos_buffer[64];
+// int32_t ypos_buffer[64];
+// usleep(10000);
+// memset(&xpos_buffer, 0, sizeof(xpos_buffer));
+// int area_boundary_check(int32_t x, int32_t y) {
+//   if (x > xPrimaryWidth)
+//     return 0;
+
+//   if (x < 0)
+//     return 0;
+
+//   if (y < 0)
+//     return 0;
+
+//   if (y > yPrimaryHeight)
+//     return 0;
+
+//   if (x == 0 && y == 0)
+//     return 0;
+
+//   return 1;
+
+//   // if (x > xPrimaryWidth)
+//   //   x = xPrimaryWidth;
+
+//   // if (x < 0)
+//   //   x = 0;
+
+//   // if (y < 0)
+//   //   y = 0;
+
+//   // if (y > yPrimaryHeight)
+//   //   y = yPrimaryHeight;
+
+//   // if (x == 0 && y == 0) {
+//   //   return;
+//   // }
+// }
+
+// int area_boundary_clamp(uint32_t *x, uint32_t *y) {
+// int area_boundary_clamp(double *x, double *y) {
+
+//   if (*x > xPrimaryWidth)
+//     *x = xPrimaryWidth;
+
+//   if (*x < 0)
+//     *x = 0;
+
+//   if (*y < 0)
+//     *y = 0;
+
+//   if (*y > yPrimaryHeight)
+//     *y = yPrimaryHeight;
+
+//   if ((*x == 0 && *y == 0)) {
+//     return 0;
+//   }
+
+//   return 1;
+// }
+
+void print_hex_buffer(uint8_t *buf, int len) {
+  printf("\n");
+  for (int i = 0; i < len; i++) {
+    printf("%02hhx ", buf[i]);
+    // printf("%d ", (buf[1] & (2 ^ i)) );
+  }
 }

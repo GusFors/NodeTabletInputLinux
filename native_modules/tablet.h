@@ -20,7 +20,8 @@ extern "C" {
 void init_uinput(const char *name, int32_t xMax, int32_t yMax);
 void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn);
 void parse_tablet_buffer(struct tablet_config tablet);
-void init_read(struct tablet_config tablet,  struct display_config display_conf, const char *hidraw_path);
+void init_read(struct tablet_config tablet, struct display_config display_conf, const char *hidraw_path);
+void print_hex_buffer(uint8_t *buf, int len);
 
 #ifdef __cplusplus
 }

@@ -10,6 +10,8 @@ let isClick = false
 let inRange = false
 
 function standardBufferParser(reportBuffer) {
+  // console.log(reportBuffer)
+
   if (reportBuffer[0] > 0x10) {
     return
   }
