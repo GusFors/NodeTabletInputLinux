@@ -72,28 +72,26 @@ int32_t yOffset;
 int32_t yPrimaryHeight;
 int32_t xPrimaryWidth;
 
+void create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr) {
+  ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0,
+  ev_ptr->time.tv_usec = 0;
+  // printf("%p\n", ev_ptr);
+}
+
 void tablet_input_event(int32_t x, int32_t y, int32_t pressure, int32_t btn) {
   struct input_event positionEvents[4];
   memset(&positionEvents, 0, sizeof(positionEvents));
+  // struct input_event *positionEvents = (struct input_event *)malloc(sizeof(struct input_event) * 4);
 
-  positionEvents[0].type = EV_KEY;
-  positionEvents[0].code = BTN_TOOL_PEN;
-  positionEvents[0].value = 1;
-  positionEvents[0].time.tv_sec = 0;
-  positionEvents[0].time.tv_usec = 0;
+  create_input(EV_KEY, BTN_TOOL_PEN, 1, &positionEvents[0]);
+  create_input(EV_ABS, ABS_X, x + xOffset, &positionEvents[1]);
+  create_input(EV_ABS, ABS_Y, y + yOffset, &positionEvents[2]);
 
-  positionEvents[1].type = EV_ABS;
-  positionEvents[1].code = ABS_X;
-  positionEvents[1].value = x + xOffset;
-  positionEvents[1].time.tv_sec = 0;
-  positionEvents[1].time.tv_usec = 0;
+  // printf("%p\n", &positionEvents[0]);
+  // printf("%p\n", &positionEvents[1]);
+  // printf("%p\n\n", &positionEvents[2]);
 
-  positionEvents[2].type = EV_ABS;
-  positionEvents[2].code = ABS_Y;
-  positionEvents[2].value = y + yOffset;
-  positionEvents[2].time.tv_sec = 0;
-  positionEvents[2].time.tv_usec = 0;
-
+  // printf("p[1]:%d\n", positionEvents[1].value);
   // printf("%08b\n", btn & 0b00000111);
 
   switch (((btn & 0xff) & 0x07)) {
