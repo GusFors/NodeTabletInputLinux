@@ -4,8 +4,8 @@
 struct display_config {
   int total_width;
   int total_height;
-  int xoffset;
-  int yoffset;
+  int offset_x;
+  int offset_y;
   int primary_height;
   int primary_width;
 };

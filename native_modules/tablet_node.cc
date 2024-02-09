@@ -57,8 +57,8 @@ NAN_METHOD(initRead) {
   // tablet.hidraw_path = tablet_path;
 
   struct display_config display_conf;
-  display_conf.xoffset = xOffset;
-  display_conf.yoffset = yOffset;
+  display_conf.offset_x = xOffset;
+  display_conf.offset_y = yOffset;
   display_conf.primary_height = yPrimaryHeight;
   display_conf.primary_width = xPrimaryWidth;
 
