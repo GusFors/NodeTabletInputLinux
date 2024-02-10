@@ -23,7 +23,7 @@ void parse_tablet_buffer(struct tablet_config tablet);
 void init_read(struct tablet_config tablet, struct display_config display_conf, const char *hidraw_path);
 void print_hex_buffer(uint8_t *buf, int len);
 int area_boundary_clamp(double x, double y, double *px, double *py);
-void create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr);
+int create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr);
 
 #ifdef __cplusplus
 }

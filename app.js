@@ -25,44 +25,19 @@ if (isListDevices) {
   })()
 }
 
+let isRunning = false
+const run = async () => {
+  const DetectedTablet = new Tablet()
+  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative, isDoubleReport })
+  isRunning = true
+}
+run()
+
 if (isExit) {
   setTimeout(() => {
     process.exit()
   }, 10000)
 }
-
-let isRunning = false
-
-const run = async () => {
-  const DetectedTablet = new Tablet()
-  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative, isDoubleReport })
-  isRunning = true
-  // if (isWebSocket) {
-  //   const { spawn } = require('child_process')
-  //   const WebSocketServer = require('ws').WebSocketServer
-  //   const wss = new WebSocketServer({ port: 4000 })
-  //   console.log('starting ws server..')
-  //   spawn('xdg-open', [__dirname + '/gui/index.html'])
-  //   wss.on('connection', (ws) => {
-  //     ws.send(JSON.stringify({ msg: 'init from console', settings: DetectedTablet.settings }))
-  //     ws.on('message', (clientData) => {
-  //       let data = JSON.parse(clientData)
-  //       console.log(data)
-  //       if (data.id === 'applyArea') {
-  //         DetectedTablet.settings.top = data.top
-  //         DetectedTablet.settings.bottom = data.bottom
-  //         DetectedTablet.settings.left = data.left
-  //         DetectedTablet.settings.right = data.right
-  //         DetectedTablet.updateScale()
-  //         console.log(DetectedTablet.settings)
-  //       }
-  //     })
-  //   })
-  // }
-}
-
-run()
-
 let restartInterval
 // might not properly close unused tablets
 process.on('uncaughtException', function (error) {

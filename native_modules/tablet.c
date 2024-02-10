@@ -49,8 +49,8 @@ void init_uinput(const char *name, int x_max, int y_max) {
   abs_xprops.code = ABS_X;
   abs_xprops.absinfo.minimum = 0;
   abs_xprops.absinfo.maximum = x_max;
-  // abs_xprops.absinfo = (input_absinfo){.value = 0, .minimum = 0, .maximum = x_max, .fuzz = 0, .flat = 0, .resolution =
-  // 0};
+  // abs_xprops.absinfo = (input_absinfo){.value = 0, .minimum = 0, .maximum = x_max, .fuzz = 0, .flat = 0, .resolution
+  // = 0};
   ioctl(fd, UI_ABS_SETUP, &abs_xprops);
 
   struct uinput_abs_setup abs_yprops;
@@ -70,11 +70,17 @@ int offset_x;
 int offset_y;
 int primary_height;
 int primary_width;
+int btn_state = 0b00000000;
+int last_btn_state = 0b00000000;
+// #define BUTTON1 0b00000010
+// #define BUTTON2 0b00000100
+#define EVENTSIZE 24 // sizeof(struct input_event)
 
-void create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr) {
+int create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr) {
   ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0,
   ev_ptr->time.tv_usec = 0;
   // printf("%p\n", ev_ptr);
+  return EVENTSIZE; // sizeof(struct input_event)
 }
 
 void tablet_input_event(int x, int y, int pressure, int btn) {
@@ -85,13 +91,6 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
   create_input(EV_KEY, BTN_TOOL_PEN, 1, &position_events[0]);
   create_input(EV_ABS, ABS_X, x + offset_x, &position_events[1]);
   create_input(EV_ABS, ABS_Y, y + offset_y, &position_events[2]);
-
-  // printf("%p\n", &position_events[0]);
-  // printf("%p\n", &position_events[1]);
-  // printf("%p\n\n", &position_events[2]);
-
-  // printf("p[1]:%d\n", position_events[1].value);
-  // printf("%08b\n", btn & 0b00000111);
 
   switch (((btn & 0xff) & 0x07)) {
   case 0x01:
@@ -134,6 +133,104 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
   }
 
   int res_w = write(fd, position_events, sizeof(position_events));
+
+  struct input_event sync_event;
+  memset(&sync_event, 0, sizeof(sync_event));
+
+  sync_event.type = EV_SYN;
+  sync_event.value = 0;
+  sync_event.code = SYN_REPORT;
+
+  write(fd, &sync_event, sizeof(sync_event));
+}
+
+void tabletbtn_input_event_(int x, int y, int pressure, int btn) {
+  int num_bytes = 0;
+  struct input_event position_events[5];
+  memset(&position_events, 0, sizeof(position_events));
+  // struct input_event *position_events = (struct input_event *)malloc(sizeof(struct input_event) * 4);
+
+  num_bytes += create_input(EV_KEY, BTN_TOOL_PEN, 1, &position_events[0]);
+  num_bytes += create_input(EV_ABS, ABS_X, x + offset_x, &position_events[1]);
+  num_bytes += create_input(EV_ABS, ABS_Y, y + offset_y, &position_events[2]);
+
+  // printf("%p\n", &position_events[0]);
+  // printf("%p\n", &position_events[1]);
+  // printf("%p\n\n", &position_events[2]);
+
+  // printf("p[1]:%d\n", position_events[1].value);
+  // printf("%08b\n", btn & 0b00000111);
+  // printf("%08b\n", btn);
+  // printf("sizeof ie:%lu", sizeof(struct input_event));
+  // printf("%p %p", position_events, &position_events);
+
+  // btn_state = penbtn;
+
+  if (btn != last_btn_state) {
+    printf("btn_state changed:%08b, changed buttons:%08b\n", btn, btn ^ last_btn_state);
+    // switch ()
+  }
+
+  // printf("btn_state:%08b\n", btn);
+
+  if ((!(btn_state & 1) && (btn & 1))) {
+    btn_state = btn_state | (btn & 1);
+    num_bytes += create_input(EV_KEY, BTN_LEFT, btn & 1, &position_events[num_bytes / EVENTSIZE]);
+  } else if ((btn_state & 1) && !(btn & 1)) {
+    btn_state = btn_state & ~1;
+    num_bytes += create_input(EV_KEY, BTN_LEFT, btn & 1, &position_events[num_bytes / EVENTSIZE]);
+  }
+
+  if ((!(btn_state & 0b00000100) && (btn & 0b00000100))) {
+    btn_state = btn_state | (btn & 0b00000100);
+    num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & 0b00000100, &position_events[num_bytes / EVENTSIZE]);
+  } else if ((btn_state & 0b00000100) && !(btn & 0b00000100)) {
+    btn_state = btn_state & ~0b00000100;
+    num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & 0b00000100, &position_events[num_bytes / EVENTSIZE]);
+  }
+
+  if ((!(btn_state & 0b00000010) && (btn & 0b00000010))) {
+    btn_state = btn_state | (btn & 0b00000010);
+  } else if ((btn_state & 0b00000010) && !(btn & 0b00000010)) {
+    btn_state = btn_state & ~0b00000010;
+  }
+
+  int res_w = write(fd, position_events, num_bytes);
+
+  last_btn_state = btn;
+
+  // printf("pen:%d btn1:%d btn2:%d num bytes:%d, res w:%d\n", btn & 0b00000001, btn & 0b00000010, (btn >> 2) & 1,
+  //        num_bytes, res_w);
+
+  // if ((!(btn_state & 1) && (btn & 1))) {
+  //   // btn_state = btn_state | btn;
+  //   btn_state = btn_state | (btn & 1);
+  //   printf("pendown, btnstate:%08b\n", btn_state);
+  // } else if ((btn_state & 1) && !(btn & 1)) {
+  //   // btn_state = btn_state & ~btn;
+  //   btn_state = btn_state & ~1;
+  //   printf("penup?,  btnstate:%08b\n", btn_state);
+  // }
+
+  // if ((!(btn_state & 0b00000100) && (btn & 0b00000100))) {
+  //   // btn_state = btn_state | btn;
+  //   btn_state = btn_state | (btn & 0b00000100);
+  //   printf("pen2down,btnstate:%08b\n", btn_state);
+  // } else if ((btn_state & 0b00000100) && !(btn & 0b00000100)) {
+  //   // btn_state = btn_state & ~btn;
+  //   btn_state = btn_state & ~0b00000100;
+  //   printf("pen2up?, btnstate:%08b\n", btn_state);
+  // }
+
+  // if ((!(btn_state & 0b00000010) && (btn & 0b00000010))) {
+  //   // btn_state = btn_state | btn;
+  //   btn_state = btn_state | (btn & 0b00000010);
+  //   printf("pen1down,btnstate:%08b\n", btn_state);
+  // } else if ((btn_state & 0b00000010) && !(btn & 0b00000010)) {
+  //   // btn_state = btn_state & ~btn;
+  //   btn_state = btn_state & ~0b00000010;
+  //   printf("pen1up?, btnstate:%08b\n", btn_state);
+  // }
 
   struct input_event sync_event;
   memset(&sync_event, 0, sizeof(sync_event));
