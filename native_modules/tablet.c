@@ -28,8 +28,9 @@ void init_uinput(const char *name, int x_max, int y_max) {
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
 
   ioctl(fd, UI_SET_EVBIT, EV_KEY);
-  ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
+  ioctl(fd, UI_SET_KEYBIT, BTN_MIDDLE); // prevent left+right middle click
+  ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
 
   // ioctl(fd, UI_SET_ABSBIT, ABS_X);
@@ -72,16 +73,16 @@ int primary_height;
 int primary_width;
 int btn_state = 0b00000000;
 int last_btn_state = 0b11010000;
-// #define BUTTON1 0b00000010
-#define PEN_BUTTON 0b00000001
+
+#define PEN_BUTTON0 0b00000001
+#define PEN_BUTTON1 0b00000010
 #define PEN_BUTTON2 0b00000100
 #define EVENT_SIZE 24 // sizeof(struct input_event)
 
 int create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr) {
   ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0,
   ev_ptr->time.tv_usec = 0;
-  // printf("%p\n", ev_ptr);
-  return EVENT_SIZE; // sizeof(struct input_event)
+  return EVENT_SIZE;
 }
 
 void tablet_input_event(int x, int y, int pressure, int btn) {
@@ -145,7 +146,7 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
   write(fd, &sync_event, sizeof(sync_event));
 }
 
-void tabletbtn_input_event_(int x, int y, int pressure, int btn) {
+void tabletbtn_input_event(int x, int y, int pressure, int btn) {
   int num_bytes = 0;
   struct input_event position_events[5];
   memset(&position_events, 0, sizeof(position_events));
@@ -155,27 +156,34 @@ void tabletbtn_input_event_(int x, int y, int pressure, int btn) {
   num_bytes += create_input(EV_ABS, ABS_Y, y + offset_y, &position_events[2]);
 
   if (btn != last_btn_state) {
-    printf("btn_state changed:%08b, changed buttons:%08b\n", btn, btn ^ last_btn_state);
-    printf("switch: %08b\n", ((btn ^ last_btn_state) & 0b00000111));
+    // printf("btn_state changed:%08b, changed buttons:%08b\n", btn, btn ^ last_btn_state);
+    // printf("btn_state: %08b\n", ((btn ^ last_btn_state) & 0b00000111));
 
-    switch (((btn ^ last_btn_state) & 0b00000111)) {
-    case 0b00000001:
-      btn_state = btn_state | (btn & PEN_BUTTON);
-      num_bytes += create_input(EV_KEY, BTN_LEFT, btn & PEN_BUTTON, &position_events[num_bytes / EVENT_SIZE]);
+    if (((btn ^ last_btn_state) & PEN_BUTTON0)) {
+      num_bytes += create_input(EV_KEY, BTN_LEFT, btn & PEN_BUTTON0, &position_events[num_bytes / EVENT_SIZE]);
+    }
 
-    case 0b00000100:
-      btn_state = btn_state | (btn & PEN_BUTTON2);
-      num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & PEN_BUTTON2, &position_events[num_bytes / EVENT_SIZE]);
+    if (((btn ^ last_btn_state) & PEN_BUTTON1)) {
+      num_bytes += create_input(EV_KEY, BTN_RIGHT, (btn & PEN_BUTTON1) >> 1, &position_events[num_bytes / EVENT_SIZE]);
+    }
+
+    if (((btn ^ last_btn_state) & PEN_BUTTON2)) {
+      // printf("pen2 %d\n", (btn & PEN_BUTTON2) >> 2);
+      num_bytes += create_input(EV_KEY, BTN_RIGHT, (btn & PEN_BUTTON2) >> 2, &position_events[num_bytes / EVENT_SIZE]);
     }
   }
-  // printf("btn_state:%08b\n", btn);
 
-  // if ((!(btn_state & PEN_BUTTON) && (btn & PEN_BUTTON))) {
-  //   btn_state = btn_state | (btn & PEN_BUTTON);
-  //   num_bytes += create_input(EV_KEY, BTN_LEFT, btn & PEN_BUTTON, &position_events[num_bytes / EVENT_SIZE]);
-  // } else if ((btn_state & PEN_BUTTON) && !(btn & PEN_BUTTON)) {
-  //   btn_state = btn_state & ~PEN_BUTTON;
-  //   num_bytes += create_input(EV_KEY, BTN_LEFT, btn & PEN_BUTTON, &position_events[num_bytes / EVENT_SIZE]);
+  int res_w = write(fd, position_events, num_bytes);
+  last_btn_state = btn;
+
+  // switch (((btn ^ last_btn_state) & 0b00000111)) {
+  //   case 0b00000001:
+  //     btn_state = btn_state | (btn & PEN_BUTTON);
+  //     num_bytes += create_input(EV_KEY, BTN_LEFT, btn & PEN_BUTTON, &position_events[num_bytes / EVENT_SIZE]);
+  //   // fall-through
+  //   case 0b00000100:
+  //       btn_state = btn_state | (btn & PEN_BUTTON2);
+  //       num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & PEN_BUTTON2, &position_events[num_bytes / EVENT_SIZE]);
   // }
 
   // if ((!(btn_state & PEN_BUTTON2) && (btn & PEN_BUTTON2))) {
@@ -186,28 +194,8 @@ void tabletbtn_input_event_(int x, int y, int pressure, int btn) {
   //   num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & PEN_BUTTON2, &position_events[num_bytes / EVENT_SIZE]);
   // }
 
-  // if ((!(btn_state & 0b00000010) && (btn & 0b00000010))) {
-  //   btn_state = btn_state | (btn & 0b00000010);
-  // } else if ((btn_state & 0b00000010) && !(btn & 0b00000010)) {
-  //   btn_state = btn_state & ~0b00000010;
-  // }
-
-  int res_w = write(fd, position_events, num_bytes);
-  // last_btn_state = btn & 0b11010000;
-  last_btn_state = btn;
-
   // printf("pen:%d btn1:%d btn2:%d num bytes:%d, res w:%d\n", btn & 0b00000001, btn & 0b00000010, (btn >> 2) & 1,
   //        num_bytes, res_w);
-
-  // if ((!(btn_state & 1) && (btn & 1))) {
-  //   // btn_state = btn_state | btn;
-  //   btn_state = btn_state | (btn & 1);
-  //   printf("pendown, btnstate:%08b\n", btn_state);
-  // } else if ((btn_state & 1) && !(btn & 1)) {
-  //   // btn_state = btn_state & ~btn;
-  //   btn_state = btn_state & ~1;
-  //   printf("penup?,  btnstate:%08b\n", btn_state);
-  // }
 
   // if ((!(btn_state & 0b00000100) && (btn & 0b00000100))) {
   //   // btn_state = btn_state | btn;
@@ -217,16 +205,6 @@ void tabletbtn_input_event_(int x, int y, int pressure, int btn) {
   //   // btn_state = btn_state & ~btn;
   //   btn_state = btn_state & ~0b00000100;
   //   printf("pen2up?, btnstate:%08b\n", btn_state);
-  // }
-
-  // if ((!(btn_state & 0b00000010) && (btn & 0b00000010))) {
-  //   // btn_state = btn_state | btn;
-  //   btn_state = btn_state | (btn & 0b00000010);
-  //   printf("pen1down,btnstate:%08b\n", btn_state);
-  // } else if ((btn_state & 0b00000010) && !(btn & 0b00000010)) {
-  //   // btn_state = btn_state & ~btn;
-  //   btn_state = btn_state & ~0b00000010;
-  //   printf("pen1up?, btnstate:%08b\n", btn_state);
   // }
 
   struct input_event sync_event;
@@ -292,7 +270,7 @@ void parse_tablet_buffer(struct tablet_config tablet) {
 
       // if ((buf[0] & 0xff) < 0x11) {
       if (area_boundary_clamp(xS, yS, &xS, &yS))
-        tabletbtn_input_event_(xS, yS, 0, buf[1]);
+        tabletbtn_input_event(xS, yS, 0, buf[1]);
       // tablet_input_event(xS, yS, 0, buf[1]);
       // }
     }
