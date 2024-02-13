@@ -23,8 +23,6 @@ void init_uinput(const char *name, int x_max, int y_max) {
     perror("uinput open err");
     exit(EXIT_FAILURE);
   }
-  printf("created uinput device:%s\n", name);
-  printf("input code: %d max size: %d\n", BTN_LEFT, UINPUT_MAX_NAME_SIZE);
 
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
@@ -66,6 +64,7 @@ void init_uinput(const char *name, int x_max, int y_max) {
 
   // write(fd, &uiPointer, sizeof(uiPointer));
   ioctl(fd, UI_DEV_CREATE);
+  printf("created uinput device:%s\n", name);
 }
 
 int is_click = 0;
@@ -204,11 +203,9 @@ void tabletbtn_input_event(int x, int y, int pressure, int btn) {
   // if ((!(btn_state & 0b00000100) && (btn & 0b00000100))) {
   //   // btn_state = btn_state | btn;
   //   btn_state = btn_state | (btn & 0b00000100);
-  //   printf("pen2down,btnstate:%08b\n", btn_state);
   // } else if ((btn_state & 0b00000100) && !(btn & 0b00000100)) {
   //   // btn_state = btn_state & ~btn;
   //   btn_state = btn_state & ~0b00000100;
-  //   printf("pen2up?, btnstate:%08b\n", btn_state);
   // }
 
   struct input_event sync_event;
@@ -234,10 +231,6 @@ int area_boundary_clamp(double x, double y, double *px, double *py) {
 
   if (y > primary_height)
     *py = primary_height;
-
-  // if (x == 0 && y == 0) {
-  //   return 0;
-  // }
 
   if (*px == 0 && *py == 0) {
     return 0;
@@ -317,6 +310,5 @@ void print_hex_buffer(uint8_t *buf, int len) {
   printf("\n");
   for (int i = 0; i < len; i++) {
     printf("%02hhx ", buf[i]);
-    // printf("%d ", (buf[1] & (2 ^ i)) );
   }
 }

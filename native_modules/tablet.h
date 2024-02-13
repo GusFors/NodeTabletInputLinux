@@ -11,7 +11,6 @@ struct tablet_config {
   int yindex;
   double xscale;
   double yscale;
-  // char *hidraw_path;
 };
 
 #ifdef __cplusplus

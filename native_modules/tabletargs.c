@@ -15,8 +15,8 @@ int main(int argc, char *argv[]) {
   int xPrimaryWidth = get_primary_monitor_width();
   int yPrimaryHeight = get_primary_monitor_height();
 
-  int x_display_maxval = get_displays_total_width();  // strtol(argv[3], NULL, 0);
-  int y_display_maxval = get_displays_total_height(); // strtol(argv[4], NULL, 0);
+  int x_display_maxval = get_displays_total_width();
+  int y_display_maxval = get_displays_total_height();
   int v = close_display();
 
   printf("x_display_maxval:%d\n", x_display_maxval);
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
   double xScale = strtod(argv[5], NULL);
   double yScale = strtod(argv[6], NULL);
 
-  printf("xScale:%f\n", xScale);
+  printf("xScale:%f\n\n", xScale);
 
   printf("xWidth:%d\n", xPrimaryWidth);
   printf("xOffset:%d\n", xOffset);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   int yBufferPos = strtol(argv[8], NULL, 0);
 
   printf("xPosition:%d\n", xBufferPos);
-  printf("yPosition:%d\n", yBufferPos);
+  printf("yPosition:%d\n\n", yBufferPos);
 
   struct tablet_config tablet;
   tablet.left = left;
@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
   tablet.yscale = yScale;
   tablet.xindex = xBufferPos;
   tablet.yindex = yBufferPos;
-  // tablet.hidraw_path = tablet_path;
 
   struct display_config display_conf;
   display_conf.offset_x = xOffset;
