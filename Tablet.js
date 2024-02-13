@@ -56,6 +56,7 @@ class Tablet {
     console.log(this.settings)
     console.log(this.monitorConfig)
     console.log(this.tabletHID.rawInfo)
+    console.log('xScale:', this.xScale, 'yScale:', this.yScale)
 
     // ignores other options
     if (parserSettings.isNative) {

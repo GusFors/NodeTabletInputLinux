@@ -110,3 +110,7 @@ displayInfo.cc
 uinput*
 
 experimental/
+
+*.o
+*.out
+tabletinput

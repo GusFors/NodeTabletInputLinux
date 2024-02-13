@@ -23,6 +23,8 @@ void init_uinput(const char *name, int x_max, int y_max) {
     perror("uinput open err");
     exit(EXIT_FAILURE);
   }
+  printf("created uinput device:%s\n", name);
+  printf("input code: %d max size: %d\n", BTN_LEFT, UINPUT_MAX_NAME_SIZE);
 
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
   ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
@@ -47,6 +49,7 @@ void init_uinput(const char *name, int x_max, int y_max) {
   ioctl(fd, UI_DEV_SETUP, &uiPointer);
 
   struct uinput_abs_setup abs_xprops;
+  memset(&abs_xprops, 0, sizeof(abs_xprops));
   abs_xprops.code = ABS_X;
   abs_xprops.absinfo.minimum = 0;
   abs_xprops.absinfo.maximum = x_max;
@@ -55,6 +58,7 @@ void init_uinput(const char *name, int x_max, int y_max) {
   ioctl(fd, UI_ABS_SETUP, &abs_xprops);
 
   struct uinput_abs_setup abs_yprops;
+  memset(&abs_yprops, 0, sizeof(abs_yprops));
   abs_yprops.code = ABS_Y;
   abs_yprops.absinfo.minimum = 0;
   abs_yprops.absinfo.maximum = y_max;
@@ -214,7 +218,8 @@ void tabletbtn_input_event(int x, int y, int pressure, int btn) {
   sync_event.value = 0;
   sync_event.code = SYN_REPORT;
 
-  write(fd, &sync_event, sizeof(sync_event));
+  int b = write(fd, &sync_event, sizeof(sync_event));
+  // printf("x:%d, y:%d, nbytes:%d syncwrite:%d fd:%d\n", x, y, res_w, b, fd);
 }
 
 int area_boundary_clamp(double x, double y, double *px, double *py) {

@@ -1,5 +1,6 @@
 #ifndef TABLET_H
 #define TABLET_H
+#include <linux/input.h>
 #include <stdint.h>
 #include "display.h"
 
