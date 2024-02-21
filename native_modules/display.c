@@ -11,9 +11,9 @@ int get_displays_total_width() {
     display = XOpenDisplay(NULL);
   }
 
-  int displayWidth = XDisplayWidth(display, 0);
+  int display_width = XDisplayWidth(display, 0);
 
-  return displayWidth;
+  return display_width;
 }
 
 int get_displays_total_height() {
@@ -21,9 +21,9 @@ int get_displays_total_height() {
     display = XOpenDisplay(NULL);
   }
 
-  int displayHeight = XDisplayHeight(display, 0);
+  int display_height = XDisplayHeight(display, 0);
 
-  return displayHeight;
+  return display_height;
 }
 
 int get_primary_monitor_xoffset() {
@@ -31,10 +31,10 @@ int get_primary_monitor_xoffset() {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
-  XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
+  XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
 
-  return monInfo->x;
+  return mon_info->x;
 }
 
 int get_primary_monitor_yoffset() {
@@ -42,10 +42,10 @@ int get_primary_monitor_yoffset() {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
-  XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
+  XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
 
-  return monInfo->y;
+  return mon_info->y;
 }
 
 int get_primary_monitor_width() {
@@ -53,10 +53,10 @@ int get_primary_monitor_width() {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
-  XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
+  XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
 
-  return monInfo->width;
+  return mon_info->width;
 }
 
 int get_primary_monitor_height() {
@@ -64,10 +64,10 @@ int get_primary_monitor_height() {
     display = XOpenDisplay(NULL);
   }
 
-  XRRScreenResources *monRes = XRRGetScreenResources(display, XDefaultRootWindow(display));
-  XRRCrtcInfo *monInfo = XRRGetCrtcInfo(display, monRes, monRes->crtcs[0]);
+  XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
 
-  return monInfo->height;
+  return mon_info->height;
 }
 
 int get_number_of_monitors() {
@@ -75,10 +75,10 @@ int get_number_of_monitors() {
     display = XOpenDisplay(NULL);
   }
 
-  int numMonitors = 0;
-  XRRGetMonitors(display, XDefaultRootWindow(display), 1, &numMonitors);
+  int num_monitors = 0;
+  XRRGetMonitors(display, XDefaultRootWindow(display), 1, &num_monitors);
 
-  return numMonitors;
+  return num_monitors;
 }
 
 int close_display() { return XCloseDisplay(display); }

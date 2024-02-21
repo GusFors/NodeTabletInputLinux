@@ -10,10 +10,10 @@ int main(int argc, char *argv[]) {
   const char *device_name = argv[2];
   printf("hidraw_path: %s\n", hidraw_path);
 
-  int xOffset = get_primary_monitor_xoffset();
-  int yOffset = get_primary_monitor_yoffset();
-  int xPrimaryWidth = get_primary_monitor_width();
-  int yPrimaryHeight = get_primary_monitor_height();
+  int xoffset = get_primary_monitor_xoffset();
+  int yoffset = get_primary_monitor_yoffset();
+  int primary_width = get_primary_monitor_width();
+  int primary_height = get_primary_monitor_height();
 
   int x_display_maxval = get_displays_total_width();
   int y_display_maxval = get_displays_total_height();
@@ -27,33 +27,33 @@ int main(int argc, char *argv[]) {
 
   printf("left:%d\n", left);
 
-  double xScale = strtod(argv[5], NULL);
-  double yScale = strtod(argv[6], NULL);
+  double xscale = strtod(argv[5], NULL);
+  double yscale = strtod(argv[6], NULL);
 
-  printf("xScale:%f\n\n", xScale);
+  printf("xscale:%f\n\n", xscale);
 
-  printf("xWidth:%d\n", xPrimaryWidth);
-  printf("xOffset:%d\n", xOffset);
+  printf("xWidth:%d\n", primary_width);
+  printf("xoffset:%d\n", xoffset);
 
-  int xBufferPos = strtol(argv[7], NULL, 0);
-  int yBufferPos = strtol(argv[8], NULL, 0);
+  int xbuf_index = strtol(argv[7], NULL, 0);
+  int ybuf_index = strtol(argv[8], NULL, 0);
 
-  printf("xPosition:%d\n", xBufferPos);
-  printf("yPosition:%d\n\n", yBufferPos);
+  printf("xposition:%d\n", xbuf_index);
+  printf("yposition:%d\n\n", ybuf_index);
 
   struct tablet_config tablet;
   tablet.left = left;
   tablet.top = top;
-  tablet.xscale = xScale;
-  tablet.yscale = yScale;
-  tablet.xindex = xBufferPos;
-  tablet.yindex = yBufferPos;
+  tablet.xscale = xscale;
+  tablet.yscale = yscale;
+  tablet.xindex = xbuf_index;
+  tablet.yindex = ybuf_index;
 
   struct display_config display_conf;
-  display_conf.offset_x = xOffset;
-  display_conf.offset_y = yOffset;
-  display_conf.primary_height = yPrimaryHeight;
-  display_conf.primary_width = xPrimaryWidth;
+  display_conf.offset_x = xoffset;
+  display_conf.offset_y = yoffset;
+  display_conf.primary_height = primary_height;
+  display_conf.primary_width = primary_width;
 
   init_uinput(device_name, x_display_maxval, y_display_maxval);
   init_read(tablet, display_conf, hidraw_path);

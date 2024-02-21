@@ -36,15 +36,15 @@ void init_uinput(const char *name, int x_max, int y_max) {
   // ioctl(fd, UI_SET_ABSBIT, ABS_X);
   // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
 
-  struct uinput_setup uiPointer;
-  memset(&uiPointer, 0, sizeof(uiPointer));
-  snprintf(uiPointer.name, UINPUT_MAX_NAME_SIZE, "%s", name);
+  struct uinput_setup utablet_setup;
+  memset(&utablet_setup, 0, sizeof(utablet_setup));
+  snprintf(utablet_setup.name, UINPUT_MAX_NAME_SIZE, "%s", name);
 
-  uiPointer.id.bustype = BUS_USB;
-  uiPointer.id.version = 0;
-  uiPointer.id.vendor = 0x0;
-  uiPointer.id.product = 0x0;
-  ioctl(fd, UI_DEV_SETUP, &uiPointer);
+  utablet_setup.id.bustype = BUS_USB;
+  utablet_setup.id.version = 0;
+  utablet_setup.id.vendor = 0x0;
+  utablet_setup.id.product = 0x0;
+  ioctl(fd, UI_DEV_SETUP, &utablet_setup);
 
   struct uinput_abs_setup abs_xprops;
   memset(&abs_xprops, 0, sizeof(abs_xprops));
@@ -62,7 +62,7 @@ void init_uinput(const char *name, int x_max, int y_max) {
   abs_yprops.absinfo.maximum = y_max;
   ioctl(fd, UI_ABS_SETUP, &abs_yprops);
 
-  // write(fd, &uiPointer, sizeof(uiPointer));
+  // write(fd, &utablet_setup, sizeof(utablet_setup));
   ioctl(fd, UI_DEV_CREATE);
   printf("created uinput device:%s\n", name);
 }
@@ -242,8 +242,8 @@ int area_boundary_clamp(double x, double y, double *px, double *py) {
 void parse_tablet_buffer(struct tablet_config tablet) {
   int x = 0;
   int y = 0;
-  double xS = 0;
-  double yS = 0;
+  double x_scaled = 0;
+  double y_scaled = 0;
   int r;
   int active = 1;
 
@@ -263,13 +263,13 @@ void parse_tablet_buffer(struct tablet_config tablet) {
       x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
       y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
 
-      xS = (x - tablet.left) * tablet.xscale;
-      yS = (y - tablet.top) * tablet.yscale;
+      x_scaled = (x - tablet.left) * tablet.xscale;
+      y_scaled = (y - tablet.top) * tablet.yscale;
 
       // if ((buf[0] & 0xff) < 0x11) {
-      if (area_boundary_clamp(xS, yS, &xS, &yS))
-        tabletbtn_input_event(xS, yS, 0, buf[1]);
-      // tablet_input_event(xS, yS, 0, buf[1]);
+      if (area_boundary_clamp(x_scaled, y_scaled, &x_scaled, &y_scaled))
+        tabletbtn_input_event(x_scaled, y_scaled, 0, buf[1]);
+      // tablet_input_event(x_scaled, y_scaled, 0, buf[1]);
       // }
     }
   }
