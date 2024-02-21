@@ -10,14 +10,20 @@ int main(int argc, char *argv[]) {
   const char *device_name = argv[2];
   printf("hidraw_path: %s\n", hidraw_path);
 
-  int xoffset = get_primary_monitor_xoffset();
-  int yoffset = get_primary_monitor_yoffset();
-  int primary_width = get_primary_monitor_width();
-  int primary_height = get_primary_monitor_height();
+  Display *display = XOpenDisplay(NULL);
+  XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
 
-  int x_display_maxval = get_displays_total_width();
-  int y_display_maxval = get_displays_total_height();
-  int v = close_display();
+  int xoffset = get_primary_monitor_xoffset(display, mon_res, mon_info);
+  int yoffset = get_primary_monitor_yoffset(display, mon_res, mon_info);
+  int primary_width = get_primary_monitor_width(display, mon_res, mon_info);
+  int primary_height = get_primary_monitor_height(display, mon_res, mon_info);
+
+  int x_display_maxval = get_displays_total_width(display);
+  int y_display_maxval = get_displays_total_height(display);
+
+  free_xresources(mon_res, mon_info);
+  int v = close_display(display);
 
   printf("x_display_maxval:%d\n", x_display_maxval);
   printf("y_display_maxval:%d\n", y_display_maxval);

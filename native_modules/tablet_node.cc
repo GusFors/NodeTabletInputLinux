@@ -33,11 +33,15 @@ NAN_METHOD(initRead) {
   double xScale = Nan::To<double>(info[6]).FromJust();
   double yScale = Nan::To<double>(info[7]).FromJust();
 
-  xOffset = get_primary_monitor_xoffset();
-  yOffset = get_primary_monitor_yoffset();
-  xPrimaryWidth = get_primary_monitor_width();
-  yPrimaryHeight = get_primary_monitor_height();
-  int v = close_display();
+  Display *display = XOpenDisplay(NULL);
+  XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
+  XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
+
+  xOffset = get_primary_monitor_xoffset(display, mon_res, mon_info);
+  yOffset = get_primary_monitor_yoffset(display, mon_res, mon_info);
+  xPrimaryWidth = get_primary_monitor_width(display, mon_res, mon_info);
+  yPrimaryHeight = get_primary_monitor_height(display, mon_res, mon_info);
+  int v = close_display(display);
 
   // xOffset = Nan::To<int32_t>(info[8]).FromJust();
   // yOffset = Nan::To<int32_t>(info[9]).FromJust();

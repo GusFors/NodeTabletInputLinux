@@ -132,6 +132,7 @@ class Tablet {
       })
       console.log('Using touchBufferParser')
     }
+    // Display.closeDisplay()
   }
 
   closeTablet() {
