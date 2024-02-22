@@ -28,7 +28,7 @@ if (isListDevices) {
 let isRunning = false
 const run = async () => {
   const DetectedTablet = new Tablet()
-  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative, isDoubleReport })
+  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative, isDoubleReport }, isExit)
   isRunning = true
 }
 run()

@@ -4,6 +4,7 @@ const deviceDetector = new DeviceDetector('/mmConfigs.json')
 const Display = require('./build/Release/display.node')
 const fs = require('fs')
 const EventEmitter = require('node:events')
+const { spawn } = require('node:child_process')
 const { mmToWac } = require('./utils/converters')
 const {
   standardBufferParser,
@@ -36,7 +37,10 @@ class Tablet {
     this.parser = null
   }
 
-  async simpleTabletInput(parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isTouch: false, isPressure: false }) {
+  async simpleTabletInput(
+    parserSettings = { isDoubleReport: false, isAvg: false, isVirtual: false, isTouch: false, isPressure: false },
+    detached = true
+  ) {
     console.log(parserSettings)
 
     this.tabletHID = await deviceDetector.getTabletHidBuffer()
@@ -61,6 +65,24 @@ class Tablet {
     // ignores other options
     if (parserSettings.isNative) {
       console.log('reading native hidraw ')
+      if (detached) {
+        let inputProcess = spawn(
+          './native_modules/tabletinput',
+          [
+            await this.tabletHID.rawInfo.hidpath,
+            await this.settings.name,
+            this.settings.left,
+            this.settings.top,
+            this.xScale,
+            this.yScale,
+            this.settings.xBufferPositions[0],
+            this.settings.yBufferPositions[0],
+          ],
+          { detached: true, stdio: 'ignore' }
+        )
+        inputProcess.unref()
+        process.exit()
+      }
       initRead(
         await this.tabletHID.rawInfo.hidpath,
         await this.settings.name,
