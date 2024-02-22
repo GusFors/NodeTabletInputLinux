@@ -72,10 +72,6 @@ void init_uinput(const char *name, int x_max, int y_max) {
 int is_click = 0;
 int click_value = 0;
 int mbtn = 0;
-int offset_x;
-int offset_y;
-int primary_height;
-int primary_width;
 int btn_state = 0b00000000;
 int last_btn_state = 0b11010000;
 
@@ -190,9 +186,9 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
   write(fd, &sync_event, sizeof(sync_event));
 }
 
-int area_boundary_clamp(double x, double y, double *px, double *py) {
-  if (x > primary_width)
-    *px = primary_width;
+int area_boundary_clamp(int max_width, int max_height, double x, double y, double *px, double *py) {
+  if (x > max_width)
+    *px = max_width;
 
   if (x < 0)
     *px = 0;
@@ -200,8 +196,8 @@ int area_boundary_clamp(double x, double y, double *px, double *py) {
   if (y < 0)
     *py = 0;
 
-  if (y > primary_height)
-    *py = primary_height;
+  if (y > max_height)
+    *py = max_height;
 
   if (*px == 0 && *py == 0) {
     return 0;
@@ -238,7 +234,7 @@ void parse_tablet_buffer(struct tablet_config tablet, struct display_config disp
       y_scaled = (y - tablet.top) * tablet.yscale;
 
       // if ((buf[0] & 0xff) < 0x11) {
-      if (area_boundary_clamp(x_scaled, y_scaled, &x_scaled, &y_scaled))
+      if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
         tabletbtn_input_event(x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[1]);
     }
   }
@@ -247,9 +243,6 @@ void parse_tablet_buffer(struct tablet_config tablet, struct display_config disp
 void init_read(struct tablet_config tablet, struct display_config display_conf, const char *hidraw_path) {
   char tablet_path[32];
   strlcpy(tablet_path, hidraw_path, 32);
-
-  primary_width = display_conf.primary_width;
-  primary_height = display_conf.primary_height;
 
   fdn = open(tablet_path, O_RDONLY | O_SYNC);
   // fdn = open(tablet_path, O_RDONLY | O_NONBLOCK);
