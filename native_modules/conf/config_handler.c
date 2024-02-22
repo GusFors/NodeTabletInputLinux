@@ -9,7 +9,9 @@ struct tablet_config get_tablet_config(const char *tablet_name) {
   struct tablet_config tablet_conf;
   // write values directly here for now
   tablet_conf.left = 3600;
+  tablet_conf.right = 11600;
   tablet_conf.top = 1406;
+  tablet_conf.bottom = 5906;
   tablet_conf.xindex = 2;
   tablet_conf.yindex = 4;
   tablet_conf.xscale = 0.32;

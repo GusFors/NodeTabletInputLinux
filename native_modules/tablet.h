@@ -6,7 +6,9 @@
 
 struct tablet_config {
   int left;
+  int right;
   int top;
+  int bottom;
   int xindex;
   int yindex;
   double xscale;
@@ -19,7 +21,7 @@ extern "C" {
 
 void init_uinput(const char *name, int x_max, int y_max);
 void tablet_input_event(int x, int y, int pressure, int btn);
-void parse_tablet_buffer(struct tablet_config tablet);
+void parse_tablet_buffer(struct tablet_config tablet, struct display_config display_conf);
 void init_read(struct tablet_config tablet, struct display_config display_conf, const char *hidraw_path);
 void print_hex_buffer(uint8_t *buf, int len);
 int area_boundary_clamp(double x, double y, double *px, double *py);
