@@ -26,6 +26,9 @@ int get_primary_monitor_height(Display *display, XRRScreenResources *mon_res, XR
 int get_number_of_monitors(Display *display);
 int close_display(Display *display);
 void free_xresources(XRRScreenResources *mon_res, XRRCrtcInfo *mon_info);
+void get_full_display_config(struct display_config *display_conf);
+void print_display_config(struct display_config *display_conf);
+// struct display_config get_display_config();
 
 #ifdef __cplusplus
 }
