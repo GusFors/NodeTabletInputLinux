@@ -35,21 +35,13 @@ int get_number_of_monitors(Display *display) {
   return num_monitors;
 }
 
-int get_primary_monitor_xoffset(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info) {
-  return mon_info->x;
-}
+int get_primary_monitor_xoffset(XRRCrtcInfo *mon_info) { return mon_info->x; }
 
-int get_primary_monitor_yoffset(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info) {
-  return mon_info->y;
-}
+int get_primary_monitor_yoffset(XRRCrtcInfo *mon_info) { return mon_info->y; }
 
-int get_primary_monitor_width(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info) {
-  return mon_info->width;
-}
+int get_primary_monitor_width(XRRCrtcInfo *mon_info) { return mon_info->width; }
 
-int get_primary_monitor_height(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info) {
-  return mon_info->height;
-}
+int get_primary_monitor_height(XRRCrtcInfo *mon_info) { return mon_info->height; }
 
 void get_full_display_config(struct display_config *display_conf) {
   // struct display_config conf;
@@ -60,10 +52,10 @@ void get_full_display_config(struct display_config *display_conf) {
   // struct display_config display_conf;
   display_conf->total_width = get_displays_total_width(display);
   display_conf->total_height = get_displays_total_height(display);
-  display_conf->offset_x = get_primary_monitor_xoffset(display, mon_res, mon_info);
-  display_conf->offset_y = get_primary_monitor_yoffset(display, mon_res, mon_info);
-  display_conf->primary_height = get_primary_monitor_height(display, mon_res, mon_info);
-  display_conf->primary_width = get_primary_monitor_width(display, mon_res, mon_info);
+  display_conf->offset_x = get_primary_monitor_xoffset(mon_info);
+  display_conf->offset_y = get_primary_monitor_yoffset(mon_info);
+  display_conf->primary_height = get_primary_monitor_height(mon_info);
+  display_conf->primary_width = get_primary_monitor_width(mon_info);
 
   free_xresources(mon_res, mon_info);
   close_display(display);

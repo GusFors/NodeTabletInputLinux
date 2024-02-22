@@ -25,7 +25,8 @@ NAN_METHOD(initRead) {
   int32_t yMax = Nan::To<int32_t>(info[3]).FromJust();
 
   init_uinput(("Virtual uinput " + device_name).c_str(), xMax, yMax);
-  std::cout << "Created device: " << "Virtual uinput " + device_name;
+  std::cout << "Created device: "
+            << "Virtual uinput " + device_name;
 
   // read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();
@@ -37,10 +38,10 @@ NAN_METHOD(initRead) {
   XRRScreenResources *mon_res = XRRGetScreenResources(display, XDefaultRootWindow(display));
   XRRCrtcInfo *mon_info = XRRGetCrtcInfo(display, mon_res, mon_res->crtcs[0]);
 
-  xOffset = get_primary_monitor_xoffset(display, mon_res, mon_info);
-  yOffset = get_primary_monitor_yoffset(display, mon_res, mon_info);
-  xPrimaryWidth = get_primary_monitor_width(display, mon_res, mon_info);
-  yPrimaryHeight = get_primary_monitor_height(display, mon_res, mon_info);
+  xOffset = get_primary_monitor_xoffset(mon_info);
+  yOffset = get_primary_monitor_yoffset(mon_info);
+  xPrimaryWidth = get_primary_monitor_width(mon_info);
+  yPrimaryHeight = get_primary_monitor_height(mon_info);
   int v = close_display(display);
 
   // xOffset = Nan::To<int32_t>(info[8]).FromJust();

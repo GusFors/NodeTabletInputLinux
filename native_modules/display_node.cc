@@ -20,22 +20,22 @@ NAN_METHOD(getDisplaysTotalHeight) {
 }
 
 NAN_METHOD(getPrimaryMonitorXoffset) {
-  int xoffset = get_primary_monitor_xoffset(display, mon_res, mon_info);
+  int xoffset = get_primary_monitor_xoffset(mon_info);
   info.GetReturnValue().Set(Nan::New(xoffset));
 }
 
 NAN_METHOD(getPrimaryMonitorYoffset) {
-  int yoffset = get_primary_monitor_yoffset(display, mon_res, mon_info);
+  int yoffset = get_primary_monitor_yoffset(mon_info);
   info.GetReturnValue().Set(Nan::New(yoffset));
 }
 
 NAN_METHOD(getPrimaryMonitorWidth) {
-  int width = get_primary_monitor_width(display, mon_res, mon_info);
+  int width = get_primary_monitor_width(mon_info);
   info.GetReturnValue().Set(Nan::New(width));
 }
 
 NAN_METHOD(getPrimaryMonitorHeight) {
-  int height = get_primary_monitor_height(display, mon_res, mon_info);
+  int height = get_primary_monitor_height(mon_info);
   info.GetReturnValue().Set(Nan::New(height));
 }
 

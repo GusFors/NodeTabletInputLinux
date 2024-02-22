@@ -19,11 +19,12 @@ extern "C" {
 
 int get_displays_total_width(Display *display);
 int get_displays_total_height(Display *display);
-int get_primary_monitor_xoffset(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info);
-int get_primary_monitor_yoffset(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info);
-int get_primary_monitor_width(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info);
-int get_primary_monitor_height(Display *display, XRRScreenResources *mon_res, XRRCrtcInfo *mon_info);
 int get_number_of_monitors(Display *display);
+int get_primary_monitor_xoffset(XRRCrtcInfo *mon_info);
+int get_primary_monitor_yoffset(XRRCrtcInfo *mon_info);
+int get_primary_monitor_width(XRRCrtcInfo *mon_info);
+int get_primary_monitor_height(XRRCrtcInfo *mon_info);
+
 int close_display(Display *display);
 void free_xresources(XRRScreenResources *mon_res, XRRCrtcInfo *mon_info);
 void get_full_display_config(struct display_config *display_conf);
