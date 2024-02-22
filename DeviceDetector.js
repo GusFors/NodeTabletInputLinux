@@ -71,7 +71,7 @@ class DeviceDetector {
   async getHidInfo() {
     let hidrawDirs = await fs.readdir('/sys/class/hidraw')
     let devices = []
-    
+
     for (let i = 0; i < hidrawDirs.length; i++) {
       let currentDevice = await fs.readFile(`/sys/class/hidraw/${hidrawDirs[i]}/device/uevent`, { encoding: 'utf8' })
       let devObj = {}
@@ -107,7 +107,6 @@ class DeviceDetector {
           let currentPath = detectedTablets[i].hidpath
           deviceBuffers.push(fsStream.createReadStream(currentPath))
           deviceBuffers[i].on('data', (buffer) => {
-            // console.log(buffer, 'testbuffer' + i)
             if (buffer.length > 31) {
               console.log('try holding pen closer to tablet')
               return
@@ -130,7 +129,6 @@ class DeviceDetector {
   }
 
   async tabletDetector() {
-    // let allDevices = HID.devices()
     let wacDevices = await this.getTabletHidInfo()
     let tabletMatches = []
     let tabletName

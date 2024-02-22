@@ -48,6 +48,7 @@ void init_uinput(const char *name, int x_max, int y_max) {
 
   struct uinput_abs_setup abs_xprops;
   memset(&abs_xprops, 0, sizeof(abs_xprops));
+
   abs_xprops.code = ABS_X;
   abs_xprops.absinfo.minimum = 0;
   abs_xprops.absinfo.maximum = x_max;
@@ -57,6 +58,7 @@ void init_uinput(const char *name, int x_max, int y_max) {
 
   struct uinput_abs_setup abs_yprops;
   memset(&abs_yprops, 0, sizeof(abs_yprops));
+
   abs_yprops.code = ABS_Y;
   abs_yprops.absinfo.minimum = 0;
   abs_yprops.absinfo.maximum = y_max;
@@ -150,7 +152,7 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
 }
 
 void tabletbtn_input_event(int x, int y, int pressure, int btn) {
-  int num_bytes = 0;
+  int num_bytes = 0; // count bytes to write
   struct input_event position_events[5];
   memset(&position_events, 0, sizeof(position_events));
 
@@ -171,7 +173,6 @@ void tabletbtn_input_event(int x, int y, int pressure, int btn) {
     }
 
     if (((btn ^ last_btn_state) & PEN_BUTTON2)) {
-      // printf("pen2 %d\n", (btn & PEN_BUTTON2) >> 2);
       num_bytes += create_input(EV_KEY, BTN_RIGHT, (btn & PEN_BUTTON2) >> 2, &position_events[num_bytes / EVENT_SIZE]);
     }
   }

@@ -10,8 +10,6 @@ let isClick = false
 let inRange = false
 
 function standardBufferParser(reportBuffer) {
-  // console.log(reportBuffer)
-
   if (reportBuffer[0] > 0x10) {
     return
   }
@@ -137,10 +135,6 @@ function standardVirtualBufferParser(reportBuffer) {
     return
   }
 
-  // if (reportBuffer[0] !== 0x02) {
-  //   return
-  // }
-
   x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
   y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
 
@@ -264,17 +258,11 @@ let xInp = []
 let yInp = []
 let isInp = true
 
-// experimental, calculate an extra position value between the two most recent position reports from the buffer,
+// calculate an extra position value between the two most recent position reports from the buffer,
 function doubleReportBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
     return
   }
-
-  // if (reportBuffer[0] !== 0x02) {
-  //   // xInp = []
-  //   // yInp = []
-  //   return
-  // }
 
   x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
   y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
@@ -442,7 +430,6 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
   }
 }
 
-// experimental
 function touchBufferParser(reportBuffer, tablet) {
   if (inRange) return
 
