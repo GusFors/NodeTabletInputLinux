@@ -44,8 +44,9 @@ int main(int argc, char *argv[]) {
   tablet.xindex = xbuf_index;
   tablet.yindex = ybuf_index;
 
-  init_uinput(device_name, display_conf.total_width, display_conf.total_height);
-  init_read(tablet, display_conf, hidraw_path);
+  init_tablet(device_name, hidraw_path, tablet, display_conf);
+  // init_uinput(device_name, display_conf.total_width, display_conf.total_height);
+  // init_read(tablet, display_conf, hidraw_path);
 
   return 0;
 }

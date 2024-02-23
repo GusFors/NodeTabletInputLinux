@@ -24,9 +24,7 @@ NAN_METHOD(initRead) {
   int32_t xMax = Nan::To<int32_t>(info[2]).FromJust();
   int32_t yMax = Nan::To<int32_t>(info[3]).FromJust();
 
-  init_uinput(("Virtual uinput " + device_name).c_str(), xMax, yMax);
-  std::cout << "Created device: "
-            << "Virtual uinput " + device_name;
+  // init_uinput(("Virtual uinput " + device_name).c_str(), xMax, yMax);
 
   // read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();
@@ -62,6 +60,8 @@ NAN_METHOD(initRead) {
   // tablet.hidraw_path = tablet_path;
 
   struct display_config display_conf;
+  display_conf.total_width = xMax;
+  display_conf.total_height = yMax;
   display_conf.offset_x = xOffset;
   display_conf.offset_y = yOffset;
   display_conf.primary_height = yPrimaryHeight;
@@ -74,9 +74,8 @@ NAN_METHOD(initRead) {
   std::cout << "\n"
             << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos << "\n";
 
-  init_read(tablet, display_conf, hidraw_path.c_str());
-
-  // parse_tablet_buffer(tablet);
+  // init_read(tablet, display_conf, hidraw_path.c_str());
+  init_tablet(("Virtual uinput " + device_name).c_str(), hidraw_path.c_str(), tablet, display_conf);
 }
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "initRead", initRead); }

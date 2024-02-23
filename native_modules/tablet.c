@@ -12,11 +12,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-int fd;
-int fdn;
-
-void init_uinput(const char *name, int x_max, int y_max) {
-  fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+int init_uinput(const char *name, int x_max, int y_max) {
+  int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
   if (fd < 0) {
     printf("error opening uinput\n");
@@ -67,6 +64,8 @@ void init_uinput(const char *name, int x_max, int y_max) {
   // write(fd, &utablet_setup, sizeof(utablet_setup));
   ioctl(fd, UI_DEV_CREATE);
   printf("created uinput device:%s\n", name);
+
+  return fd;
 }
 
 int is_click = 0;
@@ -86,7 +85,7 @@ int create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_
   return EVENT_SIZE;
 }
 
-void tabletbtn_input_event(int x, int y, int pressure, int btn) {
+void tabletbtn_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
   int num_bytes = 0; // count bytes to write
   struct input_event position_events[5];
   memset(&position_events, 0, sizeof(position_events));
@@ -111,7 +110,7 @@ void tabletbtn_input_event(int x, int y, int pressure, int btn) {
     // printf("btn_state: %08b\n", ((btn ^ last_btn_state) & 0b00000111));
   }
 
-  int res_w = write(fd, position_events, num_bytes);
+  int res_w = write(tablet_fd, position_events, num_bytes);
   last_btn_state = btn;
 
   struct input_event sync_event;
@@ -121,11 +120,11 @@ void tabletbtn_input_event(int x, int y, int pressure, int btn) {
   sync_event.value = 0;
   sync_event.code = SYN_REPORT;
 
-  int b = write(fd, &sync_event, sizeof(sync_event));
+  int b = write(tablet_fd, &sync_event, sizeof(sync_event));
   // printf("x:%d, y:%d, nbytes:%d syncwrite:%d fd:%d\n", x, y, res_w, b, fd);
 }
 
-void tablet_input_event(int x, int y, int pressure, int btn) {
+void tablet_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
   struct input_event position_events[4];
   memset(&position_events, 0, sizeof(position_events));
   // struct input_event *position_events = (struct input_event *)malloc(sizeof(struct input_event) * 4);
@@ -174,7 +173,7 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
     }
   }
 
-  int res_w = write(fd, position_events, sizeof(position_events));
+  int res_w = write(tablet_fd, position_events, sizeof(position_events));
 
   struct input_event sync_event;
   memset(&sync_event, 0, sizeof(sync_event));
@@ -183,7 +182,7 @@ void tablet_input_event(int x, int y, int pressure, int btn) {
   sync_event.value = 0;
   sync_event.code = SYN_REPORT;
 
-  write(fd, &sync_event, sizeof(sync_event));
+  write(tablet_fd, &sync_event, sizeof(sync_event));
 }
 
 int area_boundary_clamp(int max_width, int max_height, double x, double y, double *px, double *py) {
@@ -206,7 +205,7 @@ int area_boundary_clamp(int max_width, int max_height, double x, double y, doubl
   return 1;
 }
 
-void parse_tablet_buffer(struct tablet_config tablet, struct display_config display) {
+void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
   int y = 0;
   double x_scaled = 0;
@@ -218,7 +217,7 @@ void parse_tablet_buffer(struct tablet_config tablet, struct display_config disp
   memset(buf, 0x0, sizeof(buf));
 
   while (active) {
-    r = read(fdn, buf, 16);
+    r = read(buffer_fd, buf, 16);
 
     if (r < 0) {
       perror("\nread err");
@@ -235,27 +234,33 @@ void parse_tablet_buffer(struct tablet_config tablet, struct display_config disp
 
       // if ((buf[0] & 0xff) < 0x11) {
       if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
-        tabletbtn_input_event(x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[1]);
+        tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[1]);
     }
   }
 }
 
-void init_read(struct tablet_config tablet, struct display_config display_conf, const char *hidraw_path) {
-  char tablet_path[32];
-  strlcpy(tablet_path, hidraw_path, 32);
+int init_read_buffer(const char *hidraw_path) {
+  char tabletbuf_path[32];
+  strlcpy(tabletbuf_path, hidraw_path, 32);
 
-  fdn = open(tablet_path, O_RDONLY | O_SYNC);
+  int fdn = open(tabletbuf_path, O_RDONLY | O_SYNC);
   // fdn = open(tablet_path, O_RDONLY | O_NONBLOCK);
 
   if (fdn < 0) {
-    printf("Unable to open device with path %s:", tablet_path);
+    printf("Unable to open device with path %s:", tabletbuf_path);
     perror("\nread err");
     exit(EXIT_FAILURE);
   }
 
-  printf("reading reports from: %s\n", tablet_path);
+  printf("reading reports from: %s\n", tabletbuf_path);
 
-  parse_tablet_buffer(tablet, display_conf);
+  return fdn;
+}
+
+void init_tablet(const char *name, const char *hidraw_path, struct tablet_config tablet, struct display_config display) {
+  int tablet_input_fd = init_uinput(name, display.total_width, display.total_height);
+  int buffer_fd = init_read_buffer(hidraw_path);
+  parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
 }
 
 // int xpos_buffer[64];

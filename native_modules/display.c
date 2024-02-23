@@ -35,7 +35,6 @@ int get_number_of_monitors(Display *display) {
   return num_monitors;
 }
 
-
 int get_primary_monitor_xoffset(XRRCrtcInfo *mon_info) { return mon_info->x; }
 
 int get_primary_monitor_yoffset(XRRCrtcInfo *mon_info) { return mon_info->y; }
