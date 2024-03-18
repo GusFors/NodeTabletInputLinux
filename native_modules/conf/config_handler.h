@@ -7,7 +7,8 @@
 extern "C" {
 #endif
 
-struct tablet_config get_tablet_config(const char *tablet_name);
+// struct tablet_config get_tablet_config(const char *tablet_name);
+struct tablet_config get_tablet_config(int vendor, int product);
 struct display_config get_display_config();
 
 #ifdef __cplusplus

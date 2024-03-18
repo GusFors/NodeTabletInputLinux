@@ -5,8 +5,42 @@
 #include "../display.h"
 #include "../tablet.h"
 
-struct tablet_config get_tablet_config(const char *tablet_name) {
+struct tablet_config get_tablet_config(int vendor, int product) {
+  FILE *conf_file;
+  conf_file = fopen("./conf/tablets.conf", "r");
+
+  if (conf_file == NULL) {
+    printf("Err when opening file");
+    exit(1);
+  }
+
+  char line[128] = "";
+  // int vendor = 1386;
+  // int product = 782;
   struct tablet_config tablet_conf;
+  int vend_match = 0;
+  int prod_match = 0;
+
+  while ((fgets(line, 128, conf_file)) != NULL) {
+    char *key = strtok(line, "=");
+    char *strvalue = strtok(NULL, "=");
+
+    if (strvalue != NULL) {
+      int value = strtol(strvalue, NULL, 0);
+
+      if (strcmp("vendor", key) == 0 && value == vendor)
+        vend_match = 1;
+
+      if (strcmp("product", key) == 0 && value == product)
+        prod_match = 1;
+
+      printf("%s=%d\n", key, value);
+    }
+  }
+  printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+
+  fclose(conf_file);
+
   // write values directly here for now
   tablet_conf.left = 3600;
   tablet_conf.right = 11600;

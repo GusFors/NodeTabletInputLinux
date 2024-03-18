@@ -5,10 +5,12 @@
 #include "display.h"
 #include "tablet.h"
 #include "./conf/device_detector.h"
+#include "./conf/config_handler.h"
 
 int main(int argc, char *argv[]) {
   struct device_info tabletdev = detect_tablet();
   printf("path: %s\n", tabletdev.hidraw_path);
+  struct tablet_config tablet_conf = get_tablet_config(tabletdev.vendor, tabletdev.product);
 
   const char *hidraw_path = argv[1];
   const char *device_name = argv[2];
