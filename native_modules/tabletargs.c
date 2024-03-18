@@ -4,8 +4,12 @@
 #include <unistd.h>
 #include "display.h"
 #include "tablet.h"
+#include "./conf/device_detector.h"
 
 int main(int argc, char *argv[]) {
+  struct device_info tabletdev = detect_tablet();
+  printf("path: %s\n", tabletdev.hidraw_path);
+
   const char *hidraw_path = argv[1];
   const char *device_name = argv[2];
   printf("hidraw_path: %s\n", hidraw_path);

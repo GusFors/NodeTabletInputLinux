@@ -15,6 +15,8 @@ struct tablet_config {
   double yscale;
 };
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

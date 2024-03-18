@@ -1,12 +1,14 @@
-#include <linux/limits.h>
+#include "device_detector.h"
 #include <stdio.h>
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
 
-int main(void) {
+struct device_info detect_tablet() {
   DIR *hidraw_dir;
   struct dirent *hid_entry;
+  struct device_info tablet;
+  memset(&tablet, 0, sizeof(tablet));
 
   hidraw_dir = opendir("/sys/class/hidraw");
 
@@ -16,10 +18,9 @@ int main(void) {
   int found_device = 0;
   while ((hid_entry = readdir(hidraw_dir)) != NULL) {
     if (hid_entry->d_type == DT_LNK) {
-      char catpath[PATH_MAX] = "/sys/class/hidraw/";
-      strlcat(catpath, hid_entry->d_name, PATH_MAX - 1);
-      strlcat(catpath, "/device/uevent", PATH_MAX - 1);
-      printf("%s\n", catpath);
+      char catpath[256] = "/sys/class/hidraw/";
+      strlcat(catpath, hid_entry->d_name, 256);
+      strlcat(catpath, "/device/uevent", 256);
 
       FILE *uevent_file;
       uevent_file = fopen(catpath, "r");
@@ -31,7 +32,7 @@ int main(void) {
       while ((fgets(line, 128, uevent_file)) != NULL) {
         char *key = strtok(line, "=");
         char *value = strtok(NULL, "=");
-        printf("key:%s, value:%s", key, value);
+        // printf("key:%s, value:%s", key, value);
 
         if (strcmp(key, "HID_ID") == 0) {
           char *valueid_split;
@@ -50,16 +51,22 @@ int main(void) {
         }
 
         if (vendor == 1386) {
-          printf("vendor: %d, product: %d, path: %s", vendor, product, hid_entry->d_name);
+          // printf("vendor: %d, product: %d, path: %s", vendor, product, hid_entry->d_name);
+          tablet.vendor = vendor;
+          tablet.product = product;
+
+          char path[128] = "/dev/";
+          strlcat(path, hid_entry->d_name, 128);
+          strlcpy(tablet.hidraw_path, path, 128);
           break;
         }
       }
-      printf("\n");
+      // printf("\n");
       fclose(uevent_file);
     }
     if (found_device)
       break;
   }
   closedir(hidraw_dir);
-  return 0;
+  return tablet;
 }
