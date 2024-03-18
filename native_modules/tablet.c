@@ -198,12 +198,13 @@ int area_boundary_clamp(int max_width, int max_height, double x, double y, doubl
   if (y > max_height)
     *py = max_height;
 
-  if (*px == 0 && *py == 0) {
+  if (*px == 0 && *py == 0)
     return 0;
-  }
 
   return 1;
 }
+
+// int pen_btn_changed(int btn_state, int last_btn_state) {}
 
 void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
@@ -212,6 +213,7 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   double y_scaled = 0;
   int r;
   int active = 1;
+  // int last_btn_state = 0b11010000;
 
   uint8_t buf[64];
   memset(buf, 0x0, sizeof(buf));
