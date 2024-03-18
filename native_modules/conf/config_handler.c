@@ -14,10 +14,8 @@ struct tablet_config get_tablet_config(int vendor, int product) {
     exit(1);
   }
 
-  char line[128] = "";
-  // int vendor = 1386;
-  // int product = 782;
   struct tablet_config tablet_conf;
+  char line[128] = "";
   int vend_match = 0;
   int prod_match = 0;
 
@@ -25,31 +23,52 @@ struct tablet_config get_tablet_config(int vendor, int product) {
     char *key = strtok(line, "=");
     char *strvalue = strtok(NULL, "=");
 
+    if (vend_match == 1 && prod_match == 1 && strvalue == NULL) {
+      printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+      break;
+    }
+
     if (strvalue != NULL) {
       int value = strtol(strvalue, NULL, 0);
 
-      if (strcmp("vendor", key) == 0 && value == vendor)
+      if (strcmp("left", key) == 0) {
+        tablet_conf.left = value;
+      } else if (strcmp("right", key) == 0) {
+        tablet_conf.right = value;
+      } else if (strcmp("top", key) == 0) {
+        tablet_conf.top = value;
+      } else if (strcmp("bottom", key) == 0) {
+        tablet_conf.bottom = value;
+      } else if (strcmp("xindex", key) == 0) {
+        tablet_conf.xindex = value;
+      } else if (strcmp("yindex", key) == 0) {
+        tablet_conf.yindex = value;
+      } else if (strcmp("vendor", key) == 0 && value == vendor) {
         vend_match = 1;
-
-      if (strcmp("product", key) == 0 && value == product)
+      } else if (strcmp("product", key) == 0 && value == product) {
         prod_match = 1;
+      }
 
       printf("%s=%d\n", key, value);
     }
   }
-  printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
 
   fclose(conf_file);
 
+  if (vend_match == 0 || prod_match == 0) {
+    printf("\nfailed to find a matching tablet config\n");
+    exit(0);
+  }
+
   // write values directly here for now
-  tablet_conf.left = 3600;
-  tablet_conf.right = 11600;
-  tablet_conf.top = 1406;
-  tablet_conf.bottom = 5906;
-  tablet_conf.xindex = 2;
-  tablet_conf.yindex = 4;
   tablet_conf.xscale = 0.32;
   tablet_conf.yscale = 0.32;
+  // tablet_conf.left = 3600;
+  // tablet_conf.right = 11600;
+  // tablet_conf.top = 1406;
+  // tablet_conf.bottom = 5906;
+  // tablet_conf.xindex = 2;
+  // tablet_conf.yindex = 4;
 
   return tablet_conf;
 }
