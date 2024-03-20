@@ -12,10 +12,13 @@ struct device_info detect_tablet() {
 
   hidraw_dir = opendir("/sys/class/hidraw");
 
-  if (hidraw_dir == NULL)
-    printf("error opening dir");
+  if (hidraw_dir == NULL) {
+    printf("error opening dir\n");
+    exit(0);
+  }
 
   int found_device = 0;
+
   while ((hid_entry = readdir(hidraw_dir)) != NULL) {
     if (hid_entry->d_type == DT_LNK) {
       char catpath[256] = "/sys/class/hidraw/";
@@ -64,9 +67,17 @@ struct device_info detect_tablet() {
       // printf("\n");
       fclose(uevent_file);
     }
+
     if (found_device)
       break;
   }
+
   closedir(hidraw_dir);
+
+  if (tablet.product == 0) {
+    printf("failed to find tablet hidraw\n");
+    exit(0);
+  }
+
   return tablet;
 }
