@@ -14,7 +14,7 @@ struct device_info detect_tablet() {
 
   if (hidraw_dir == NULL) {
     printf("error opening dir\n");
-    exit(0);
+    exit(1);
   }
 
   int found_device = 0;

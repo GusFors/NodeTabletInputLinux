@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "../display.h"
 #include "../tablet.h"
 #include "config_handler.h"
@@ -19,14 +20,20 @@ struct tablet_config get_tablet_config(int vendor, int product) {
   char line[128] = "";
   int vend_match = 0;
   int prod_match = 0;
+  int matched_keys = 0;
 
   while ((fgets(line, 128, conf_file)) != NULL) {
     char *key = strtok(line, "=");
-    char *strvalue = strtok(NULL, "=");
+    char *strvalue = strtok(NULL, " ");
 
-    if (vend_match == 1 && prod_match == 1 && strvalue == NULL) {
-      printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+    if (vend_match == 1 && prod_match == 1 && strvalue == NULL)
       break;
+
+    if (line[0] == '[') {
+      printf("\nNew conf entry: %s", key);
+      vend_match = 0;
+      prod_match = 0;
+      memset(&tablet_conf, 0, sizeof(tablet_conf));
     }
 
     if (strvalue != NULL) {
@@ -54,22 +61,18 @@ struct tablet_config get_tablet_config(int vendor, int product) {
     }
   }
 
-  fclose(conf_file);
-
-  if (vend_match == 0 || prod_match == 0) {
+  if (vend_match == 1 && prod_match == 1) {
+    printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+  } else {
     printf("\nfailed to find a matching tablet config\n");
     exit(0);
   }
 
+  fclose(conf_file);
+
   // write values directly here for now
   tablet_conf.xscale = 0.32;
   tablet_conf.yscale = 0.32;
-  // tablet_conf.left = 3600;
-  // tablet_conf.right = 11600;
-  // tablet_conf.top = 1406;
-  // tablet_conf.bottom = 5906;
-  // tablet_conf.xindex = 2;
-  // tablet_conf.yindex = 4;
 
   return tablet_conf;
 }
@@ -96,9 +99,14 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
     char *key = strtok(line, "=");
     char *strvalue = strtok(NULL, "=");
 
-    if (vend_match == 1 && prod_match == 1 && strvalue == NULL) {
-      printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+    if (vend_match == 1 && prod_match == 1 && strvalue == NULL)
       break;
+
+    if (line[0] == '[') {
+      printf("\nNew conf entry: %s", key);
+      vend_match = 0;
+      prod_match = 0;
+      memset(&tablet_conf, 0, sizeof(tablet_conf));
     }
 
     if (strvalue != NULL) {
@@ -129,7 +137,9 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
 
   fclose(conf_file);
 
-  if (vend_match == 0 || prod_match == 0) {
+  if (vend_match == 1 && prod_match == 1) {
+    printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+  } else {
     printf("\nfailed to find a matching tablet config\n");
     exit(0);
   }
@@ -148,6 +158,95 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
 
   printf("\nconverted config\n");
   print_tablet_config(tablet_conf);
+
+  return tablet_conf;
+}
+
+struct tablet_config get_tablet_config_trim(int vendor, int product) {
+  FILE *conf_file;
+  conf_file = fopen("./conf/tablets.conf", "r");
+
+  if (conf_file == NULL) {
+    printf("Err when opening file");
+    exit(1);
+  }
+
+  struct tablet_config tablet_conf;
+  char line[128] = "";
+  int vend_match = 0;
+  int prod_match = 0;
+
+  while ((fgets(line, 128, conf_file)) != NULL) {
+    char *key = strtok(line, "=");
+    char *strvalue = strtok(NULL, " ");
+    char *key_start = key;
+
+    // printf("strvalue:%s\n", strvalue);
+
+    if (vend_match == 1 && prod_match == 1 && strvalue == NULL)
+      break;
+
+    // if (key != NULL && strvalue == NULL)
+    //   printf("Could not match: %s", key);
+
+    while (isspace(*key_start)) {
+      if (key_start == key)
+        printf("key_start init:%p\n", key_start);
+
+      key_start++;
+    }
+
+    if (key_start != key)
+      printf("key_start end:%p\n", key_start);
+
+    // if (isspace(key_start[0]))
+    //   printf("isspace\n");
+
+    if (line[0] == '[') {
+      printf("\nNew conf entry: %s", key);
+      vend_match = 0;
+      prod_match = 0;
+      memset(&tablet_conf, 0, sizeof(tablet_conf));
+    }
+
+    if (strvalue != NULL) {
+      int value = strtol(strvalue, NULL, 0);
+      // char *ven = "vendor";
+      // char *ind = strstr(key, ven); // substr
+
+      if (strcmp("left", key_start) == 0) {
+        tablet_conf.left = value;
+      } else if (strcmp("right", key_start) == 0) {
+        tablet_conf.right = value;
+      } else if (strcmp("top", key_start) == 0) {
+        tablet_conf.top = value;
+      } else if (strcmp("bottom", key_start) == 0) {
+        tablet_conf.bottom = value;
+      } else if (strcmp("xindex", key_start) == 0) {
+        tablet_conf.xindex = value;
+      } else if (strcmp("yindex", key_start) == 0) {
+        tablet_conf.yindex = value;
+      } else if (strcmp("vendor", key_start) == 0 && value == vendor) {
+        vend_match = 1;
+      } else if (strcmp("product", key_start) == 0 && value == product) {
+        prod_match = 1;
+      }
+
+      printf("%s=%d\n", key, value);
+    }
+  }
+
+  if (vend_match == 1 && prod_match == 1) {
+    printf("matched vendor: %d, matched product: %d\n", vend_match, prod_match);
+  } else {
+    printf("\nfailed to find a matching tablet config\n");
+    exit(0);
+  }
+
+  fclose(conf_file);
+
+  tablet_conf.xscale = 0.32;
+  tablet_conf.yscale = 0.32;
 
   return tablet_conf;
 }
