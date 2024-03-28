@@ -78,58 +78,6 @@ function standardBufferParser(reportBuffer) {
   }
 }
 
-function pressureBufferParser(reportBuffer) {
-  if (reportBuffer[0] > 0x10) {
-    return
-  }
-
-  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
-  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
-
-  xS = (x - this.settings.left) * this.xScale
-  yS = (y - this.settings.top) * this.yScale
-
-  if (xS > this.monitorConfig.width) {
-    xS = this.monitorConfig.width
-  }
-
-  if (xS < 0) {
-    xS = 0
-  }
-
-  if (yS > this.monitorConfig.height) {
-    yS = this.monitorConfig.height
-  }
-
-  if (yS < 0) {
-    yS = 0
-  }
-
-  if (x === 0 && y === 0) {
-    return
-  }
-
-  let pressure = reportBuffer[6] | (reportBuffer[7] << 8)
-  let mouseClick = -1
-  switch (reportBuffer[1] & 0x07) {
-    case 0x01:
-      if (isClick === false) {
-        isClick = true
-        mouseClick = 1
-      }
-      break
-
-    case 0x00:
-      if (isClick) {
-        isClick = false
-        mouseClick = 0
-      } else {
-        mouseClick = -1
-      }
-  }
-  Pointer.setUinputPointer(xS + this.monitorConfig.xOffset, yS, pressure, mouseClick)
-}
-
 function standardVirtualBufferParser(reportBuffer) {
   if (reportBuffer[0] > 0x10) {
     return
@@ -491,17 +439,9 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   }
 }
 
-function proBufferParser(reportBuffer) {
-  if (reportBuffer[0] === 17) {
-    // touch wheel
-  }
-}
-
 module.exports = {
   standardBufferParser,
-  pressureBufferParser,
   doubleReportBufferParser,
-  proBufferParser,
   standardAvgBufferParser,
   initXPointer,
   initUinput,
@@ -510,3 +450,9 @@ module.exports = {
   Pointer,
   touchBufferParser,
 }
+
+// let pressure = reportBuffer[6] | (reportBuffer[7] << 8)
+// Pointer.setUinputPointer(xS + this.monitorConfig.xOffset, yS, pressure, mouseClick)
+// if (reportBuffer[0] === 17) {
+//   // touch wheel
+// }
