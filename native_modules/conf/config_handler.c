@@ -220,6 +220,7 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
 
     if (strvalue != NULL) {
       int value = strtol(strvalue, NULL, 0);
+      
       // char *ven = "vendor";
       // char *ind = strstr(key, ven); // substr
 

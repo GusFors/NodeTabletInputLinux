@@ -14,7 +14,6 @@ function standardBufferParser(reportBuffer) {
     return
   }
 
-  // get x and y position from the buffer, get the indexes from the tablets config file
   x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
   y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
 
@@ -22,7 +21,6 @@ function standardBufferParser(reportBuffer) {
   xS = (x - this.settings.left) * this.xScale
   yS = (y - this.settings.top) * this.yScale
 
-  // extra checks to keep cursor on primary monitor
   if (xS > this.monitorConfig.width) {
     xS = this.monitorConfig.width
   }
@@ -39,7 +37,7 @@ function standardBufferParser(reportBuffer) {
     yS = 0
   }
 
-  // used when touch is active
+  // if using touch, check for pen first
   if (reportBuffer[1] > 0x00) {
     inRange = true
   } else {
@@ -50,10 +48,8 @@ function standardBufferParser(reportBuffer) {
     return
   }
 
-  // add offset to xS
   Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
-  // different pens can have different button bits
   switch (reportBuffer[1] & 0x07) {
     case 0x01:
       if (isClick === false) {
@@ -351,7 +347,6 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
   let sum = 0
   let latest = positionBufferArr.length - 1
 
-  // wait until there are enough values, prevent cursor getting stuck at display border
   if (positionBufferArr.length >= amountOfPositions) {
     // let s = 0
     // for (let y = 0; y < 5; y++) {
@@ -359,7 +354,6 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
     // }
 
     // if (isNaN(s) || s > 65) {
-    //    console.log('speed ', s)
     //   let l = positionBufferArr[latest]
     //   // for (let j = 0; j < avgPositionStrength; j++) {
     //   //   positionBufferArr[latest - j] = (positionBufferArr[latest - j] - l) / 2
@@ -377,7 +371,7 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
         sum += positionBufferArr[i - 1]
       }
     }
-    // how much the most recent position value should be prioritized when calculating average position
+
     for (let y = 0; y < currentPositionPrio; y++) {
       sum += positionBufferArr[latest]
       amountOfPositions++
@@ -401,7 +395,6 @@ module.exports = {
 }
 
 // let pressure = reportBuffer[6] | (reportBuffer[7] << 8)
-// Pointer.setUinputPointer(xS + this.monitorConfig.xOffset, yS, pressure, mouseClick)
 // if (reportBuffer[0] === 17) {
 //   // touch wheel
 // }
