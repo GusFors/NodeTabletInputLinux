@@ -40,8 +40,11 @@ function standardBufferParser(reportBuffer) {
   }
 
   // used when touch is active
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
+  if (reportBuffer[1] > 0x00) {
+    inRange = true
+  } else {
+    inRange = false
+  }
 
   if (x === 0 && y === 0) {
     return
@@ -102,9 +105,6 @@ function pressureBufferParser(reportBuffer) {
     yS = 0
   }
 
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
-
   if (x === 0 && y === 0) {
     return
   }
@@ -157,72 +157,11 @@ function standardVirtualBufferParser(reportBuffer) {
     yS = 0
   }
 
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
-
-  if (x === 0 && y === 0) {
-    return
+  if (reportBuffer[1] > 0x00) {
+    inRange = true
+  } else {
+    inRange = false
   }
-
-  Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
-
-  switch (reportBuffer[1] & 0x07) {
-    case 0x01:
-      if (isClick === false) {
-        isClick = true
-        Pointer.mouseLeftClickDown()
-      }
-      break
-
-    case 0x04:
-      if (!isClick) {
-        isClick = true
-        Pointer.mouseRightClickDown()
-        Pointer.mouseRightClickUp()
-      }
-      break
-
-    case 0x00:
-      if (isClick) {
-        isClick = false
-        Pointer.mouseLeftClickUp()
-      }
-  }
-}
-
-function proBufferParser(reportBuffer) {
-  if (reportBuffer[0] === 17) {
-    // touch wheel
-  }
-
-  if (reportBuffer[0] != 0x10) {
-    return
-  }
-
-  x = reportBuffer[this.settings.xBufferPositions[0]] | (reportBuffer[this.settings.xBufferPositions[1]] << 8)
-  y = reportBuffer[this.settings.yBufferPositions[0]] | (reportBuffer[this.settings.yBufferPositions[1]] << 8)
-
-  xS = (x - this.settings.left) * this.xScale
-  yS = (y - this.settings.top) * this.yScale
-
-  if (xS > this.monitorConfig.width) {
-    xS = this.monitorConfig.width
-  }
-
-  if (xS < 0) {
-    xS = 0
-  }
-
-  if (yS > this.monitorConfig.height) {
-    yS = this.monitorConfig.height
-  }
-
-  if (yS < 0) {
-    yS = 0
-  }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 
   if (x === 0 && y === 0) {
     return
@@ -285,9 +224,6 @@ function doubleReportBufferParser(reportBuffer) {
   if (yS < 0) {
     yS = 0
   }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 
   if (x === 0 && y === 0) {
     return
@@ -376,9 +312,6 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
   if (yS < 0) {
     yS = 0
   }
-
-  if (reportBuffer[1] === 0x00) inRange = false
-  if (reportBuffer[1] > 0x00) inRange = true
 
   if (x === 0 && y === 0) {
     xBuffer = []
@@ -555,6 +488,12 @@ function averagePosition(positionBufferArr, amountOfPositions, currentPositionPr
     return sum / amountOfPositions
   } else {
     return positionBufferArr[latest]
+  }
+}
+
+function proBufferParser(reportBuffer) {
+  if (reportBuffer[0] === 17) {
+    // touch wheel
   }
 }
 

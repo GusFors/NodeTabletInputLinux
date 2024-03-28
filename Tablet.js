@@ -98,7 +98,6 @@ class Tablet {
       return
     } else {
       console.log('using node parsers with readstreams are currently broken, using interval as workaround')
-      //  process.exit()
       this.tabletHID.buffer.close()
       this.tabletHID.buffer = new EventEmitter()
       let buffer = Buffer.alloc(16)

@@ -21,6 +21,7 @@ struct tablet_config get_tablet_config(int vendor, int product) {
   int vend_match = 0;
   int prod_match = 0;
   int matched_keys = 0;
+  char *name;
 
   while ((fgets(line, 128, conf_file)) != NULL) {
     char *key = strtok(line, "=");
@@ -204,6 +205,14 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
 
     if (line[0] == '[') {
       printf("\nNew conf entry: %s", key);
+
+      // char *name_start = strstr(line, "[");
+      // char *name_end = strstr(line, "]");
+
+      // char *name_start = strtok(key, "[");
+      // char *name_end = strtok(name, "]");
+      // printf("name:%s, %s\n", name, name2);
+
       vend_match = 0;
       prod_match = 0;
       memset(&tablet_conf, 0, sizeof(tablet_conf));

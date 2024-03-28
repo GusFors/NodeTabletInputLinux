@@ -1,6 +1,5 @@
 let isExit = process.argv.includes('-e')
 let isAvg = process.argv.includes('-s')
-let isWebSocket = process.argv.includes('-w')
 let isAutomaticRestart = process.argv.includes('-r')
 let isDoubleReport = process.argv.includes('-d')
 let isVirtualDevice = process.argv.includes('-v')
@@ -33,17 +32,13 @@ const run = async () => {
 }
 run()
 
-if (isExit) {
-  setTimeout(() => {
-    process.exit()
-  }, 10000)
-}
+
+
 let restartInterval
-// might not properly close unused tablets
+
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error.message)
   isRunning = false
-
   console.log(error)
 
   if (isAutomaticRestart) {
