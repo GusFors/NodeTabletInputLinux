@@ -43,23 +43,15 @@ class Tablet {
     console.log(parserSettings)
 
     this.tabletHID = await deviceDetector.getTabletHidBuffer()
-    this.settings = mmToWac(await deviceDetector.getConfig())
+    this.settings = mmToWac(await deviceDetector.getTabletConfig(await this.tabletHID.rawInfo.productId))
     console.log('\nGetting input from', this.settings.name)
 
     this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
     this.yScale = this.monitorConfig.height / ((this.settings.bottom - this.settings.top) / this.settings.multiplier)
 
-    console.log('Total X screen width: ' + this.monitorConfig.xTotalWidth)
-    console.log('Total X screen height: ' + this.monitorConfig.xTotalHeight)
-    console.log('Number of active monitors: ' + this.monitorConfig.numOfMonitors)
-    console.log('Assumed primary monitor xOffset: ' + this.monitorConfig.xOffset)
-    console.log('Assumed primary monitor yOffset: ' + this.monitorConfig.yOffset)
-    console.log('Assumed primary monitor width: ' + this.monitorConfig.width + '\n')
-
     console.log(this.settings)
     console.log(this.monitorConfig)
     console.log(this.tabletHID.rawInfo)
-    console.log('xScale:', this.xScale, 'yScale:', this.yScale)
 
     // ignores other options
     if (parserSettings.isNative) {
@@ -153,11 +145,6 @@ class Tablet {
       console.log('Using touchBufferParser')
     }
     // Display.closeDisplay()
-  }
-
-  closeTablet() {
-    this.tabletHID.buffer.close()
-    this.tabletHID.buffer = null
   }
 
   updateScale() {

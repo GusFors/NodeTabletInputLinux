@@ -7,20 +7,6 @@ class DeviceDetector {
     this.configs = new ConfigHandler().readConfigSync(configPath)
   }
 
-  async getConfig() {
-    return new Promise(async (resolve, reject) => {
-      let wacomDevices = await this.getTabletHidInfo()
-
-      this.configs.forEach((config) => {
-        wacomDevices.forEach((device) => {
-          if (config.productId === device.productId) {
-            return resolve(config)
-          }
-        })
-      })
-    })
-  }
-
   async getTabletHidInfo(logAllDevicesOnly = false) {
     return new Promise(async (resolve, reject) => {
       let hidrawDirs = await fs.readdir('/sys/class/hidraw')
@@ -108,20 +94,15 @@ class DeviceDetector {
     })
   }
 
-  async tabletDetector() {
-    let wacDevices = await this.getTabletHidInfo()
-    let tabletMatches = []
-    let tabletName
-
-    for (let i = 0; i < wacDevices.length; i++) {
-      for (let x = 0; x < this.configs.length; x++) {
-        if (this.configs[x].productId === wacDevices[i].productId) {
-          tabletMatches.push(wacDevices[i])
-          tabletName = this.configs[x].name
+  async getTabletConfig(productId) {
+    return new Promise(async (resolve, reject) => {
+      for (let i = 0; i < this.configs.length; i++) {
+        if (productId === this.configs[i].productId) {
+          resolve(this.configs[i])
         }
       }
-    }
-    return tabletMatches
+      reject('could find matching config')
+    })
   }
 }
 

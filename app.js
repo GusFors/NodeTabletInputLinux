@@ -3,7 +3,6 @@ let isAvg = process.argv.includes('-s')
 let isAutomaticRestart = process.argv.includes('-r')
 let isDoubleReport = process.argv.includes('-d')
 let isVirtualDevice = process.argv.includes('-v')
-let isNewConfig = process.argv.includes('-c')
 let isListDevices = process.argv.includes('-de')
 let isTouch = process.argv.includes('-t')
 let isPressure = process.argv.includes('-p')
@@ -22,7 +21,7 @@ if (isListDevices) {
 let isRunning = false
 const run = async () => {
   const DetectedTablet = new Tablet()
-  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isNewConfig, isTouch, isPressure, isNative, isDoubleReport }, isExit)
+  DetectedTablet.simpleTabletInput({ isVirtual: isVirtualDevice, isTouch, isPressure, isNative, isDoubleReport }, isExit)
   isRunning = true
 }
 run()
