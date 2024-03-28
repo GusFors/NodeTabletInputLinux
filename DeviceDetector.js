@@ -21,7 +21,7 @@ class DeviceDetector {
     })
   }
 
-  async getTabletHidInfo() {
+  async getTabletHidInfo(logAllDevicesOnly = false) {
     return new Promise(async (resolve, reject) => {
       let hidrawDirs = await fs.readdir('/sys/class/hidraw')
 
@@ -40,25 +40,34 @@ class DeviceDetector {
           }
         }
 
-        if (isTablet) {
-          let deviceInfo = currentDevice.split('\n')
-          let sObj = {}
+        let deviceInfo = currentDevice.split('\n')
+        let sObj = {}
 
-          for (let j = 0; j < deviceInfo.length; j++) {
-            let kv = deviceInfo[j].split('=')
-            if (kv[0]) sObj[kv[0]] = kv[1]
+        for (let j = 0; j < deviceInfo.length; j++) {
+          let kv = deviceInfo[j].split('=')
+          if (kv[0]) sObj[kv[0]] = kv[1]
 
-            if (kv[0] === 'HID_ID') {
-              let ids = kv[1].split(':')
-              let conv = parseInt(ids[2], 16)
-              tablet.productId = conv
-            }
+          if (kv[0] === 'HID_ID') {
+            let ids = kv[1].split(':')
+            let conv = parseInt(ids[2], 16)
+            tablet.productId = conv
           }
+        }
 
-          tablet.rawInfo = sObj
-          tablet.hidpath = '/dev/' + hidrawDirs[i]
+        tablet.rawInfo = sObj
+        tablet.hidpath = '/dev/' + hidrawDirs[i]
+
+        if (isTablet) {
           foundTablets.push(tablet)
         }
+
+        if (logAllDevicesOnly) {
+          console.log(sObj, `/dev/${hidrawDirs[i]}`)
+        }
+      }
+
+      if (logAllDevicesOnly) {
+        process.exit()
       }
 
       if (foundTablets.length < 1) {
@@ -66,35 +75,6 @@ class DeviceDetector {
       }
       resolve(foundTablets)
     })
-  }
-
-  async getHidInfo() {
-    let hidrawDirs = await fs.readdir('/sys/class/hidraw')
-    let devices = []
-
-    for (let i = 0; i < hidrawDirs.length; i++) {
-      let currentDevice = await fs.readFile(`/sys/class/hidraw/${hidrawDirs[i]}/device/uevent`, { encoding: 'utf8' })
-      let devObj = {}
-
-      let deviceInfo = currentDevice.split('\n')
-      let sObj = {}
-
-      for (let j = 0; j < deviceInfo.length; j++) {
-        let kv = deviceInfo[j].split('=')
-        if (kv[0]) sObj[kv[0]] = kv[1]
-
-        if (kv[0] === 'HID_ID') {
-          let ids = kv[1].split(':')
-          let conv = parseInt(ids[2], 16)
-          devObj.productId = conv
-        }
-      }
-
-      devObj.rawInfo = sObj
-      devObj.hidpath = '/dev/' + hidrawDirs[i]
-      devices.push(devObj)
-    }
-    return devices
   }
 
   async getTabletHidBuffer() {

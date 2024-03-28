@@ -14,7 +14,6 @@ const {
   initUinput,
   Pointer,
   touchBufferParser,
-  pressureBufferParser,
   initRead,
   standardVirtualBufferParser,
 } = require('./Parsers')

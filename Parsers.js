@@ -323,39 +323,6 @@ function touchBufferParser(reportBuffer, tablet) {
 
     let xS = x * xScale
     let yS = y * yScale
-
-    if (xS < 0) {
-      xS = 0
-    }
-
-    if (yS > tablet.monitorConfig.height) {
-      yS = tablet.monitorConfig.height
-    }
-
-    if (yS < 0) {
-      yS = 0
-    }
-
-    if (x === 0 && y === 0) {
-      return
-    }
-
-    Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
-
-    switch (reportBuffer[3]) {
-      case 0x01:
-        if (isClick === false) {
-          isClick = true
-          Pointer.mouseLeftClickDown()
-        }
-        break
-
-      case 0x00:
-        if (isClick) {
-          isClick = false
-          Pointer.mouseLeftClickUp()
-        }
-    }
   } else {
     let x = reportBuffer[4] << 8
     let y = reportBuffer[5] << 8
@@ -365,24 +332,6 @@ function touchBufferParser(reportBuffer, tablet) {
 
     let xS = x * xScale
     let yS = y * yScale
-
-    if (xS < 0) {
-      xS = 0
-    }
-
-    if (yS > tablet.monitorConfig.height) {
-      yS = tablet.monitorConfig.height
-    }
-
-    if (yS < 0) {
-      yS = 0
-    }
-
-    if (x === 0 && y === 0) {
-      return
-    }
-
-    Pointer.setPointerPosition(xS + tablet.monitorConfig.xOffset, yS)
   }
 }
 

@@ -15,12 +15,7 @@ const Tablet = require('./Tablet')
 if (isListDevices) {
   ;(async () => {
     const d = new DeviceDetector()
-    let devices = await d.getHidInfo()
-
-    for (let i = 0; i < devices.length; i++) {
-      console.log(devices[i])
-    }
-    process.exit()
+    let devices = await d.getTabletHidInfo(true)
   })()
 }
 
@@ -31,8 +26,6 @@ const run = async () => {
   isRunning = true
 }
 run()
-
-
 
 let restartInterval
 
