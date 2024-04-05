@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
   struct device_info tabletdev = detect_tablet();
   printf("path: %s\n", tabletdev.hidraw_path);
-  struct tablet_config tablet = get_tablet_config(tabletdev.vendor, tabletdev.product);
+  struct tablet_config tablet = get_tablet_mmconfig(tabletdev.vendor, tabletdev.product);
 
   const char *hidraw_path = argv[1];
   const char *device_name = argv[2];
@@ -32,6 +32,9 @@ int main(int argc, char *argv[]) {
 
   double xscale = (double)display_conf.primary_width / (right - left);
   double yscale = (double)display_conf.primary_height / (bottom - top);
+  
+  tablet.xscale = (double)display_conf.primary_width / (tablet.right - tablet.left);
+  tablet.yscale = (double)display_conf.primary_height / (tablet.bottom - tablet.top);
 
   // struct tablet_config tablet;
   // tablet.left = left;
@@ -51,7 +54,7 @@ int main(int argc, char *argv[]) {
   printf("yposition:%d\n", tablet.yindex);
   printf("xscale:%f\n\n", tablet.xscale);
 
-  init_tablet(device_name, hidraw_path, tablet, display_conf);
+  init_tablet(device_name, tabletdev.hidraw_path, tablet, display_conf);
   // init_uinput(device_name, display_conf.total_width, display_conf.total_height);
   // init_read(tablet, display_conf, hidraw_path);
 

@@ -1,5 +1,5 @@
-Just made for fun, some stuff might be broken.
+Absolute input tablet parser. Just made for fun, some stuff might be broken.
 
-1. If it doesn't build the native modules automatically with `npm install` run `node-gyp rebuild`
-2. Set tablets area/config in `configs/mmConfigs.json`, optionally run `node utils/converters.js` to convert from/to mm values, see comments in `utils/converters.js` for examples.
+1. Run node parser with `npm install` and `npm start`. When editing native modules use `node-gyp rebuild`. Run `native_modules/tabletargs.c` if not using node. 
+2. Set tablets area/config in `configs/mmConfigs.json` or `native_modules/conf` 
 

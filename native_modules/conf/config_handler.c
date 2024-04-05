@@ -154,8 +154,8 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
   tablet_conf.right = right;
   tablet_conf.top = top;
   tablet_conf.bottom = bottom;
-  tablet_conf.xscale = 0.32;
-  tablet_conf.yscale = 0.32;
+  // tablet_conf.xscale = 0.16;
+  // tablet_conf.yscale = 0.16;
 
   printf("\nconverted config\n");
   print_tablet_config(tablet_conf);
