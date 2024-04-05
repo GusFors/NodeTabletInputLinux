@@ -71,7 +71,6 @@ struct tablet_config get_tablet_config(int vendor, int product) {
 
   fclose(conf_file);
 
-  // write values directly here for now
   tablet_conf.xscale = 0.32;
   tablet_conf.yscale = 0.32;
 
@@ -95,6 +94,7 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
   double h = 0;
   double x = 0;
   double y = 0;
+  int res = 100;
 
   while ((fgets(line, 128, conf_file)) != NULL) {
     char *key = strtok(line, "=");
@@ -113,7 +113,6 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
     if (strvalue != NULL) {
       double value = strtod(strvalue, NULL);
 
-      // check trunc
       if (strcmp("width", key) == 0) {
         w = value;
       } else if (strcmp("height", key) == 0) {
@@ -130,6 +129,8 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
         vend_match = 1;
       } else if (strcmp("product", key) == 0 && value == product) {
         prod_match = 1;
+      } else if (strcmp("res", key) == 0) {
+        res = value;
       }
 
       printf("%s=%f\n", key, value);
@@ -145,17 +146,15 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
     exit(0);
   }
 
-  int left = (x - w / 2) * 100;
-  int right = (x + w / 2) * 100;
-  int top = (y - h / 2) * 100;
-  int bottom = (y + h / 2) * 100;
+  int left = (x - w / 2) * res;
+  int right = (x + w / 2) * res;
+  int top = (y - h / 2) * res;
+  int bottom = (y + h / 2) * res;
 
   tablet_conf.left = left;
   tablet_conf.right = right;
   tablet_conf.top = top;
   tablet_conf.bottom = bottom;
-  // tablet_conf.xscale = 0.16;
-  // tablet_conf.yscale = 0.16;
 
   printf("\nconverted config\n");
   print_tablet_config(tablet_conf);
@@ -220,7 +219,7 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
 
     if (strvalue != NULL) {
       int value = strtol(strvalue, NULL, 0);
-      
+
       // char *ven = "vendor";
       // char *ind = strstr(key, ven); // substr
 
