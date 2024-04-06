@@ -47,7 +47,7 @@ NAN_METHOD(initDisplay) {
 NAN_METHOD(initUinput) {
   fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
-  std::string devName = "Virtual uinput " + std::string(*Nan::Utf8String(info[0]));
+  std::string devName = "uinput " + std::string(*Nan::Utf8String(info[0]));
   int32_t xMax = Nan::To<int32_t>(info[1]).FromJust();
   int32_t yMax = Nan::To<int32_t>(info[2]).FromJust();
   bool isPressure = Nan::To<bool>(info[3]).FromJust();

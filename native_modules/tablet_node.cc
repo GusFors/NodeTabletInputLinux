@@ -24,8 +24,6 @@ NAN_METHOD(initRead) {
   int32_t xMax = Nan::To<int32_t>(info[2]).FromJust();
   int32_t yMax = Nan::To<int32_t>(info[3]).FromJust();
 
-  // init_uinput(("Virtual uinput " + device_name).c_str(), xMax, yMax);
-
   // read from json config file instead of going through node to send all values
   int32_t left = Nan::To<int32_t>(info[4]).FromJust();
   int32_t top = Nan::To<int32_t>(info[5]).FromJust();
@@ -75,7 +73,7 @@ NAN_METHOD(initRead) {
             << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos << "\n";
 
   // init_read(tablet, display_conf, hidraw_path.c_str());
-  init_tablet(("Virtual uinput " + device_name).c_str(), hidraw_path.c_str(), tablet, display_conf);
+  init_tablet(("uinput " + device_name).c_str(), hidraw_path.c_str(), tablet, display_conf);
 }
 
 NAN_MODULE_INIT(init) { Nan::SetMethod(target, "initRead", initRead); }

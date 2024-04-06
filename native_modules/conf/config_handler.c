@@ -71,13 +71,10 @@ struct tablet_config get_tablet_config(int vendor, int product) {
 
   fclose(conf_file);
 
-  tablet_conf.xscale = 0.32;
-  tablet_conf.yscale = 0.32;
-
   return tablet_conf;
 }
 
-struct tablet_config get_tablet_mmconfig(int vendor, int product) {
+struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_name) {
   FILE *conf_file;
   conf_file = fopen("./conf/mmtablets.conf", "r");
 
@@ -105,6 +102,8 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product) {
 
     if (line[0] == '[') {
       printf("\nNew conf entry: %s", key);
+      strlcpy(matched_name, "Absolute uinput Tablet ", 64);
+      strlcat(matched_name, key, 64);
       vend_match = 0;
       prod_match = 0;
       memset(&tablet_conf, 0, sizeof(tablet_conf));

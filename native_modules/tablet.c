@@ -49,8 +49,6 @@ int init_uinput(const char *name, int x_max, int y_max) {
   abs_xprops.code = ABS_X;
   abs_xprops.absinfo.minimum = 0;
   abs_xprops.absinfo.maximum = x_max;
-  // abs_xprops.absinfo = (input_absinfo){.value = 0, .minimum = 0, .maximum = x_max, .fuzz = 0, .flat = 0, .resolution
-  // = 0};
   ioctl(fd, UI_ABS_SETUP, &abs_xprops);
 
   struct uinput_abs_setup abs_yprops;
@@ -61,7 +59,6 @@ int init_uinput(const char *name, int x_max, int y_max) {
   abs_yprops.absinfo.maximum = y_max;
   ioctl(fd, UI_ABS_SETUP, &abs_yprops);
 
-  // write(fd, &utablet_setup, sizeof(utablet_setup));
   ioctl(fd, UI_DEV_CREATE);
   printf("created uinput device:%s\n", name);
 
@@ -127,7 +124,6 @@ void tabletbtn_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
 void tablet_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
   struct input_event position_events[4];
   memset(&position_events, 0, sizeof(position_events));
-  // struct input_event *position_events = (struct input_event *)malloc(sizeof(struct input_event) * 4);
 
   create_input(EV_KEY, BTN_TOOL_PEN, 1, &position_events[0]);
   create_input(EV_ABS, ABS_X, x, &position_events[1]);
