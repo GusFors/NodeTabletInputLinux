@@ -24,7 +24,6 @@ const run = async () => {
 run()
 
 let restartInterval
-
 process.on('uncaughtException', function (error) {
   console.log('Crashed with error: ', error.message)
   isRunning = false

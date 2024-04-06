@@ -101,6 +101,7 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_
       break;
 
     if (line[0] == '[') {
+      // remove newline char?
       printf("\nNew conf entry: %s", key);
       strlcpy(matched_name, "Absolute uinput Tablet ", 64);
       strlcat(matched_name, key, 64);

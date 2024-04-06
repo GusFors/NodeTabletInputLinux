@@ -100,9 +100,7 @@ class Tablet {
       }, 1)
     }
 
-    // init the pointer and display before setting pointer positions and clicks
     initXPointer()
-
     if (parserSettings.isVirtual) {
       let uiDevice = initUinput(await this.settings.name, this.monitorConfig.xTotalWidth, this.monitorConfig.xTotalHeight, parserSettings.isPressure)
       console.log('Created uinput device:', uiDevice)

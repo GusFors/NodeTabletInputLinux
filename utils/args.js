@@ -23,14 +23,12 @@ function getArgValue(key, type, defaultValue) {
       if (defaultValue) {
         return defaultValue
       }
-
       throw new Error(`Argument value ${key} is not of type ${type}, was instead given ${typeof value} '${value}'`)
     }
 
     value = parseFloat(value)
     value = Number.isNaN(value) ? 'Nan' : value
   }
-
   return value
 }
 

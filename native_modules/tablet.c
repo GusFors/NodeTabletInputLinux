@@ -202,6 +202,9 @@ int area_boundary_clamp(int max_width, int max_height, double x, double y, doubl
 
 // int pen_btn_changed(int btn_state, int last_btn_state) {}
 
+int xpos_buffer[4];
+int ypos_buffer[4];
+
 void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
   int y = 0;
@@ -209,6 +212,8 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   double y_scaled = 0;
   int r;
   int active = 1;
+
+  // might skip first click with pth
   // int last_btn_state = 0b11010000;
 
   uint8_t buf[64];
@@ -233,6 +238,65 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
       // if ((buf[0] & 0xff) < 0x11) {
       if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
         tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[1]);
+    }
+  }
+}
+
+void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
+  int x = 0;
+  int y = 0;
+  double x_scaled = 0;
+  double y_scaled = 0;
+  int r;
+  int active = 1;
+
+  int xpos_buffer[] = {-1, -1, -1, -1};
+  int ypos_buffer[] = {-1, -1, -1, -1};
+  int xprevious = -1;
+  int yprevious = -1;
+
+  uint8_t buf[64];
+  memset(buf, 0x0, sizeof(buf));
+
+  while (active) {
+    r = read(buffer_fd, buf, 16);
+
+    if (r < 0) {
+      perror("\nread err");
+      exit(EXIT_FAILURE);
+    }
+
+    if (buf[0] <= 0x10) {
+      // print_hex_buffer(buf, r);
+      x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
+      y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
+
+      x_scaled = (x - tablet.left) * tablet.xscale;
+      y_scaled = (y - tablet.top) * tablet.yscale;
+
+      // if ((buf[0] & 0xff) < 0x11) {
+      if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled)) {
+        x = x_scaled + display.offset_x;
+        y = y_scaled + display.offset_y;
+        int xdiff = abs(xprevious - x);
+        int ydiff = abs(yprevious - y);
+        // printf("diff: %d\n", xdiff);
+
+        if (xdiff <= 3)
+          x = xprevious;
+        else if (xdiff > 3)
+          x = ((xprevious + x) / 2);
+
+        if (ydiff <= 3)
+          y = yprevious;
+        else if (ydiff > 3)
+          y = ((yprevious + y) / 2);
+        // check -1 first?
+
+        tabletbtn_input_event(tablet_fd, x, y, 0, buf[1]);
+        xprevious = x;
+        yprevious = y;
+      }
     }
   }
 }
