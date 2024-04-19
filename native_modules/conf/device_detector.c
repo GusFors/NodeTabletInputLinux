@@ -14,7 +14,7 @@ struct device_info detect_tablet() {
 
   if (hidraw_dir == NULL) {
     printf("error opening dir\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   int found_device = 0;
@@ -92,7 +92,7 @@ struct device_info detect_tablet() {
 
   if (tablet.product == 0) {
     printf("failed to find tablet hidraw\n");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   return tablet;

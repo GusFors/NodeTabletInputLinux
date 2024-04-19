@@ -202,9 +202,6 @@ int area_boundary_clamp(int max_width, int max_height, double x, double y, doubl
 
 // int pen_btn_changed(int btn_state, int last_btn_state) {}
 
-int xpos_buffer[4];
-int ypos_buffer[4];
-
 void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
   int y = 0;
@@ -212,6 +209,9 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   double y_scaled = 0;
   int r;
   int active = 1;
+
+  // int xpos_buffer[4];
+  // int ypos_buffer[4];
 
   // might skip first click with pth
   // int last_btn_state = 0b11010000;
