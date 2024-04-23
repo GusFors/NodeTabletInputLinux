@@ -121,66 +121,6 @@ void tabletbtn_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
   // printf("x:%d, y:%d, nbytes:%d syncwrite:%d fd:%d\n", x, y, res_w, b, fd);
 }
 
-void tablet_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
-  struct input_event position_events[4];
-  memset(&position_events, 0, sizeof(position_events));
-
-  create_input(EV_KEY, BTN_TOOL_PEN, 1, &position_events[0]);
-  create_input(EV_ABS, ABS_X, x, &position_events[1]);
-  create_input(EV_ABS, ABS_Y, y, &position_events[2]);
-
-  switch (((btn & 0xff) & 0x07)) {
-  case 0x01:
-    click_value = 1;
-    if (is_click == 0) {
-      mbtn = BTN_LEFT;
-      is_click = 1;
-      position_events[3].type = EV_KEY;
-      position_events[3].code = mbtn;
-      position_events[3].value = click_value;
-      position_events[3].time.tv_sec = 0;
-      position_events[3].time.tv_usec = 0;
-    }
-    break;
-
-  case 0x04:
-    click_value = 1;
-    if (is_click == 0) {
-      mbtn = BTN_RIGHT;
-      is_click = 1;
-      position_events[3].type = EV_KEY;
-      position_events[3].code = mbtn;
-      position_events[3].value = click_value;
-      position_events[3].time.tv_sec = 0;
-      position_events[3].time.tv_usec = 0;
-    }
-    break;
-
-  case 0x00:
-    click_value = 0;
-    if (is_click) {
-      is_click = 0;
-      position_events[3].type = EV_KEY;
-      position_events[3].code = mbtn;
-      position_events[3].value = click_value;
-      position_events[3].time.tv_sec = 0;
-      position_events[3].time.tv_usec = 0;
-      mbtn = 0;
-    }
-  }
-
-  int res_w = write(tablet_fd, position_events, sizeof(position_events));
-
-  struct input_event sync_event;
-  memset(&sync_event, 0, sizeof(sync_event));
-
-  sync_event.type = EV_SYN;
-  sync_event.value = 0;
-  sync_event.code = SYN_REPORT;
-
-  write(tablet_fd, &sync_event, sizeof(sync_event));
-}
-
 int area_boundary_clamp(int max_width, int max_height, double x, double y, double *px, double *py) {
   if (x > max_width)
     *px = max_width;
@@ -200,8 +140,6 @@ int area_boundary_clamp(int max_width, int max_height, double x, double y, doubl
   return 1;
 }
 
-// int pen_btn_changed(int btn_state, int last_btn_state) {}
-
 void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
   int y = 0;
@@ -209,9 +147,6 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   double y_scaled = 0;
   int r;
   int active = 1;
-
-  // int xpos_buffer[4];
-  // int ypos_buffer[4];
 
   // might skip first click with pth
   // int last_btn_state = 0b11010000;
@@ -229,13 +164,12 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
 
     if (buf[0] <= 0x10) {
       // print_hex_buffer(buf, r);
-      x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
-      y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
+      x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
+      y = (buf[tablet.yindex]) | ((buf[tablet.yindex + 1]) << 8);
 
       x_scaled = (x - tablet.left) * tablet.xscale;
       y_scaled = (y - tablet.top) * tablet.yscale;
 
-      // if ((buf[0] & 0xff) < 0x11) {
       if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
         tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[1]);
     }
@@ -325,6 +259,67 @@ void init_tablet(const char *name, const char *hidraw_path, struct tablet_config
   parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
 }
 
+void tablet_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
+  struct input_event position_events[4];
+  memset(&position_events, 0, sizeof(position_events));
+
+  create_input(EV_KEY, BTN_TOOL_PEN, 1, &position_events[0]);
+  create_input(EV_ABS, ABS_X, x, &position_events[1]);
+  create_input(EV_ABS, ABS_Y, y, &position_events[2]);
+
+  switch (((btn & 0xff) & 0x07)) {
+  case 0x01:
+    click_value = 1;
+    if (is_click == 0) {
+      mbtn = BTN_LEFT;
+      is_click = 1;
+      position_events[3].type = EV_KEY;
+      position_events[3].code = mbtn;
+      position_events[3].value = click_value;
+      position_events[3].time.tv_sec = 0;
+      position_events[3].time.tv_usec = 0;
+    }
+    break;
+
+  case 0x04:
+    click_value = 1;
+    if (is_click == 0) {
+      mbtn = BTN_RIGHT;
+      is_click = 1;
+      position_events[3].type = EV_KEY;
+      position_events[3].code = mbtn;
+      position_events[3].value = click_value;
+      position_events[3].time.tv_sec = 0;
+      position_events[3].time.tv_usec = 0;
+    }
+    break;
+
+  case 0x00:
+    click_value = 0;
+    if (is_click) {
+      is_click = 0;
+      position_events[3].type = EV_KEY;
+      position_events[3].code = mbtn;
+      position_events[3].value = click_value;
+      position_events[3].time.tv_sec = 0;
+      position_events[3].time.tv_usec = 0;
+      mbtn = 0;
+    }
+  }
+
+  int res_w = write(tablet_fd, position_events, sizeof(position_events));
+
+  struct input_event sync_event;
+  memset(&sync_event, 0, sizeof(sync_event));
+
+  sync_event.type = EV_SYN;
+  sync_event.value = 0;
+  sync_event.code = SYN_REPORT;
+
+  write(tablet_fd, &sync_event, sizeof(sync_event));
+}
+
+// int pen_btn_changed(int btn_state, int last_btn_state) {}
 // int xpos_buffer[64];
 // int ypos_buffer[64];
 // usleep(10000);
