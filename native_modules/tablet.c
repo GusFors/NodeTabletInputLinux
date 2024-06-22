@@ -30,9 +30,6 @@ int init_uinput(const char *name, int x_max, int y_max) {
   ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
   ioctl(fd, UI_SET_EVBIT, EV_ABS);
 
-  // ioctl(fd, UI_SET_ABSBIT, ABS_X);
-  // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
-
   struct uinput_setup utablet_setup;
   memset(&utablet_setup, 0, sizeof(utablet_setup));
   snprintf(utablet_setup.name, UINPUT_MAX_NAME_SIZE, "%s", name);
@@ -75,6 +72,7 @@ int last_btn_state = 0b11010000;
 #define PEN_BUTTON1 0b00000010
 #define PEN_BUTTON2 0b00000100
 #define EVENT_SIZE 24 // sizeof(struct input_event)
+// #define PEN_BUTTON2 0b00100000 // 0x10 // buf[13]
 
 int create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr) {
   ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0,
@@ -171,7 +169,7 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
       y_scaled = (y - tablet.top) * tablet.yscale;
 
       if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
-        tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[1]);
+        tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[tablet.bindex]);
     }
   }
 }
@@ -256,6 +254,8 @@ int init_read_buffer(const char *hidraw_path) {
 void init_tablet(const char *name, const char *hidraw_path, struct tablet_config tablet, struct display_config display) {
   int tablet_input_fd = init_uinput(name, display.total_width, display.total_height);
   int buffer_fd = init_read_buffer(hidraw_path);
+
+  int r = strcmp("Absolute uinput Tablet [CTC-4110]", name);
   parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
 }
 
@@ -319,47 +319,68 @@ void tablet_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
   write(tablet_fd, &sync_event, sizeof(sync_event));
 }
 
-// int pen_btn_changed(int btn_state, int last_btn_state) {}
-// int xpos_buffer[64];
-// int ypos_buffer[64];
-// usleep(10000);
-// memset(&xpos_buffer, 0, sizeof(xpos_buffer));
-
-// int area_boundary_clamp(uint *x, uint *y) {
-// int area_boundary_clamp(double *x, double *y) {
-
-// switch (((btn ^ last_btn_state) & 0b00000111)) {
-//   case 0b00000001:
-//     btn_state = btn_state | (btn & PEN_BUTTON);
-//     num_bytes += create_input(EV_KEY, BTN_LEFT, btn & PEN_BUTTON, &position_events[num_bytes / EVENT_SIZE]);
-//   // fall-through
-//   case 0b00000100:
-//       btn_state = btn_state | (btn & PEN_BUTTON2);
-//       num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & PEN_BUTTON2, &position_events[num_bytes / EVENT_SIZE]);
-// }
-
-// if ((!(btn_state & PEN_BUTTON2) && (btn & PEN_BUTTON2))) {
-//   btn_state = btn_state | (btn & PEN_BUTTON2);
-//   num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & PEN_BUTTON2, &position_events[num_bytes / EVENT_SIZE]);
-// } else if ((btn_state & PEN_BUTTON2) && !(btn & PEN_BUTTON2)) {
-//   btn_state = btn_state & ~PEN_BUTTON2;
-//   num_bytes += create_input(EV_KEY, BTN_RIGHT, btn & PEN_BUTTON2, &position_events[num_bytes / EVENT_SIZE]);
-// }
-
-// printf("pen:%d btn1:%d btn2:%d num bytes:%d, res w:%d\n", btn & 0b00000001, btn & 0b00000010, (btn >> 2) & 1,
-//        num_bytes, res_w);
-
-// if ((!(btn_state & 0b00000100) && (btn & 0b00000100))) {
-//   // btn_state = btn_state | btn;
-//   btn_state = btn_state | (btn & 0b00000100);
-// } else if ((btn_state & 0b00000100) && !(btn & 0b00000100)) {
-//   // btn_state = btn_state & ~btn;
-//   btn_state = btn_state & ~0b00000100;
-// }
-
 void print_hex_buffer(uint8_t *buf, int len) {
   printf("\n");
   for (int i = 0; i < len; i++) {
     printf("%02hhx ", buf[i]);
   }
+}
+
+int init_uinput_tablet(const char *name, int x_max, int y_max) {
+  int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
+
+  if (fd < 0) {
+    printf("error opening uinput\n");
+    perror("uinput open err");
+    exit(EXIT_FAILURE);
+  }
+
+  ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
+  ioctl(fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
+
+  ioctl(fd, UI_SET_EVBIT, EV_KEY);
+  ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
+  ioctl(fd, UI_SET_KEYBIT, BTN_MIDDLE);
+  ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
+
+  ioctl(fd, UI_SET_EVBIT, EV_ABS);
+  ioctl(fd, UI_SET_KEYBIT, BTN_TOUCH);
+  ioctl(fd, UI_SET_KEYBIT, BTN_STYLUS);
+  ioctl(fd, UI_SET_KEYBIT, BTN_STYLUS2);
+
+  // ioctl(fd, UI_SET_ABSBIT, ABS_X);
+  // ioctl(fd, UI_SET_ABSBIT, ABS_Y);
+
+  struct uinput_setup utablet_setup;
+  memset(&utablet_setup, 0, sizeof(utablet_setup));
+  snprintf(utablet_setup.name, UINPUT_MAX_NAME_SIZE, "%s", name);
+
+  utablet_setup.id.bustype = BUS_USB;
+  utablet_setup.id.version = 0;
+  utablet_setup.id.vendor = 0x0;
+  utablet_setup.id.product = 0x0;
+  ioctl(fd, UI_DEV_SETUP, &utablet_setup);
+
+  struct uinput_abs_setup abs_xprops;
+  memset(&abs_xprops, 0, sizeof(abs_xprops));
+
+  abs_xprops.code = ABS_X;
+  abs_xprops.absinfo.minimum = 0;
+  abs_xprops.absinfo.maximum = x_max;
+  abs_xprops.absinfo.resolution = 100;
+  ioctl(fd, UI_ABS_SETUP, &abs_xprops);
+
+  struct uinput_abs_setup abs_yprops;
+  memset(&abs_yprops, 0, sizeof(abs_yprops));
+
+  abs_yprops.code = ABS_Y;
+  abs_yprops.absinfo.minimum = 0;
+  abs_yprops.absinfo.maximum = y_max;
+  abs_yprops.absinfo.resolution = 100;
+  ioctl(fd, UI_ABS_SETUP, &abs_yprops);
+
+  ioctl(fd, UI_DEV_CREATE);
+  printf("created uinput tablet device:%s\n", name);
+
+  return fd;
 }

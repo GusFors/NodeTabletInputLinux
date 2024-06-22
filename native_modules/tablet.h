@@ -11,6 +11,7 @@ struct tablet_config {
   int bottom;
   int xindex;
   int yindex;
+  int bindex;
   double xscale;
   double yscale;
 };

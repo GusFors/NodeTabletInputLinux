@@ -62,6 +62,8 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_
         tablet_conf.xindex = value;
       } else if (strcmp("yindex", key) == 0) {
         tablet_conf.yindex = value;
+      } else if (strcmp("bindex", key) == 0) {
+        tablet_conf.bindex = value;
       } else if (strcmp("vendor", key) == 0 && value == vendor) {
         vend_match = 1;
       } else if (strcmp("product", key) == 0 && value == product) {

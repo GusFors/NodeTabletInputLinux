@@ -46,7 +46,7 @@ struct device_info detect_tablet() {
         if (strcmp(key, "HID_PHYS") == 0) {
           inputnum = value[strlen(value) - 2] - '0';
 
-          if (inputnum == 0 && vendor == 1386) {
+          if (inputnum == 0 && (vendor == 1386 || vendor == 1329)) {
             first_input = 1;
             printf("\nfirst input match\n");
             break;
@@ -59,7 +59,7 @@ struct device_info detect_tablet() {
 
           while (valueid_split != NULL) {
             int conv = strtol(valueid_split, NULL, 16);
-            if (conv == 1386) {
+            if ((conv == 1386 || conv == 1329)) {
               vendor = conv;
               valueid_split = strtok(NULL, ":");
               product = strtol(valueid_split, NULL, 16);
@@ -68,7 +68,7 @@ struct device_info detect_tablet() {
             valueid_split = strtok(NULL, ":");
           }
 
-          if (vendor == 1386) {
+          if ((vendor == 1386 || vendor == 1329)) {
             printf("vendor: %d, product: %d, path: %s", vendor, product, hid_entry->d_name);
             tablet.vendor = vendor;
             tablet.product = product;

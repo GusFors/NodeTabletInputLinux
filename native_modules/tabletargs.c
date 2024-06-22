@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
   printf("bottom:%d\n", tablet.bottom);
   printf("xposition:%d\n", tablet.xindex);
   printf("yposition:%d\n", tablet.yindex);
+  printf("bposition:%d\n", tablet.bindex);
   printf("xscale:%f\n\n", tablet.xscale);
 
   init_tablet(matched_name, tabletdev.hidraw_path, tablet, display_conf);
