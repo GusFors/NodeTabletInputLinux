@@ -38,11 +38,11 @@ function standardBufferParser(reportBuffer) {
   }
 
   // if using touch, check for pen first
-  if (reportBuffer[1] > 0x00) {
-    inRange = true
-  } else {
-    inRange = false
-  }
+  // if (reportBuffer[1] > 0x00) {
+  //   inRange = true
+  // } else {
+  //   inRange = false
+  // }
 
   if (x === 0 && y === 0) {
     return
@@ -50,7 +50,7 @@ function standardBufferParser(reportBuffer) {
 
   Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
-  switch (reportBuffer[1] & 0x07) {
+  switch (reportBuffer[this.settings.bBufferPositions[0]] & 0x07) {
     case 0x01:
       if (isClick === false) {
         isClick = true
@@ -113,7 +113,7 @@ function standardVirtualBufferParser(reportBuffer) {
 
   Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
 
-  switch (reportBuffer[1] & 0x07) {
+  switch (reportBuffer[this.settings.bBufferPositions[0]] & 0x07) {
     case 0x01:
       if (isClick === false) {
         isClick = true
@@ -191,7 +191,7 @@ function doubleReportBufferParser(reportBuffer) {
     Pointer.setPointerPosition(xS + this.monitorConfig.xOffset, yS)
   }
 
-  switch (reportBuffer[1] & 0x07) {
+  switch (reportBuffer[this.settings.bBufferPositions[0]] & 0x07) {
     case 0x01:
       if (isClick === false) {
         isClick = true
@@ -283,7 +283,7 @@ function standardAvgBufferParser(reportBuffer, isDouble = true) {
     averagePosition(yBuffer, avgPositionStrength, currentPositionStrength)
   )
 
-  switch (reportBuffer[1] & 0x07) {
+  switch (reportBuffer[this.settings.bBufferPositions[0]] & 0x07) {
     case 0x01:
       if (isClick === false) {
         isClick = true
@@ -339,8 +339,8 @@ function initUinput(devName, xMax, yMax, isPressure) {
   return Pointer.initUinput(devName, xMax, yMax, isPressure)
 }
 
-function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xBufferPositions, yBufferPositions) {
-  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xBufferPositions, yBufferPositions)
+function initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xBufferPositions, yBufferPositions, bBufferPositions) {
+  return PointerN.initRead(devPath, devName, xMax, yMax, left, top, xScale, yScale, xBufferPositions, yBufferPositions, bBufferPositions)
 }
 
 function averagePosition(positionBufferArr, amountOfPositions, currentPositionPrio) {

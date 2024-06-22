@@ -20,7 +20,7 @@ class DeviceDetector {
 
         for (let y = 0; y < r.length; y++) {
           let rInfo = r[y]
-          if (rInfo.includes('0000056A')) {
+          if (rInfo.includes('0000056A') || rInfo.includes('00000531')) {
             isTablet = true
             break
           }
@@ -72,6 +72,7 @@ class DeviceDetector {
         for (let i = 0; i < detectedTablets.length; i++) {
           let currentPath = detectedTablets[i].hidpath
           deviceBuffers.push(fsStream.createReadStream(currentPath))
+
           deviceBuffers[i].on('data', (buffer) => {
             if (buffer.length > 31) {
               console.log('try holding pen closer to tablet')

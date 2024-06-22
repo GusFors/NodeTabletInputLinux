@@ -44,6 +44,8 @@ class Tablet {
 
     this.tabletHID = await deviceDetector.getTabletHidBuffer()
     this.settings = mmToWac(await deviceDetector.getTabletConfig(await this.tabletHID.rawInfo.productId))
+    if (!this.settings.bBufferPositions) this.settings.bBufferPositions = [1]
+
     console.log('\nGetting input from', this.settings.name)
 
     this.xScale = this.monitorConfig.width / ((this.settings.right - this.settings.left) / this.settings.multiplier)
@@ -84,7 +86,8 @@ class Tablet {
         this.xScale,
         this.yScale,
         this.settings.xBufferPositions[0],
-        this.settings.yBufferPositions[0]
+        this.settings.yBufferPositions[0],
+        this.settings.bBufferPositions[0]
       )
       return
     } else {

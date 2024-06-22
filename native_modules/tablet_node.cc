@@ -47,6 +47,7 @@ NAN_METHOD(initRead) {
 
   int32_t xBufferPos = Nan::To<int32_t>(info[8]).FromJust();
   int32_t yBufferPos = Nan::To<int32_t>(info[9]).FromJust();
+  int32_t bBufferPos = Nan::To<int32_t>(info[10]).FromJust();
 
   struct tablet_config tablet;
   tablet.left = left;
@@ -55,6 +56,7 @@ NAN_METHOD(initRead) {
   tablet.yscale = yScale;
   tablet.xindex = xBufferPos;
   tablet.yindex = yBufferPos;
+  tablet.bindex = bBufferPos;
   // tablet.hidraw_path = tablet_path;
 
   struct display_config display_conf;
@@ -70,7 +72,7 @@ NAN_METHOD(initRead) {
   std::cout << "\n"
             << "xPrimaryWidth: " << xPrimaryWidth << " yPrimaryHeight: " << yPrimaryHeight;
   std::cout << "\n"
-            << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos << "\n";
+            << "xBufferPos: " << xBufferPos << " yBufferPos: " << yBufferPos << " bBufferPos: " << bBufferPos << "\n";
 
   // init_read(tablet, display_conf, hidraw_path.c_str());
   init_tablet(("uinput " + device_name).c_str(), hidraw_path.c_str(), tablet, display_conf);
