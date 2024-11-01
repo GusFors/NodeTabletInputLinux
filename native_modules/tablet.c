@@ -66,7 +66,7 @@ int is_click = 0;
 int click_value = 0;
 int mbtn = 0;
 int btn_state = 0b00000000;
-int last_btn_state = 0b11010000;
+int last_btn_state = 0b11010000; // 0b00000000
 
 #define PEN_BUTTON0 0b00000001
 #define PEN_BUTTON1 0b00000010

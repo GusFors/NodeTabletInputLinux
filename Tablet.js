@@ -60,7 +60,7 @@ class Tablet {
       console.log('reading native hidraw ')
       if (detached) {
         let inputProcess = spawn(
-          './native_modules/tabletinput',
+          __dirname + '/native_modules/tabletinput',
           [
             await this.tabletHID.rawInfo.hidpath,
             await this.settings.name,
@@ -71,7 +71,7 @@ class Tablet {
             this.settings.xBufferPositions[0],
             this.settings.yBufferPositions[0],
           ],
-          { detached: true, stdio: 'ignore' }
+          { detached: true, stdio: 'ignore', cwd: __dirname + '/native_modules/' }
         )
         inputProcess.unref()
         process.exit()
