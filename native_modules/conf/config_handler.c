@@ -115,8 +115,6 @@ struct tablet_config get_tablet_config(int vendor, int product) {
   char line[128] = "";
   bool vend_match = 0;
   bool prod_match = 0;
-  int matched_keys = 0;
-  char *name;
 
   while ((fgets(line, 128, conf_file)) != NULL) {
     char *key = strtok(line, "=");
@@ -133,7 +131,7 @@ struct tablet_config get_tablet_config(int vendor, int product) {
     }
 
     if (strvalue != NULL) {
-      int value = strtol(strvalue, NULL, 0);
+      int value = (int)strtol(strvalue, NULL, 0);
 
       if (strcmp("left", key) == 0) {
         tablet_conf.left = value;
@@ -144,9 +142,11 @@ struct tablet_config get_tablet_config(int vendor, int product) {
       } else if (strcmp("bottom", key) == 0) {
         tablet_conf.bottom = value;
       } else if (strcmp("xindex", key) == 0) {
-        tablet_conf.xindex = value;
+        tablet_conf.xindex = (uint8_t)value;
       } else if (strcmp("yindex", key) == 0) {
-        tablet_conf.yindex = value;
+        tablet_conf.yindex = (uint8_t)value;
+      } else if (strcmp("bindex", key) == 0) {
+        tablet_conf.bindex = (uint8_t)value;
       } else if (strcmp("vendor", key) == 0 && value == vendor) {
         vend_match = 1;
       } else if (strcmp("product", key) == 0 && value == product) {
@@ -225,7 +225,7 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
     }
 
     if (strvalue != NULL) {
-      int value = strtol(strvalue, NULL, 0);
+      int value = (int)strtol(strvalue, NULL, 0);
 
       // char *ven = "vendor";
       // char *ind = strstr(key, ven); // substr
@@ -238,10 +238,12 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
         tablet_conf.top = value;
       } else if (strcmp("bottom", key_start) == 0) {
         tablet_conf.bottom = value;
-      } else if (strcmp("xindex", key_start) == 0) {
-        tablet_conf.xindex = value;
-      } else if (strcmp("yindex", key_start) == 0) {
-        tablet_conf.yindex = value;
+      } else if (strcmp("xindex", key) == 0) {
+        tablet_conf.xindex = (uint8_t)value;
+      } else if (strcmp("yindex", key) == 0) {
+        tablet_conf.yindex = (uint8_t)value;
+      } else if (strcmp("bindex", key) == 0) {
+        tablet_conf.bindex = (uint8_t)value;
       } else if (strcmp("vendor", key_start) == 0 && value == vendor) {
         vend_match = 1;
       } else if (strcmp("product", key_start) == 0 && value == product) {
@@ -261,12 +263,10 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
 
   fclose(conf_file);
 
-  tablet_conf.xscale = 0.32;
-  tablet_conf.yscale = 0.32;
-
   return tablet_conf;
 }
 
+// use as possible override for autodetected values
 struct display_config get_display_config() {
   struct display_config display_conf;
   display_conf.offset_x = 2560;

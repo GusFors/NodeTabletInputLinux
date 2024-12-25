@@ -7,31 +7,27 @@
 // Display *display = NULL;
 
 int get_displays_total_width(Display *display) {
-  if (display == NULL) {
+  if (display == NULL)
     display = XOpenDisplay(NULL);
-  }
 
   int display_width = XDisplayWidth(display, 0);
   return display_width;
 }
 
 int get_displays_total_height(Display *display) {
-  if (display == NULL) {
+  if (display == NULL)
     display = XOpenDisplay(NULL);
-  }
 
   int display_height = XDisplayHeight(display, 0);
   return display_height;
 }
 
 int get_number_of_monitors(Display *display) {
-  if (display == NULL) {
+  if (display == NULL)
     display = XOpenDisplay(NULL);
-  }
 
   int num_monitors = 0;
   XRRGetMonitors(display, XDefaultRootWindow(display), 1, &num_monitors);
-
   return num_monitors;
 }
 
@@ -39,9 +35,9 @@ int get_primary_monitor_xoffset(XRRCrtcInfo *mon_info) { return mon_info->x; }
 
 int get_primary_monitor_yoffset(XRRCrtcInfo *mon_info) { return mon_info->y; }
 
-int get_primary_monitor_width(XRRCrtcInfo *mon_info) { return mon_info->width; }
+unsigned int get_primary_monitor_width(XRRCrtcInfo *mon_info) { return mon_info->width; }
 
-int get_primary_monitor_height(XRRCrtcInfo *mon_info) { return mon_info->height; }
+unsigned int get_primary_monitor_height(XRRCrtcInfo *mon_info) { return mon_info->height; }
 
 void get_full_display_config(struct display_config *display_conf) {
   Display *display = XOpenDisplay(NULL);
@@ -59,11 +55,11 @@ void get_full_display_config(struct display_config *display_conf) {
   close_display(display);
 }
 
-void print_display_config(struct display_config *display_conf) {}
-
 int close_display(Display *display) { return XCloseDisplay(display); }
 
 void free_xresources(XRRScreenResources *mon_res, XRRCrtcInfo *mon_info) {
   XRRFreeScreenResources(mon_res);
   XRRFreeCrtcInfo(mon_info);
 }
+
+// void print_display_config(struct display_config *display_conf) {}

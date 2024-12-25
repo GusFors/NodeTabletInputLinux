@@ -7,7 +7,6 @@
 extern "C" {
 #endif
 
-// struct tablet_config get_tablet_config(const char *tablet_name);
 struct tablet_config get_tablet_config(int vendor, int product);
 struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_name);
 struct tablet_config get_tablet_config_trim(int vendor, int product);

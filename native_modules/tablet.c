@@ -16,7 +16,6 @@ int init_uinput(const char *name, int x_max, int y_max) {
   int fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 
   if (fd < 0) {
-    printf("error opening uinput\n");
     perror("uinput open err");
     exit(EXIT_FAILURE);
   }
@@ -66,7 +65,7 @@ int is_click = 0;
 int click_value = 0;
 int mbtn = 0;
 int btn_state = 0b00000000;
-int last_btn_state = 0b11010000; // 0b00000000 // static?
+int last_btn_state = 0b11010000; // 0b00000000
 
 #define PEN_BUTTON0 0b00000001
 #define PEN_BUTTON1 0b00000010
@@ -74,15 +73,22 @@ int last_btn_state = 0b11010000; // 0b00000000 // static?
 #define EVENT_SIZE 24 // sizeof(struct input_event)
 // #define PEN_BUTTON2 0b00100000 // 0x10 // buf[13]
 
-int create_input(uint16_t ev_type, uint16_t ev_code, int ev_value, struct input_event *ev_ptr) {
+size_t create_input(uint16_t ev_type, uint16_t ev_code, int ev_value, struct input_event *ev_ptr) {
   ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0, ev_ptr->time.tv_usec = 0;
   return EVENT_SIZE;
 }
 
 void tabletbtn_input_event(int tablet_fd, int x, int y, int btn) {
-  int num_bytes = 0; // count bytes to write
+  size_t num_bytes = 0; // count bytes to write
   struct input_event position_events[5];
   memset(&position_events, 0, sizeof(position_events));
+
+  struct input_event sync_event;
+  memset(&sync_event, 0, sizeof(sync_event));
+
+  sync_event.type = EV_SYN;
+  sync_event.value = 0;
+  sync_event.code = SYN_REPORT;
 
   num_bytes += create_input(EV_KEY, BTN_TOOL_PEN, 1, &position_events[0]);
   num_bytes += create_input(EV_ABS, ABS_X, x, &position_events[1]);
@@ -100,22 +106,24 @@ void tabletbtn_input_event(int tablet_fd, int x, int y, int btn) {
     if (((btn ^ last_btn_state) & PEN_BUTTON2)) {
       num_bytes += create_input(EV_KEY, BTN_RIGHT, (btn & PEN_BUTTON2) >> 2, &position_events[num_bytes / EVENT_SIZE]);
     }
-    // printf("btn_state changed:%08b, changed buttons:%08b\n", btn, btn ^ last_btn_state);
-    // printf("btn_state: %08b\n", ((btn ^ last_btn_state) & 0b00000111));
+
+    DEBUG_PRINT("btn_state changed:%08b, changed buttons:%08b\n", btn, btn ^ last_btn_state);
+    DEBUG_PRINT("btn_state: %08b\n", ((btn ^ last_btn_state) & 0b00000111));
   }
 
-  int res_w = write(tablet_fd, position_events, num_bytes);
+#ifndef DEBUG_EVENTS
+  write(tablet_fd, position_events, num_bytes);
+  write(tablet_fd, &sync_event, sizeof(sync_event));
+#else
+  ssize_t res_w = write(tablet_fd, position_events, num_bytes);
+
+  if (res_w < 0)
+    perror("\nwrite error");
+
+  ssize_t b = write(tablet_fd, &sync_event, sizeof(sync_event));
+  printf("x:%d, y:%d, nbytes:%zd syncwrite:%zd fd:%d\n", x, y, res_w, b, tablet_fd);
+#endif
   last_btn_state = btn;
-
-  struct input_event sync_event;
-  memset(&sync_event, 0, sizeof(sync_event));
-
-  sync_event.type = EV_SYN;
-  sync_event.value = 0;
-  sync_event.code = SYN_REPORT;
-
-  int b = write(tablet_fd, &sync_event, sizeof(sync_event));
-  // printf("x:%d, y:%d, nbytes:%d syncwrite:%d fd:%d\n", x, y, res_w, b, fd);
 }
 
 int area_boundary_clamp(int max_width, int max_height, double x, double y, double *px, double *py) {
