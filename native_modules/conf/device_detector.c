@@ -3,8 +3,10 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-struct device_info detect_tablet() {
+struct device_info detect_tablet(bool verbose) {
   DIR *hidraw_dir;
   struct dirent *hid_entry;
   struct device_info tablet;
@@ -22,7 +24,10 @@ struct device_info detect_tablet() {
 
   while ((hid_entry = readdir(hidraw_dir)) != NULL) {
     if (hid_entry->d_type == DT_LNK) {
-      // printf("dir: %s\n", hid_entry->d_name);
+
+      if (verbose)
+        printf("dir: %s\n", hid_entry->d_name);
+
       char catpath[256] = "/sys/class/hidraw/";
       strlcat(catpath, hid_entry->d_name, 256);
       strlcat(catpath, "/device/uevent", 256);
@@ -31,14 +36,16 @@ struct device_info detect_tablet() {
       uevent_file = fopen(catpath, "r");
 
       char line[128] = "";
-      int vendor = 0;
-      int product = 0;
+      long vendor = 0;
+      long product = 0;
       int inputnum = -1;
 
       while ((fgets(line, 128, uevent_file)) != NULL) {
         char *key = strtok(line, "=");
         char *value = strtok(NULL, "=");
-        // printf("key:%s, value:%s", key, value);
+
+        if (verbose)
+          printf("key:%s, value:%s", key, value);
 
         if (key == NULL || value == NULL)
           continue;
@@ -58,29 +65,29 @@ struct device_info detect_tablet() {
           valueid_split = strtok(value, ":");
 
           while (valueid_split != NULL) {
-            int conv = strtol(valueid_split, NULL, 16);
+            long conv = strtol(valueid_split, NULL, 16);
+
             if ((conv == 1386 || conv == 1329)) {
               vendor = conv;
               valueid_split = strtok(NULL, ":");
               product = strtol(valueid_split, NULL, 16);
               found_device = 1;
             }
+
             valueid_split = strtok(NULL, ":");
           }
 
           if ((vendor == 1386 || vendor == 1329)) {
-            printf("vendor: %d, product: %d, path: %s", vendor, product, hid_entry->d_name);
-            tablet.vendor = vendor;
-            tablet.product = product;
+            printf("vendor: %ld, product: %ld, path: %s ", vendor, product, hid_entry->d_name);
+            tablet.vendor = (int16_t)vendor;
+            tablet.product = (int16_t)product;
 
             char path[128] = "/dev/";
             strlcat(path, hid_entry->d_name, 128);
             strlcpy(tablet.hidraw_path, path, 128);
-            // break;
           }
         }
       }
-      // printf("\n");
       fclose(uevent_file);
     }
 

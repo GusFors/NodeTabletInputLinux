@@ -66,7 +66,7 @@ int is_click = 0;
 int click_value = 0;
 int mbtn = 0;
 int btn_state = 0b00000000;
-int last_btn_state = 0b11010000; // 0b00000000
+int last_btn_state = 0b11010000; // 0b00000000 // static?
 
 #define PEN_BUTTON0 0b00000001
 #define PEN_BUTTON1 0b00000010
@@ -74,13 +74,12 @@ int last_btn_state = 0b11010000; // 0b00000000
 #define EVENT_SIZE 24 // sizeof(struct input_event)
 // #define PEN_BUTTON2 0b00100000 // 0x10 // buf[13]
 
-int create_input(int ev_type, int ev_code, int ev_value, struct input_event *ev_ptr) {
-  ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0,
-  ev_ptr->time.tv_usec = 0;
+int create_input(uint16_t ev_type, uint16_t ev_code, int ev_value, struct input_event *ev_ptr) {
+  ev_ptr->type = ev_type, ev_ptr->code = ev_code, ev_ptr->value = ev_value, ev_ptr->time.tv_sec = 0, ev_ptr->time.tv_usec = 0;
   return EVENT_SIZE;
 }
 
-void tabletbtn_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
+void tabletbtn_input_event(int tablet_fd, int x, int y, int btn) {
   int num_bytes = 0; // count bytes to write
   struct input_event position_events[5];
   memset(&position_events, 0, sizeof(position_events));
@@ -169,7 +168,7 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
       y_scaled = (y - tablet.top) * tablet.yscale;
 
       if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
-        tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, 0, buf[tablet.bindex]);
+        tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, buf[tablet.bindex]);
     }
   }
 }
@@ -225,7 +224,7 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
           y = ((yprevious + y) / 2);
         // check -1 first?
 
-        tabletbtn_input_event(tablet_fd, x, y, 0, buf[1]);
+        tabletbtn_input_event(tablet_fd, x, y, buf[1]);
         xprevious = x;
         yprevious = y;
       }
@@ -259,7 +258,7 @@ void init_tablet(const char *name, const char *hidraw_path, struct tablet_config
   parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
 }
 
-void tablet_input_event(int tablet_fd, int x, int y, int pressure, int btn) {
+void tablet_input_event(int tablet_fd, int x, int y, int btn) {
   struct input_event position_events[4];
   memset(&position_events, 0, sizeof(position_events));
 

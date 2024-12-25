@@ -114,3 +114,4 @@ experimental/
 *.o
 *.out
 tabletinput
+*.temp

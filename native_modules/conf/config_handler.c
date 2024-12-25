@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <ctype.h>
 #include "../display.h"
@@ -18,13 +19,13 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_
 
   struct tablet_config tablet_conf;
   char line[128] = "";
-  int vend_match = 0;
-  int prod_match = 0;
+  bool vend_match = false;
+  bool prod_match = false;
   double w = 0;
   double h = 0;
   double x = 0;
   double y = 0;
-  int res = 100;
+  uint16_t res = 100;
 
   while ((fgets(line, 128, conf_file)) != NULL) {
     char *key = strtok(line, "=");
@@ -42,8 +43,8 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_
         key[len - 1] = '\0';
 
       strlcat(matched_name, key, 64);
-      vend_match = 0;
-      prod_match = 0;
+      vend_match = false;
+      prod_match = false;
       memset(&tablet_conf, 0, sizeof(tablet_conf));
     }
 
@@ -59,17 +60,17 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_
       } else if (strcmp("yoffset", key) == 0) {
         y = value;
       } else if (strcmp("xindex", key) == 0) {
-        tablet_conf.xindex = value;
+        tablet_conf.xindex = (uint8_t)value;
       } else if (strcmp("yindex", key) == 0) {
-        tablet_conf.yindex = value;
+        tablet_conf.yindex = (uint8_t)value;
       } else if (strcmp("bindex", key) == 0) {
-        tablet_conf.bindex = value;
+        tablet_conf.bindex = (uint8_t)value;
       } else if (strcmp("vendor", key) == 0 && value == vendor) {
-        vend_match = 1;
+        vend_match = true;
       } else if (strcmp("product", key) == 0 && value == product) {
-        prod_match = 1;
+        prod_match = true;
       } else if (strcmp("res", key) == 0) {
-        res = value;
+        res = (uint16_t)value;
       }
 
       printf("%s=%f\n", key, value);
@@ -85,15 +86,15 @@ struct tablet_config get_tablet_mmconfig(int vendor, int product, char *matched_
     exit(EXIT_FAILURE);
   }
 
-  int left = (x - w / 2) * res;
-  int right = (x + w / 2) * res;
-  int top = (y - h / 2) * res;
-  int bottom = (y + h / 2) * res;
+  double left = (x - w / 2) * res;
+  double right = (x + w / 2) * res;
+  double top = (y - h / 2) * res;
+  double bottom = (y + h / 2) * res;
 
-  tablet_conf.left = left;
-  tablet_conf.right = right;
-  tablet_conf.top = top;
-  tablet_conf.bottom = bottom;
+  tablet_conf.left = (int)left;
+  tablet_conf.right = (int)right;
+  tablet_conf.top = (int)top;
+  tablet_conf.bottom = (int)bottom;
 
   printf("\nconverted config\n");
   print_tablet_config(tablet_conf);
@@ -112,8 +113,8 @@ struct tablet_config get_tablet_config(int vendor, int product) {
 
   struct tablet_config tablet_conf;
   char line[128] = "";
-  int vend_match = 0;
-  int prod_match = 0;
+  bool vend_match = 0;
+  bool prod_match = 0;
   int matched_keys = 0;
   char *name;
 
@@ -179,8 +180,8 @@ struct tablet_config get_tablet_config_trim(int vendor, int product) {
 
   struct tablet_config tablet_conf;
   char line[128] = "";
-  int vend_match = 0;
-  int prod_match = 0;
+  bool vend_match = 0;
+  bool prod_match = 0;
 
   while ((fgets(line, 128, conf_file)) != NULL) {
     char *key = strtok(line, "=");
