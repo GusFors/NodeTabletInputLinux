@@ -10,6 +10,7 @@
 #include "display.h"
 #include "tablet.h"
 #include <fcntl.h>
+#include <time.h>
 #include <unistd.h>
 
 int init_uinput(const char *name, int x_max, int y_max) {
@@ -178,6 +179,69 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   }
 }
 
+void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
+  int x = 0;
+  int y = 0;
+  double x_scaled = 0;
+  double y_scaled = 0;
+  int x_prev = -1;
+  int y_prev = -1;
+
+  double double_report_delay = ((1000.0 / 133) / 2.0) * 1000000;
+  struct timespec ts = {.tv_sec = 0, .tv_nsec = (long)double_report_delay}; // 3759398
+
+  // double x_values[4] = {-1, -1, -1, -1};
+  // int x_length = 0;
+
+  // double y_values[4] = {-1, -1, -1, -1};
+  // int y_length = 0;
+
+  // x_values[x_length] = x_scaled;
+  // x_length++;
+
+  ssize_t r;
+  int active = 1;
+
+  uint8_t buf[64];
+  memset(buf, 0x0, sizeof(buf));
+
+  while (active) {
+    r = read(buffer_fd, buf, 16);
+
+    if (r < 0) {
+      perror("\nread err");
+      exit(EXIT_FAILURE);
+    }
+
+    if (buf[0] <= 0x10) {
+      x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
+      y = (buf[tablet.yindex]) | ((buf[tablet.yindex + 1]) << 8);
+
+      x_scaled = (x - tablet.left) * tablet.xscale;
+      y_scaled = (y - tablet.top) * tablet.yscale;
+
+      if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled))
+        tabletbtn_input_event(tablet_fd, (int)x_scaled + display.offset_x, (int)y_scaled + display.offset_y, buf[tablet.bindex]);
+
+      nanosleep(&ts, NULL);
+
+      if (x_prev != -1) {
+        double x2 = (int)(((x_scaled + x_prev)) / 2);
+        double y2 = (int)((y_scaled + y_prev) / 2);
+
+        if (area_boundary_clamp(display.primary_width, display.primary_height, &x2, &y2))
+          tabletbtn_input_event(tablet_fd, (int)x2 + display.offset_x, (int)y2 + display.offset_y, buf[tablet.bindex]);
+      }
+
+      x_prev = x_scaled;
+      y_prev = y_scaled;
+    } else {
+      x_prev = -1;
+      y_prev = -1;
+    }
+  }
+}
+
 void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
   int y = 0;
@@ -212,8 +276,8 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
 
       // if ((buf[0] & 0xff) < 0x11) {
       if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled)) {
-        x = x_scaled + display.offset_x;
-        y = y_scaled + display.offset_y;
+        x = (int)x_scaled + display.offset_x;
+        y = (int)y_scaled + display.offset_y;
         int xdiff = abs(xprevious - x);
         int ydiff = abs(yprevious - y);
         // printf("diff: %d\n", xdiff);
@@ -259,8 +323,7 @@ void init_tablet(const char *name, const char *hidraw_path, struct tablet_config
   int tablet_input_fd = init_uinput(name, display.total_width, display.total_height);
   int buffer_fd = init_read_buffer(hidraw_path);
 
-  int r = strcmp("Absolute uinput Tablet [CTC-4110]", name);
-  parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
+  parse_tablet_buffer_interpolated(buffer_fd, tablet_input_fd, tablet, display);
 }
 
 void tablet_input_event(int tablet_fd, int x, int y, int btn) {
