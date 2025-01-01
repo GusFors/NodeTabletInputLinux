@@ -126,20 +126,20 @@ void tabletbtn_input_event(int tablet_fd, int x, int y, int btn) {
   last_btn_state = btn;
 }
 
-int area_boundary_clamp(int max_width, int max_height, double x, double y, double *px, double *py) {
-  if (x > max_width)
-    *px = max_width;
+int area_boundary_clamp(unsigned int max_width, unsigned int max_height, double *x, double *y) {
+  if (*x > max_width)
+    *x = max_width;
 
-  if (x < 0)
-    *px = 0;
+  if (*x < 0)
+    *x = 0;
 
-  if (y < 0)
-    *py = 0;
+  if (*y < 0)
+    *y = 0;
 
-  if (y > max_height)
-    *py = max_height;
+  if (*y > max_height)
+    *y = max_height;
 
-  if (*px == 0 && *py == 0)
+  if (*x == 0 && *y == 0)
     return 0;
 
   return 1;
@@ -150,11 +150,9 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   int y = 0;
   double x_scaled = 0;
   double y_scaled = 0;
-  int r;
-  int active = 1;
 
-  // might skip first click with pth
-  // int last_btn_state = 0b11010000;
+  ssize_t r;
+  int active = 1;
 
   uint8_t buf[64];
   memset(buf, 0x0, sizeof(buf));
@@ -168,15 +166,14 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
     }
 
     if (buf[0] <= 0x10) {
-      // print_hex_buffer(buf, r);
       x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
       y = (buf[tablet.yindex]) | ((buf[tablet.yindex + 1]) << 8);
 
       x_scaled = (x - tablet.left) * tablet.xscale;
       y_scaled = (y - tablet.top) * tablet.yscale;
 
-      if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled))
-        tabletbtn_input_event(tablet_fd, x_scaled + display.offset_x, y_scaled + display.offset_y, buf[tablet.bindex]);
+      if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled))
+        tabletbtn_input_event(tablet_fd, (int)x_scaled + display.offset_x, (int)y_scaled + display.offset_y, buf[tablet.bindex]);
     }
   }
 }
@@ -186,7 +183,7 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
   int y = 0;
   double x_scaled = 0;
   double y_scaled = 0;
-  int r;
+  ssize_t r;
   int active = 1;
 
   int xpos_buffer[] = {-1, -1, -1, -1};
@@ -214,7 +211,7 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
       y_scaled = (y - tablet.top) * tablet.yscale;
 
       // if ((buf[0] & 0xff) < 0x11) {
-      if (area_boundary_clamp(display.primary_width, display.primary_height, x_scaled, y_scaled, &x_scaled, &y_scaled)) {
+      if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled)) {
         x = x_scaled + display.offset_x;
         y = y_scaled + display.offset_y;
         int xdiff = abs(xprevious - x);
@@ -314,7 +311,7 @@ void tablet_input_event(int tablet_fd, int x, int y, int btn) {
     }
   }
 
-  int res_w = write(tablet_fd, position_events, sizeof(position_events));
+  write(tablet_fd, position_events, sizeof(position_events));
 
   struct input_event sync_event;
   memset(&sync_event, 0, sizeof(sync_event));
