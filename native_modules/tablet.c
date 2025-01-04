@@ -179,6 +179,8 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   }
 }
 
+#define REPORT_RATE 133
+
 void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
   int y = 0;
@@ -187,17 +189,8 @@ void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct table
   int x_prev = -1;
   int y_prev = -1;
 
-  double double_report_delay = ((1000.0 / 133) / 2.0) * 1000000;
+  double double_report_delay = ((1000.0 / REPORT_RATE) / 2.0) * 1000000;
   struct timespec ts = {.tv_sec = 0, .tv_nsec = (long)double_report_delay}; // 3759398
-
-  // double x_values[4] = {-1, -1, -1, -1};
-  // int x_length = 0;
-
-  // double y_values[4] = {-1, -1, -1, -1};
-  // int y_length = 0;
-
-  // x_values[x_length] = x_scaled;
-  // x_length++;
 
   ssize_t r;
   int active = 1;
@@ -220,7 +213,6 @@ void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct table
       x_scaled = (x - tablet.left) * tablet.xscale;
       y_scaled = (y - tablet.top) * tablet.yscale;
 
-      // oops, jumps back instead of value between when moving constantly in one direction?
       if (x_prev != -1) {
         double x2 = (int)(((x_scaled + x_prev)) / 2);
         double y2 = (int)((y_scaled + y_prev) / 2);
