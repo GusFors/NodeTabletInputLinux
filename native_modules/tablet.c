@@ -166,6 +166,8 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
       exit(EXIT_FAILURE);
     }
 
+    DEBUG_REPORT(buf, r);
+
     if (buf[0] <= 0x10) {
       x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
       y = (buf[tablet.yindex]) | ((buf[tablet.yindex + 1]) << 8);
@@ -206,6 +208,8 @@ void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct table
       exit(EXIT_FAILURE);
     }
 
+    DEBUG_REPORT(buf, r);
+
     if (buf[0] <= 0x10) {
       x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
       y = (buf[tablet.yindex]) | ((buf[tablet.yindex + 1]) << 8);
@@ -232,10 +236,12 @@ void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct table
 
       x_prev = (int)x_scaled;
       y_prev = (int)y_scaled;
-    } else {
-      x_prev = -1;
-      y_prev = -1;
+      continue;
+      ;
     }
+
+    x_prev = -1;
+    y_prev = -1;
   }
 }
 
@@ -247,8 +253,8 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
   ssize_t r;
   int active = 1;
 
-  int xpos_buffer[] = {-1, -1, -1, -1};
-  int ypos_buffer[] = {-1, -1, -1, -1};
+  // int xpos_buffer[] = {-1, -1, -1, -1};
+  // int ypos_buffer[] = {-1, -1, -1, -1};
   int xprevious = -1;
   int yprevious = -1;
 
@@ -263,21 +269,23 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
       exit(EXIT_FAILURE);
     }
 
+    DEBUG_REPORT(buf, r);
+
     if (buf[0] <= 0x10) {
-      // print_hex_buffer(buf, r);
+
       x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
       y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
 
       x_scaled = (x - tablet.left) * tablet.xscale;
       y_scaled = (y - tablet.top) * tablet.yscale;
 
-      // if ((buf[0] & 0xff) < 0x11) {
       if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled)) {
         x = (int)x_scaled + display.offset_x;
         y = (int)y_scaled + display.offset_y;
         int xdiff = abs(xprevious - x);
         int ydiff = abs(yprevious - y);
-        // printf("diff: %d\n", xdiff);
+
+        DEBUG_PRINT("diff: %d\n", xdiff);
 
         if (xdiff <= 3)
           x = xprevious;
@@ -385,10 +393,10 @@ void tablet_input_event(int tablet_fd, int x, int y, int btn) {
 }
 
 void print_hex_buffer(uint8_t *buf, int len) {
-  printf("\n");
   for (int i = 0; i < len; i++) {
     printf("%02hhx ", buf[i]);
   }
+  printf("\n");
 }
 
 int init_uinput_tablet(const char *name, int x_max, int y_max) {

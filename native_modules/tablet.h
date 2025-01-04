@@ -25,6 +25,15 @@ struct tablet_config {
   } while (0)
 #endif
 
+#ifndef DEBUG_RAWREPORT
+#define DEBUG_REPORT(...) while (0)
+#else
+#define DEBUG_REPORT(...)                                                                                                                            \
+  do {                                                                                                                                               \
+    print_hex_buffer(__VA_ARGS__);                                                                                                                   \
+  } while (0)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
