@@ -326,8 +326,16 @@ void init_tablet(const char *name, const char *hidraw_path, struct tablet_config
   int tablet_input_fd = init_uinput(name, display.total_width, display.total_height);
   int buffer_fd = init_read_buffer(hidraw_path);
 
-  parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
-  // parse_tablet_buffer_interpolated(buffer_fd, tablet_input_fd, tablet, display);
+  switch (tablet.parser) {
+  case STANDARD_PARSER:
+    parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
+    break;
+  case DOUBLE_REPORT_PARSER:
+    parse_tablet_buffer_interpolated(buffer_fd, tablet_input_fd, tablet, display);
+    break;
+  default:
+    parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
+  }
 }
 
 void tablet_input_event(int tablet_fd, int x, int y, int btn) {

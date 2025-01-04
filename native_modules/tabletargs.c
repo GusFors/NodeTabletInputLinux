@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[]) {
   bool verbose = false;
-  bool double_report = false;
+  enum parser_type p = STANDARD_PARSER;
 
   for (int i = 1; i < argc; i++) {
     printf("arg[%d]: %s\n", i, argv[i]);
@@ -18,12 +18,13 @@ int main(int argc, char *argv[]) {
       verbose = 1;
 
     if (strncmp(argv[i], "-d", sizeof("-d")) == 0)
-      double_report = 1;
+      p = DOUBLE_REPORT_PARSER;
   }
 
   char matched_name[64];
   struct device_info tabletdev = detect_tablet(verbose);
   struct tablet_config tablet = get_tablet_mmconfig(tabletdev.vendor, tabletdev.product, matched_name);
+  tablet.parser = p;
   printf("path: %s\n", tabletdev.hidraw_path);
 
   struct display_config display_conf;

@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include "display.h"
 
+enum parser_type {
+  STANDARD_PARSER = 0,
+  DOUBLE_REPORT_PARSER = 1,
+  AVERAGE_REPORT_PARSER = 2,
+};
+
 struct tablet_config {
   int left;
   int right;
@@ -12,6 +18,7 @@ struct tablet_config {
   uint8_t xindex;
   uint8_t yindex;
   uint8_t bindex;
+  uint8_t parser;
   double xscale;
   double yscale;
 };
