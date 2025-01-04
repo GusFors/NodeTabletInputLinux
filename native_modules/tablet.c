@@ -220,21 +220,26 @@ void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct table
       x_scaled = (x - tablet.left) * tablet.xscale;
       y_scaled = (y - tablet.top) * tablet.yscale;
 
-      if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled))
-        tabletbtn_input_event(tablet_fd, (int)x_scaled + display.offset_x, (int)y_scaled + display.offset_y, buf[tablet.bindex]);
-
-      nanosleep(&ts, NULL);
-
+      // oops, jumps back instead of value between when moving constantly in one direction?
       if (x_prev != -1) {
         double x2 = (int)(((x_scaled + x_prev)) / 2);
         double y2 = (int)((y_scaled + y_prev) / 2);
 
         if (area_boundary_clamp(display.primary_width, display.primary_height, &x2, &y2))
           tabletbtn_input_event(tablet_fd, (int)x2 + display.offset_x, (int)y2 + display.offset_y, buf[tablet.bindex]);
+
+        nanosleep(&ts, NULL);
+
+        if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled))
+          tabletbtn_input_event(tablet_fd, (int)x_scaled + display.offset_x, (int)y_scaled + display.offset_y, buf[tablet.bindex]);
+
+      } else {
+        if (area_boundary_clamp(display.primary_width, display.primary_height, &x_scaled, &y_scaled))
+          tabletbtn_input_event(tablet_fd, (int)x_scaled + display.offset_x, (int)y_scaled + display.offset_y, buf[tablet.bindex]);
       }
 
-      x_prev = x_scaled;
-      y_prev = y_scaled;
+      x_prev = (int)x_scaled;
+      y_prev = (int)y_scaled;
     } else {
       x_prev = -1;
       y_prev = -1;
@@ -323,7 +328,8 @@ void init_tablet(const char *name, const char *hidraw_path, struct tablet_config
   int tablet_input_fd = init_uinput(name, display.total_width, display.total_height);
   int buffer_fd = init_read_buffer(hidraw_path);
 
-  parse_tablet_buffer_interpolated(buffer_fd, tablet_input_fd, tablet, display);
+  parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);
+  // parse_tablet_buffer_interpolated(buffer_fd, tablet_input_fd, tablet, display);
 }
 
 void tablet_input_event(int tablet_fd, int x, int y, int btn) {
