@@ -57,7 +57,7 @@ int init_uinput(const char *name, int x_max, int y_max) {
   ioctl(fd, UI_ABS_SETUP, &abs_yprops);
 
   ioctl(fd, UI_DEV_CREATE);
-  printf("created uinput device:%s\n", name);
+  printf("created uinput device: %s\n", name);
 
   return fd;
 }
@@ -237,7 +237,6 @@ void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct table
       x_prev = (int)x_scaled;
       y_prev = (int)y_scaled;
       continue;
-      ;
     }
 
     x_prev = -1;
@@ -272,7 +271,6 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
     DEBUG_REPORT(buf, r);
 
     if (buf[0] <= 0x10) {
-
       x = (buf[tablet.xindex] & 0xff) | ((buf[tablet.xindex + 1] & 0xff) << 8);
       y = (buf[tablet.yindex] & 0xff) | ((buf[tablet.yindex + 1] & 0xff) << 8);
 
@@ -347,7 +345,7 @@ void tablet_input_event(int tablet_fd, int x, int y, int btn) {
       mbtn = BTN_LEFT;
       is_click = 1;
       position_events[3].type = EV_KEY;
-      position_events[3].code = mbtn;
+      position_events[3].code = (uint16_t)mbtn;
       position_events[3].value = click_value;
       position_events[3].time.tv_sec = 0;
       position_events[3].time.tv_usec = 0;
@@ -360,7 +358,7 @@ void tablet_input_event(int tablet_fd, int x, int y, int btn) {
       mbtn = BTN_RIGHT;
       is_click = 1;
       position_events[3].type = EV_KEY;
-      position_events[3].code = mbtn;
+      position_events[3].code = (uint16_t)mbtn;
       position_events[3].value = click_value;
       position_events[3].time.tv_sec = 0;
       position_events[3].time.tv_usec = 0;
@@ -372,7 +370,7 @@ void tablet_input_event(int tablet_fd, int x, int y, int btn) {
     if (is_click) {
       is_click = 0;
       position_events[3].type = EV_KEY;
-      position_events[3].code = mbtn;
+      position_events[3].code = (uint16_t)mbtn;
       position_events[3].value = click_value;
       position_events[3].time.tv_sec = 0;
       position_events[3].time.tv_usec = 0;

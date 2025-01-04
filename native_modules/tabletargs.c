@@ -9,12 +9,16 @@
 
 int main(int argc, char *argv[]) {
   bool verbose = false;
+  bool double_report = false;
 
   for (int i = 1; i < argc; i++) {
     printf("arg[%d]: %s\n", i, argv[i]);
 
     if (strncmp(argv[i], "-v", sizeof("-v")) == 0)
       verbose = 1;
+
+    if (strncmp(argv[i], "-d", sizeof("-d")) == 0)
+      double_report = 1;
   }
 
   char matched_name[64];
