@@ -319,6 +319,27 @@ int init_read_buffer(const char *hidraw_path) {
 
   printf("reading reports from: %s\n", tabletbuf_path);
 
+#ifdef DEBUG_DEVINFO
+  struct hidraw_devinfo device_info = {0};
+  ioctl(fdn, HIDIOCGRAWINFO, &device_info);
+  printf("device vendor: %d, product: %d, bus type: %d\n", device_info.vendor, device_info.product, device_info.bustype);
+
+  uint32_t rd_size = 0;
+  ioctl(fdn, HIDIOCGRDESCSIZE, &rd_size);
+  printf("report desc size: %d\n", rd_size);
+
+  struct hidraw_report_descriptor report_descr;
+  memset(&report_descr, 0x0, sizeof(report_descr));
+  report_descr.size = rd_size;
+
+  ioctl(fdn, HIDIOCGRDESC, &report_descr);
+  print_hex_buffer(report_descr.value, rd_size);
+
+  char dev_name[256];
+  ioctl(fdn, HIDIOCGRAWNAME(256), dev_name);
+  printf("device name: %s\n", dev_name);
+#endif
+
   return fdn;
 }
 
@@ -398,8 +419,8 @@ void tablet_input_event(int tablet_fd, int x, int y, int btn) {
   write(tablet_fd, &sync_event, sizeof(sync_event));
 }
 
-void print_hex_buffer(uint8_t *buf, int len) {
-  for (int i = 0; i < len; i++) {
+void print_hex_buffer(uint8_t *buf, unsigned int len) {
+  for (unsigned int i = 0; i < len; i++) {
     printf("%02hhx ", buf[i]);
   }
   printf("\n");
