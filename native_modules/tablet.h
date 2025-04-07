@@ -8,6 +8,7 @@ enum parser_type {
   STANDARD_PARSER = 0,
   DOUBLE_REPORT_PARSER = 1,
   AVERAGE_REPORT_PARSER = 2,
+  AVERAGE_BUFFERED_REPORT_PARSER = 3,
 };
 
 struct tablet_config {

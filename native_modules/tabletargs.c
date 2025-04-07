@@ -19,6 +19,14 @@ int main(int argc, char *argv[]) {
 
     if (strncmp(argv[i], "-d", sizeof("-d")) == 0)
       p = DOUBLE_REPORT_PARSER;
+
+    if (strncmp(argv[i], "-a", sizeof("-a")) == 0)
+      p = AVERAGE_REPORT_PARSER;
+
+    if (strncmp(argv[i], "-b", sizeof("-b")) == 0)
+      p = AVERAGE_BUFFERED_REPORT_PARSER;
+
+
   }
 
   char matched_name[64];
