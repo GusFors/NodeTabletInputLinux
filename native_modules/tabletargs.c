@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
     if (strncmp(argv[i], "-b", sizeof("-b")) == 0)
       p = AVERAGE_BUFFERED_REPORT_PARSER;
 
-
+    if (strncmp(argv[i], "-i", sizeof("-i")) == 0)
+      p = INTERPOLATED_PARSER;
   }
 
   char matched_name[64];

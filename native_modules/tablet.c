@@ -310,7 +310,7 @@ int init_read_buffer(const char *hidraw_path) {
   strlcpy(tabletbuf_path, hidraw_path, 32);
 
   int fdn = open(tabletbuf_path, O_RDONLY | O_SYNC);
-  // fdn = open(tablet_path, O_RDONLY | O_NONBLOCK);
+  // int fdn = open(tabletbuf_path, O_RDONLY | O_NONBLOCK);
 
   if (fdn < 0) {
     printf("Unable to open device with path %s:", tabletbuf_path);
@@ -364,6 +364,10 @@ void init_tablet(const char *name, const char *hidraw_path, struct tablet_config
   case AVERAGE_REPORT_PARSER:
     printf("Using avg parser\n");
     parse_tablet_avg(buffer_fd, tablet_input_fd, tablet, display);
+    break;
+  case INTERPOLATED_PARSER:
+    printf("Using interpolation parser\n");
+    parse_tablet_buffer_interpolated_mult(buffer_fd, tablet_input_fd, tablet, display);
     break;
   default:
     parse_tablet_buffer(buffer_fd, tablet_input_fd, tablet, display);

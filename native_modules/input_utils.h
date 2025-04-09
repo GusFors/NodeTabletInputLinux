@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display);
+void parse_tablet_buffer_interpolated_mult(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display);
 
 #ifdef __cplusplus
 }
