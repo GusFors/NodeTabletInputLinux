@@ -112,9 +112,9 @@ void parse_tablet_buffer_avg(int buffer_fd, int tablet_fd, struct tablet_config 
   }
 }
 
-#define BASE_REPORT_RATE 133
-#define MULTIPLIER 8
-#define SLEEP_SCHED_ADJUSTMENT 2.0 / MULTIPLIER
+#define BASE_REPORT_RATE 200
+#define MULTIPLIER 4
+#define SLEEP_SCHED_ADJUSTMENT 0.1 / MULTIPLIER
 
 void parse_tablet_buffer_interpolated_mult(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
@@ -146,11 +146,11 @@ void parse_tablet_buffer_interpolated_mult(int buffer_fd, int tablet_fd, struct 
       // continue;
     }
 
-    // hardcoded for 480 values
-    if (buf[0] == 0xc0 || buf[1] <= 0x80)
-      continue;
-
     DEBUG_REPORT(buf, r);
+
+    // hardcoded for 480 values
+    // if (buf[0] == 0xc0 || buf[1] <= 0x80)
+    //   continue;
 
     if (buf[0] <= 0x10) {
       x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
@@ -190,7 +190,7 @@ void parse_tablet_buffer_interpolated_mult(int buffer_fd, int tablet_fd, struct 
 
           int n = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, NULL);
 #else
-          struct timespec ts_delay = {.tv_sec = 0, .tv_nsec = (long)(double_report_delay)};
+          struct timespec ts_delay = {.tv_sec = 0, .tv_nsec = (long)(double_report_delay)}; // uneven space of 3ms before next report? TODO
           nanosleep(&ts_delay, NULL);
 #endif
         }

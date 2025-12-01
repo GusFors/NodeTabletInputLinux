@@ -117,13 +117,13 @@ void tabletbtn_input_event(int tablet_fd, int x, int y, int btn) {
   write(tablet_fd, position_events, num_bytes);
   write(tablet_fd, &sync_event, sizeof(sync_event));
 #else
-  ssize_t res_w = write(tablet_fd, position_events, num_bytes);
+  // ssize_t res_w = write(tablet_fd, position_events, num_bytes);
 
-  if (res_w < 0)
-    perror("\nwrite error");
+  // if (res_w < 0)
+  //   perror("\nwrite error");
 
-  ssize_t b = write(tablet_fd, &sync_event, sizeof(sync_event));
-  printf("x:%d, y:%d, nbytes:%zd syncwrite:%zd fd:%d\n", x, y, res_w, b, tablet_fd);
+  // ssize_t b = write(tablet_fd, &sync_event, sizeof(sync_event));
+  // printf("x:%d, y:%d, nbytes:%zd syncwrite:%zd fd:%d\n", x, y, res_w, b, tablet_fd);
 #endif
   last_btn_state = btn;
 }
@@ -160,7 +160,7 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   memset(buf, 0x0, sizeof(buf));
 
   while (active) {
-    r = read(buffer_fd, buf, 16);
+    r = read(buffer_fd, buf, 32);
 
     if (r < 0) {
       perror("\nread err");
@@ -169,7 +169,8 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
 
     DEBUG_REPORT(buf, r);
 
-    if (buf[0] <= 0x10) {
+    if (buf[0] == 0x1e) {
+      printf("%08b\n", buf[tablet.bindex]);
       x = (buf[tablet.xindex]) | ((buf[tablet.xindex + 1]) << 8);
       y = (buf[tablet.yindex]) | ((buf[tablet.yindex + 1]) << 8);
 
@@ -182,7 +183,7 @@ void parse_tablet_buffer(int buffer_fd, int tablet_fd, struct tablet_config tabl
   }
 }
 
-#define REPORT_RATE 240
+#define REPORT_RATE 300
 
 void parse_tablet_buffer_interpolated(int buffer_fd, int tablet_fd, struct tablet_config tablet, struct display_config display) {
   int x = 0;
